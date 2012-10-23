@@ -1,7 +1,7 @@
 { stdenv, fetchurl, kernel, xlibs, which, imake
 , mesa # for fgl_glxgears
 , libXxf86vm, xf86vidmodeproto # for fglrx_gamma
-, xorg, makeWrapper, glibc, patchelf
+, xorg, makeWrapper, glibc, patchelf, unzip
 }:
 
 # If you want to use a different Xorg version probably
@@ -20,21 +20,22 @@ assert stdenv.system == "x86_64-linux";
 
 stdenv.mkDerivation rec {
   name = "ati-drivers-${version}-${kernel.version}";
-  version = "10-11-x86";
+  version = "12.10-x86";
 
   builder = ./builder.sh;
 
   inherit libXxf86vm xf86vidmodeproto;
 
+  archiveBaseName = "amd-driver-installer-catalyst-12.10-x86.x86_64";
   src = fetchurl {
-    url = https://www2.ati.com/drivers/linux/ati-driver-installer-10-11-x86.x86_64.run;
-    sha256 = "1z33w831ayx1j5lm9d1xv6whkmzsz9v8li3s8c96hwnwki6zpimr";
+    url = "https://www2.ati.com/drivers/linux/${archiveBaseName}.zip";
+    sha256 = "0pc33la5avzqyzf3jj388cpwh1nph1l32l1k3f04awk84irhjana";
   };
 
   buildInputs =
     [ xlibs.libXext xlibs.libX11
       xlibs.libXrandr which imake makeWrapper
-      patchelf
+      patchelf unzip
     ];
     
   inherit kernel glibc /* glibc only used for setting interpreter */;

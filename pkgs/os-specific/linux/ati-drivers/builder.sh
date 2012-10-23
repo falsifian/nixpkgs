@@ -7,8 +7,8 @@ die(){ echo $@; exit 1; }
 
 
 # custom unpack:
-cp $src archive
-sh archive --extract .
+unzip $src
+sh "${archiveBaseName}.run" --extract .
 
 
 kernelVersion=$(cd ${kernel}/lib/modules && ls)
