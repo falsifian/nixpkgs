@@ -323,9 +323,10 @@ let
     inherit lib;
   };
 
-  makeInitrd = {contents}: import ../build-support/kernel/make-initrd.nix {
-    inherit stdenv perl cpio contents ubootChooser;
-  };
+  makeInitrd = {contents, compressor ? "gzip -9"}:
+    import ../build-support/kernel/make-initrd.nix {
+      inherit stdenv perl cpio contents ubootChooser compressor;
+    };
 
   makeWrapper = makeSetupHook { } ../build-support/setup-hooks/make-wrapper.sh;
 
@@ -369,6 +370,8 @@ let
   acct = callPackage ../tools/system/acct { };
 
   aefs = callPackage ../tools/filesystems/aefs { };
+
+  aespipe = callPackage ../tools/security/aespipe { };
 
   aircrackng = callPackage ../tools/networking/aircrack-ng { };
 
@@ -418,6 +421,8 @@ let
     inherit pkgs;
     pkgs_i686 = pkgsi686Linux;
   };
+
+  apg = callPackage ../tools/security/apg { };
 
   xcodeenv = callPackage ../development/mobile/xcodeenv { };
 
@@ -3338,9 +3343,10 @@ let
 
   swftools = callPackage ../tools/video/swftools { };
 
+  texinfo413 = callPackage ../development/tools/misc/texinfo/4.13a.nix { };
   texinfo49 = callPackage ../development/tools/misc/texinfo/4.9.nix { };
-
-  texinfo = callPackage ../development/tools/misc/texinfo { };
+  texinfo5 = callPackage ../development/tools/misc/texinfo/5.0.nix { };
+  texinfo = texinfo413;
 
   texi2html = callPackage ../development/tools/misc/texi2html { };
 
@@ -4962,6 +4968,8 @@ let
         # optional
   };
 
+  snappy = callPackage ../development/libraries/snappy { };
+
   sofia_sip = callPackage ../development/libraries/sofia-sip { };
 
   soprano = callPackage ../development/libraries/soprano { };
@@ -5103,6 +5111,8 @@ let
   vxl = callPackage ../development/libraries/vxl {
     libpng = libpng12;
   };
+
+  wayland = callPackage ../development/libraries/wayland { };
 
   webkit =
     builderDefsPackage ../development/libraries/webkit {
@@ -5660,6 +5670,8 @@ let
   xorgReplacements = callPackage ../servers/x11/xorg/replacements.nix { };
 
   xorgVideoUnichrome = callPackage ../servers/x11/xorg/unichrome/default.nix { };
+
+  yaws = callPackage ../servers/http/yaws { };
 
   zabbix = recurseIntoAttrs (import ../servers/monitoring/zabbix {
     inherit fetchurl stdenv pkgconfig postgresql curl openssl zlib;
@@ -6891,6 +6903,8 @@ let
     ecb = callPackage ../applications/editors/emacs-modes/ecb { };
 
     jabber = callPackage ../applications/editors/emacs-modes/jabber { };
+
+    emacsClangCompleteAsync = callPackage ../applications/editors/emacs-modes/emacs-clang-complete-async { };
 
     emacsSessionManagement = callPackage ../applications/editors/emacs-modes/session-management-for-emacs { };
 
@@ -8185,7 +8199,9 @@ let
 
   blackshadeselite = callPackage ../games/blackshadeselite { };
 
-  blobby = callPackage ../games/blobby {};
+  blobby = callPackage ../games/blobby {
+    boost = boost149;
+  };
 
   bsdgames = callPackage ../games/bsdgames { };
 
@@ -8438,10 +8454,10 @@ let
 
   enlightenment = callPackage ../desktops/enlightenment { };
 
-  # e17 = recurseIntoAttrs (
-  #   let callPackage = newScope pkgs.e17; in
-  #   import ../desktops/e17 { inherit callPackage pkgs; }
-  # );
+  e17 = recurseIntoAttrs (
+    let callPackage = newScope pkgs.e17; in
+    import ../desktops/e17 { inherit callPackage pkgs; }
+  );
 
   gnome2 = callPackage ../desktops/gnome-2 {
     callPackage = pkgs.newScope pkgs.gnome2;

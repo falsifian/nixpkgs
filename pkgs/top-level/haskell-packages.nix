@@ -147,7 +147,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
     xhtml        = self.xhtml_3000_2_1;         # 7.6 ok
     zlib         = self.zlib_0_5_4_0;           # 7.6 ok
     cabalInstall = self.cabalInstall_1_16_0_2;  # 7.6 ok
-    alex         = self.alex_3_0_2;             # 7.6 ok
+    alex         = self.alex_3_0_4;             # 7.6 ok
     haddock      = self.haddock_2_13_1;         # 7.6 ok
     happy        = self.happy_1_18_10;          # 7.6 ok
     primitive    = self.primitive_0_5_0_1; # semi-official, but specified
@@ -874,6 +874,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
     libc = pkgs.stdenv.gcc.libc;
   };
 
+  Glob = callPackage ../development/libraries/haskell/Glob {};
+
   GlomeVec = callPackage ../development/libraries/haskell/GlomeVec {};
 
   gloss = callPackage ../development/libraries/haskell/gloss {
@@ -1181,6 +1183,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
 
   logict = callPackage ../development/libraries/haskell/logict {};
 
+  maccatcher = callPackage ../development/libraries/haskell/maccatcher {};
+
   mathFunctions = callPackage ../development/libraries/haskell/math-functions {};
 
   mainlandPretty = callPackage ../development/libraries/haskell/mainland-pretty {};
@@ -1218,8 +1222,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   monadLogger = callPackage ../development/libraries/haskell/monad-logger {};
 
   monadPar_0_1_0_3 = callPackage ../development/libraries/haskell/monad-par/0.1.0.3.nix {};
-  monadPar_0_3 = callPackage ../development/libraries/haskell/monad-par/0.3.nix {};
-  monadPar = self.monadPar_0_3;
+  monadPar_0_3_4 = callPackage ../development/libraries/haskell/monad-par/0.3.4.nix {};
+  monadPar = self.monadPar_0_3_4;
 
   monadParExtras = callPackage ../development/libraries/haskell/monad-par-extras {};
 
@@ -1540,7 +1544,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
 
   skein = callPackage ../development/libraries/haskell/skein {};
 
-  smallcheck = callPackage ../development/libraries/haskell/smallcheck {};
+  smallcheck_0_6_2 = callPackage ../development/libraries/haskell/smallcheck/0.6.2.nix {};
+  smallcheck_1_0_1 = callPackage ../development/libraries/haskell/smallcheck/1.0.1.nix {};
+  smallcheck = self.smallcheck_1_0_1;
 
   snap = callPackage ../development/libraries/haskell/snap/snap.nix {};
 
@@ -1613,7 +1619,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
 
   Shellac = callPackage ../development/libraries/haskell/Shellac/Shellac.nix {};
 
-  show = callPackage ../development/libraries/haskell/show {};
+  show = callPackage ../development/libraries/haskell/show {
+    smallcheck = self.smallcheck_0_6_2;
+  };
 
   SMTPClient = callPackage ../development/libraries/haskell/SMTPClient {};
 
@@ -1754,6 +1762,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   utilityHt = callPackage ../development/libraries/haskell/utility-ht {};
 
   uulib = callPackage ../development/libraries/haskell/uulib {};
+
+  uuid = callPackage ../development/libraries/haskell/uuid {};
 
   uuParsinglib = callPackage ../development/libraries/haskell/uu-parsinglib {};
 
@@ -1942,7 +1952,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   alex_2_3_5 = callPackage ../development/tools/parsing/alex/2.3.5.nix {};
   alex_3_0_1 = callPackage ../development/tools/parsing/alex/3.0.1.nix {};
   alex_3_0_2 = callPackage ../development/tools/parsing/alex/3.0.2.nix {};
-  alex = self.alex_3_0_2;
+  alex_3_0_4 = callPackage ../development/tools/parsing/alex/3.0.4.nix {};
+  alex = self.alex_3_0_4;
 
   alexMeta = callPackage ../development/tools/haskell/alex-meta {};
 

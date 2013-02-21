@@ -4,8 +4,8 @@
 
 cabal.mkDerivation (self: {
   pname = "persistent-sqlite";
-  version = "1.1.2";
-  sha256 = "0pb52k7a7js71s4d2mynd62i8gk99az7y72rycs0xg9r9cr081p3";
+  version = "1.1.3.1";
+  sha256 = "0kbsi6njk4c10khlh81pmqai20jcq5v9cgy1xyskkp26d3y0llya";
   buildDepends = [
     aeson conduit monadControl persistent text transformers
   ];
