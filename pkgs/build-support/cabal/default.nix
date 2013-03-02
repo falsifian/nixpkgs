@@ -8,8 +8,8 @@
         # environment overly, but also to keep hash-backwards-compatible with the old cabal.nix.
         internalAttrs = [
           "internalAttrs" "buildDepends" "buildTools" "extraLibraries" "pkgconfigDepends"
-          "isLibrary" "isExecutable"
-        ];
+          "isLibrary" "isExecutable" "testDepends"
+        ] ++ stdenv.lib.optional (!args.doCheck or false) "doCheck";
 
         # Stuff happening after the user preferences have been processed. We remove
         # internal attributes and strip null elements from the dependency lists, all
@@ -55,6 +55,7 @@
             # but often propagatedBuildInputs is preferable anyway
             buildInputs = [ghc Cabal] ++ self.extraBuildInputs;
             extraBuildInputs = self.buildTools ++
+                               (stdenv.lib.optionals (self.doCheck or false) self.testDepends) ++
                                (if self.pkgconfigDepends == [] then [] else [pkgconfig]) ++
                                (if self.isLibrary then [] else self.buildDepends ++ self.extraLibraries ++ self.pkgconfigDepends);
 

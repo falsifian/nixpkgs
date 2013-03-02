@@ -1,14 +1,17 @@
-{ cabal, liftedBase, monadControl, resourcet, text, transformers
-, transformersBase, void
+{ cabal, doctest, hspec, liftedBase, monadControl, QuickCheck
+, resourcet, text, transformers, transformersBase, void
 }:
 
 cabal.mkDerivation (self: {
   pname = "conduit";
-  version = "1.0.0";
-  sha256 = "1sx7s3awzb7y51prmmvrx9gxhd5068rbzwl719lfx3r50k94r00d";
+  version = "1.0.1";
+  sha256 = "1r3d30cap4f7qxi9v2ab5w31w9ay19z848d4l8klf1np9xs27hki";
   buildDepends = [
     liftedBase monadControl resourcet text transformers
     transformersBase void
+  ];
+  testDepends = [
+    doctest hspec QuickCheck resourcet text transformers void
   ];
   meta = {
     homepage = "http://github.com/snoyberg/conduit";
