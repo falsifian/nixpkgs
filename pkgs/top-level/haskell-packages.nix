@@ -106,6 +106,18 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
     enableLibraryProfiling = enableLibraryProfiling;
   };
 
+  # A variant of the cabal build driver that disables unit testing.
+  # Useful for breaking cycles, where the unit test of a package A
+  # depends on package B, which has A as a regular build input.
+  cabalNoTest = {
+    mkDerivation = x: rec {
+      final = self.cabal.mkDerivation (self: (x final) // { doCheck = false; });
+    }.final;
+  };
+
+  # Convenience helper function.
+  disableTest = x: x.override { cabal = self.cabalNoTest; };
+
   # Haskell Platform
   #
   # We try to support several platform versions. For these, we set all
@@ -133,21 +145,21 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
     OpenGL       = self.OpenGL_2_6_0_1;         # 7.6 ok
     parallel     = self.parallel_3_2_0_3;       # 7.6 ok
     parsec       = self.parsec_3_1_3;           # 7.6 ok
-    QuickCheck   = self.QuickCheck_2_5_1_1;     # 7.6 ok
+    QuickCheck   = self.QuickCheck_2_6;         # 7.6 ok
     random       = self.random_1_0_1_1;         # 7.6 ok
     regexBase    = self.regexBase_0_93_2;       # 7.6 ok
     regexCompat  = self.regexCompat_0_95_1;     # 7.6 ok
     regexPosix   = self.regexPosix_0_95_2;      # 7.6 ok
     split        = self.split_0_2_1_2;          # 7.6 ok
     stm          = self.stm_2_4_2;              # 7.6 ok
-    syb          = self.syb_0_3_7;              # 7.6 ok
+    syb          = self.syb_0_4_0;              # 7.6 ok
     text         = self.text_0_11_2_3;          # 7.6 ok
     transformers = self.transformers_0_3_0_0;   # 7.6 ok
     vector       = self.vector_0_10_0_1;        # 7.6 ok
     xhtml        = self.xhtml_3000_2_1;         # 7.6 ok
     zlib         = self.zlib_0_5_4_1;           # 7.6 ok
     cabalInstall = self.cabalInstall_1_16_0_2;  # 7.6 ok
-    alex         = self.alex_3_0_4;             # 7.6 ok
+    alex         = self.alex_3_0_5;             # 7.6 ok
     haddock      = self.haddock_2_13_1;         # 7.6 ok
     happy        = self.happy_1_18_10;          # 7.6 ok
     primitive    = self.primitive_0_5_0_1; # semi-official, but specified
@@ -617,6 +629,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   ConfigFile = callPackage ../development/libraries/haskell/ConfigFile {};
 
   configurator = callPackage ../development/libraries/haskell/configurator {};
+
+  constraints = callPackage ../development/libraries/haskell/constraints {};
 
   convertible = callPackage ../development/libraries/haskell/convertible {};
 
@@ -1468,8 +1482,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   QuickCheck_2_4_1_1 = callPackage ../development/libraries/haskell/QuickCheck/2.4.1.1.nix {};
   QuickCheck_2_4_2 = callPackage ../development/libraries/haskell/QuickCheck/2.4.2.nix {};
   QuickCheck_2_5_1_1 = callPackage ../development/libraries/haskell/QuickCheck/2.5.1.1.nix {};
+  QuickCheck_2_6 = callPackage ../development/libraries/haskell/QuickCheck/2.6.nix {};
   QuickCheck1 = self.QuickCheck_1_2_0_1;
-  QuickCheck2 = self.QuickCheck_2_5_1_1;
+  QuickCheck2 = self.QuickCheck_2_6;
   QuickCheck  = self.QuickCheck2;
 
   RangedSets = callPackage ../development/libraries/haskell/Ranged-sets {};
@@ -1620,6 +1635,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   syb_0_3_6_1 = callPackage ../development/libraries/haskell/syb/0.3.6.1.nix {};
   syb_0_3_6_2 = callPackage ../development/libraries/haskell/syb/0.3.6.2.nix {};
   syb_0_3_7 = callPackage ../development/libraries/haskell/syb/0.3.7.nix {};
+  syb_0_4_0 = callPackage ../development/libraries/haskell/syb/0.4.0.nix {};
   syb = null;  # by default, we assume that syb ships with GHC, which is
                # true for the older GHC versions
 
@@ -1638,6 +1654,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   };
 
   SHA = callPackage ../development/libraries/haskell/SHA {};
+
+  shake = callPackage ../development/libraries/haskell/shake {};
 
   shakespeare = callPackage ../development/libraries/haskell/shakespeare {};
 
@@ -1997,8 +2015,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   alex_2_3_5 = callPackage ../development/tools/parsing/alex/2.3.5.nix {};
   alex_3_0_1 = callPackage ../development/tools/parsing/alex/3.0.1.nix {};
   alex_3_0_2 = callPackage ../development/tools/parsing/alex/3.0.2.nix {};
-  alex_3_0_4 = callPackage ../development/tools/parsing/alex/3.0.4.nix {};
-  alex = self.alex_3_0_4;
+  alex_3_0_5 = callPackage ../development/tools/parsing/alex/3.0.5.nix {};
+  alex = self.alex_3_0_5;
 
   alexMeta = callPackage ../development/tools/haskell/alex-meta {};
 
