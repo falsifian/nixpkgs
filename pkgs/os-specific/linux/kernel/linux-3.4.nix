@@ -177,6 +177,7 @@ let
       DMAR? n # experimental
       DVB_DYNAMIC_MINORS y # we use udev
       EFI_STUB y # EFI bootloader in the bzImage itself
+      FHANDLE y # used by systemd
       FUSION y # Fusion MPT device support
       IDE_GD_ATAPI y # ATAPI floppy support
       IRDA_ULTRA y # Ultra (connectionless) protocol
@@ -244,7 +245,7 @@ in
 import ./generic.nix (
 
   rec {
-    version = "3.4.35";
+    version = "3.4.38";
     testing = false;
 
     preConfigure = ''
@@ -253,7 +254,7 @@ import ./generic.nix (
 
     src = fetchurl {
       url = "mirror://kernel/linux/kernel/v3.x/${if testing then "testing/" else ""}linux-${version}.tar.xz";
-      sha256 = "1gyl0zgrbvx5w7qwh7amr4f3gl35hdm21zniksgsyx9cbyfxf8a4";
+      sha256 = "1j3389frp98f7l4l4mp1lyw5g1g9yll6fayiyz7dsnx8fkxsga4h";
     };
 
     config = configWithPlatform stdenv.platform;
