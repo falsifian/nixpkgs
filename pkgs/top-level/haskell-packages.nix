@@ -476,6 +476,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
 
   asn1Data = callPackage ../development/libraries/haskell/asn1-data {};
 
+  asn1Types = callPackage ../development/libraries/haskell/asn1-types {};
+
   AspectAG = callPackage ../development/libraries/haskell/AspectAG {};
 
   async_2_0_1_3 = callPackage ../development/libraries/haskell/async/2.0.1.3.nix {};
@@ -1772,8 +1774,6 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   testFrameworkTh = callPackage ../development/libraries/haskell/test-framework-th {};
 
   testFrameworkThPrime = callPackage ../development/libraries/haskell/test-framework-th-prime {};
-
-  testpack = callPackage ../development/libraries/haskell/testpack {};
 
   texmath = callPackage ../development/libraries/haskell/texmath {};
 
