@@ -3309,7 +3309,11 @@ let
   pkgconfig = forceNativeDrv (callPackage ../development/tools/misc/pkgconfig { });
   pkgconfigUpstream = lowPrio (pkgconfig.override { vanilla = true; });
 
-  premake = callPackage ../development/tools/misc/premake { };
+  premake3 = callPackage ../development/tools/misc/premake/3.nix { };
+
+  premake4 = callPackage ../development/tools/misc/premake { };
+
+  premake = premake4;
 
   pstack = callPackage ../development/tools/misc/gdb/pstack.nix { };
 
@@ -4418,6 +4422,8 @@ let
   libosip = callPackage ../development/libraries/osip {};
 
   libotr = callPackage ../development/libraries/libotr { };
+
+  libotr_3_2 = callPackage ../development/libraries/libotr/3.2.nix { };
 
   libp11 = callPackage ../development/libraries/libp11 { };
 
@@ -6633,6 +6639,7 @@ let
     # For some reason, TLS support is broken when using GnuTLS 3.0 (can't
     # connect to jabber.org, for instance.)
     gnutls = gnutls2;
+    libotr = libotr_3_2;
   };
 
   blender = callPackage  ../applications/misc/blender {
