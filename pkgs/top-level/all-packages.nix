@@ -433,11 +433,19 @@ let
   apg = callPackage ../tools/security/apg { };
 
   xcodeenv = callPackage ../development/mobile/xcodeenv { };
-
-  titaniumenv = import ../development/mobile/titaniumenv {
+  
+  titaniumenv_2_1 = import ../development/mobile/titaniumenv {
+    inherit pkgs;
+    pkgs_i686 = pkgsi686Linux;
+    version = "2.1";
+  };
+  
+  titaniumenv_3_1 = import ../development/mobile/titaniumenv {
     inherit pkgs;
     pkgs_i686 = pkgsi686Linux;
   };
+  
+  titaniumenv = titaniumenv_3_1;
 
   inherit (androidenv) androidsdk_4_1;
 
@@ -3987,6 +3995,8 @@ let
 
   gts = callPackage ../development/libraries/gts { };
 
+  gvfs = callPackage ../development/libraries/gvfs { };
+
   gwenhywfar = callPackage ../development/libraries/gwenhywfar { };
 
   # TODO : Add MIT Kerberos and let admin choose.
@@ -5322,9 +5332,18 @@ let
     python = python27;
   });
 
-  plone43Packages = recurseIntoAttrs (import ../development/web/plone {
+  plone41Packages = recurseIntoAttrs (import ../development/web/plone/4.1.6.nix {
     inherit pkgs;
-    python = python27;
+    pythonPackages = python27Packages;
+  });
+
+  plone42Packages = recurseIntoAttrs (import ../development/web/plone/4.2.5.nix {
+    inherit pkgs;
+    pythonPackages = python27Packages;
+  });
+
+  plone43Packages = recurseIntoAttrs (import ../development/web/plone/4.3.0.nix {
+    inherit pkgs;
     pythonPackages = python27Packages;
   });
 
@@ -6179,6 +6198,8 @@ let
     config = config.pcmciaUtils.config or null;
   };
 
+  plymouth = callPackage ../os-specific/linux/plymouth { };
+
   pmount = callPackage ../os-specific/linux/pmount { };
 
   pmutils = callPackage ../os-specific/linux/pm-utils { };
@@ -6291,7 +6312,9 @@ let
   udev145 = callPackage ../os-specific/linux/udev/145.nix { };
   udev = pkgs.systemd;
 
-  udisks = callPackage ../os-specific/linux/udisks { };
+  udisks1 = callPackage ../os-specific/linux/udisks/1-default.nix { };
+  udisks2 = callPackage ../os-specific/linux/udisks/2-default.nix { };
+  udisks = udisks1;
 
   untie = callPackage ../os-specific/linux/untie { };
 
@@ -7164,7 +7187,7 @@ let
   gphoto2 = callPackage ../applications/misc/gphoto2 { };
 
   gphoto2fs = builderDefsPackage ../applications/misc/gphoto2/gphotofs.nix {
-    inherit libgphoto2 fuse pkgconfig glib;
+    inherit libgphoto2 fuse pkgconfig glib libtool;
   };
 
   graphicsmagick = callPackage ../applications/graphics/graphicsmagick { };
@@ -7769,6 +7792,9 @@ let
   skype = callPackage_i686 ../applications/networking/instant-messengers/skype {
     usePulseAudio = config.pulseaudio or true;
   };
+
+  skype4pidgin = callPackage ../applications/networking/instant-messengers/pidgin-plugins/skype4pidgin { };
+
 
   skype_call_recorder = callPackage ../applications/networking/instant-messengers/skype-call-recorder { };
 
@@ -8501,16 +8527,18 @@ let
 
   gnome = recurseIntoAttrs gnome2;
 
-  kde4 = recurseIntoAttrs pkgs.kde47;
+  kde4 = recurseIntoAttrs pkgs.kde48;
 
   kde47 = kdePackagesFor (pkgs.kde47 // {
       boost = boost149;
       eigen = eigen2;
+      libotr = libotr_3_2;
     }) ../desktops/kde-4.7;
 
   kde48 = kdePackagesFor (pkgs.kde48 // {
       boost = boost149;
       eigen = eigen2;
+      libotr = libotr_3_2;
     }) ../desktops/kde-4.8;
 
   kdePackagesFor = self: dir:
