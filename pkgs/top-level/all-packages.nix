@@ -433,18 +433,18 @@ let
   apg = callPackage ../tools/security/apg { };
 
   xcodeenv = callPackage ../development/mobile/xcodeenv { };
-  
+
   titaniumenv_2_1 = import ../development/mobile/titaniumenv {
     inherit pkgs;
     pkgs_i686 = pkgsi686Linux;
     version = "2.1";
   };
-  
+
   titaniumenv_3_1 = import ../development/mobile/titaniumenv {
     inherit pkgs;
     pkgs_i686 = pkgsi686Linux;
   };
-  
+
   titaniumenv = titaniumenv_3_1;
 
   inherit (androidenv) androidsdk_4_1;
@@ -2476,7 +2476,8 @@ let
   haskellPackages_ghc742_profiling    = recurseIntoAttrs (haskell.packages_ghc742.profiling);
   haskellPackages_ghc742              = recurseIntoAttrs (haskell.packages_ghc742.highPrio);
   haskellPackages_ghc761              =                   haskell.packages_ghc761;
-  haskellPackages_ghc762              = recurseIntoAttrs (haskell.packages_ghc762);
+  haskellPackages_ghc762              =                   haskell.packages_ghc762;
+  haskellPackages_ghc763              = recurseIntoAttrs  haskell.packages_ghc763;
   # Reasonably current HEAD snapshot.
   haskellPackages_ghcHEAD             =                   haskell.packages_ghcHEAD;
 
@@ -7426,9 +7427,7 @@ let
   links = callPackage ../applications/networking/browsers/links { };
 
   ledger = callPackage ../applications/office/ledger/2.6.3.nix { };
-  ledger3 = callPackage ../applications/office/ledger/3.0.nix {
-    boost = boost149;
-  };
+  ledger3 = callPackage ../applications/office/ledger/3.0.nix { };
 
   links2 = callPackage ../applications/networking/browsers/links2 { };
 
@@ -8540,6 +8539,12 @@ let
       eigen = eigen2;
       libotr = libotr_3_2;
     }) ../desktops/kde-4.8;
+
+  kde410 = kdePackagesFor (pkgs.kde410 // {
+      boost = boost149;
+      eigen = eigen2;
+      libotr = libotr_3_2;
+    }) ../desktops/kde-4.10;
 
   kdePackagesFor = self: dir:
     let callPackageOrig = callPackage; in
