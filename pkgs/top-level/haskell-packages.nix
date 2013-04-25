@@ -449,7 +449,11 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
 
   acidState = callPackage ../development/libraries/haskell/acid-state {};
 
-  Agda = callPackage ../development/libraries/haskell/Agda {};
+  Agda = callPackage ../development/libraries/haskell/Agda {
+    hashable = self.hashable_1_1_2_5;
+    hashtables = self.hashtables.override { hashable = self.hashable_1_1_2_5; };
+    unorderedContainers = self.unorderedContainers.override { hashable = self.hashable_1_1_2_5; };
+  };
 
   accelerate = callPackage ../development/libraries/haskell/accelerate {};
 
@@ -1003,16 +1007,14 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   happstackHamlet = callPackage ../development/libraries/haskell/happstack/happstack-hamlet.nix {};
 
   hashable_1_1_2_5 = callPackage ../development/libraries/haskell/hashable/1.1.2.5.nix {};
-  hashable_1_2_0_5 = callPackage ../development/libraries/haskell/hashable/1.2.0.5.nix {};
-  hashable = self.hashable_1_1_2_5;
+  hashable_1_2_0_6 = callPackage ../development/libraries/haskell/hashable/1.2.0.6.nix {};
+  hashable = self.hashable_1_2_0_6;
 
   hashedStorage = callPackage ../development/libraries/haskell/hashed-storage {};
 
   hashtables = callPackage ../development/libraries/haskell/hashtables {};
 
-  haskeline_0_6_4_7 = callPackage ../development/libraries/haskell/haskeline/0.6.4.7.nix {};
-  haskeline_0_7_0_3 = callPackage ../development/libraries/haskell/haskeline/0.7.0.3.nix {};
-  haskeline = self.haskeline_0_7_0_3;
+  haskeline = callPackage ../development/libraries/haskell/haskeline {};
 
   haskelineClass = callPackage ../development/libraries/haskell/haskeline-class {};
 
@@ -2057,8 +2059,6 @@ let result = let callPackage = x : y : modifyPrio (newScope result.final x y);
   epic = callPackage ../development/compilers/epic {};
 
   flapjax = callPackage ../development/compilers/flapjax {};
-
-  idris = callPackage ../development/compilers/idris {};
 
   pakcs = callPackage ../development/compilers/pakcs {};
 

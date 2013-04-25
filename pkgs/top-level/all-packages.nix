@@ -1213,6 +1213,8 @@ let
     mtutils = callPackage ../tools/text/multitran/mtutils { };
   });
 
+  munge = callPackage ../tools/security/munge { };
+
   muscleframework = callPackage ../tools/security/muscleframework { };
 
   muscletool = callPackage ../tools/security/muscletool { };
@@ -1296,7 +1298,9 @@ let
 
   odt2txt = callPackage ../tools/text/odt2txt { };
 
-  offlineimap = callPackage ../tools/networking/offlineimap { };
+  offlineimap = callPackage ../tools/networking/offlineimap {
+    inherit (pythonPackages) sqlite3;
+  };
 
   opendbx = callPackage ../development/libraries/opendbx { };
 
@@ -2892,7 +2896,11 @@ let
 
   perl = if system != "i686-cygwin" then perl516 else sysPerl;
 
-  php = callPackage ../development/interpreters/php/5.3.nix { };
+  php = php54;
+
+  php53 = callPackage ../development/interpreters/php/5.3.nix { };
+
+  php54 = callPackage ../development/interpreters/php/5.4.nix { };
 
   php_apc = callPackage ../development/libraries/php-apc { };
 
@@ -3044,6 +3052,8 @@ let
   autoconf = callPackage ../development/tools/misc/autoconf { };
 
   autoconf213 = callPackage ../development/tools/misc/autoconf/2.13.nix { };
+ 
+  autocutsel = callPackage ../tools/X11/autocutsel{ };
 
   automake = automake112x;
 
@@ -6800,6 +6810,8 @@ let
     inherit (xlibs) libX11;
   };
 
+  doodle = callPackage ../applications/search/doodle { };
+
   dunst = callPackage ../applications/misc/dunst { };
 
   dvb_apps  = callPackage ../applications/video/dvb-apps { };
@@ -8966,6 +8978,8 @@ let
 
   gxemul = callPackage ../misc/gxemul { };
 
+  hatari = callPackage ../misc/emulators/hatari { };
+
   hplip = callPackage ../misc/drivers/hplip { };
 
   # using the new configuration style proposal which is unstable
@@ -9206,5 +9220,7 @@ let
   misc = import ../misc/misc.nix { inherit pkgs stdenv; };
 
   bullet = callPackage ../development/libraries/bullet {};
+
+  dart = callPackage ../development/interpreters/dart { };
 
 }; in pkgs
