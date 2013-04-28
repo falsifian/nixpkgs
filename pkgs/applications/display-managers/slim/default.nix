@@ -2,11 +2,11 @@
 , fontconfig, freetype, pam, dbus_libs }:
 
 stdenv.mkDerivation rec {
-  name = "slim-1.3.4";
+  name = "slim-1.3.5";
 
   src = fetchurl {
     url = "http://download.berlios.de/slim/${name}.tar.gz";
-    sha256 = "00fmrg2v41jnqhx0yc1kv97xxh5gai18n0i4as9g1fcq1i32cp0m";
+    sha256 = "0aanclmm7ac3h1pxd5p78n5y8ns1ly8cwxggjidqvyp2a6gj13c1";
   };
 
   patches = [
