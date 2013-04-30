@@ -1483,6 +1483,8 @@ let
 
   rtmpdump = callPackage ../tools/video/rtmpdump { };
 
+  reaverwps = callPackage ../tools/networking/reaver-wps {};
+
   recutils = callPackage ../tools/misc/recutils { };
 
   recoll = callPackage ../applications/search/recoll { };
@@ -3052,7 +3054,7 @@ let
   autoconf = callPackage ../development/tools/misc/autoconf { };
 
   autoconf213 = callPackage ../development/tools/misc/autoconf/2.13.nix { };
- 
+
   autocutsel = callPackage ../tools/X11/autocutsel{ };
 
   automake = automake112x;
@@ -4996,21 +4998,23 @@ let
 
   srtp = callPackage ../development/libraries/srtp {};
 
-  sqlite = lowPrio (callPackage ../development/libraries/sqlite {
+  sqlite_3_7_16 = lowPrio (callPackage ../development/libraries/sqlite/3.7.16.nix {
     readline = null;
     ncurses = null;
   });
 
-  sqlite36 = callPackage ../development/libraries/sqlite/3.6.x.nix {
+  sqlite_3_7_14 = lowPrio (callPackage ../development/libraries/sqlite/3.7.14.nix {
     readline = null;
     ncurses = null;
-  };
+  });
+
+  sqlite = sqlite_3_7_16;
 
   sqliteInteractive = appendToName "interactive" (sqlite.override {
     inherit readline ncurses;
   });
 
-  sqliteFull = lowPrio (callPackage ../development/libraries/sqlite/full.nix {
+  sqliteFull = lowPrio (callPackage ../development/libraries/sqlite/3.7.9-full.nix {
     inherit readline ncurses;
   });
 
@@ -6080,6 +6084,7 @@ let
     virtualbox = callPackage ../applications/virtualization/virtualbox {
       stdenv = stdenv_32bit;
       inherit (gnome) libIDL;
+      enableExtensionPack = config.virtualbox.enableExtensionPack or false;
     };
 
     virtualboxGuestAdditions = callPackage ../applications/virtualization/virtualbox/guest-additions { };
@@ -7810,6 +7815,8 @@ let
   skype_call_recorder = callPackage ../applications/networking/instant-messengers/skype-call-recorder { };
 
   st = callPackage ../applications/misc/st { };
+
+  bittorrentSync = callPackage ../applications/networking/bittorrentsync { };
 
   dropbox = callPackage ../applications/networking/dropbox { };
 
