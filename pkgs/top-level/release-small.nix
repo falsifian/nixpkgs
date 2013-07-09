@@ -198,8 +198,9 @@ with import ./release-lib.nix { inherit supportedSystems; };
   zile = linux;
   zip = all;
 
-  dbus_all = {
+  dbus = {
     libs = linux;
+    daemon = linux;
     tools = linux;
   };
 
