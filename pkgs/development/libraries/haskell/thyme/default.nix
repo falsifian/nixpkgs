@@ -1,17 +1,20 @@
-{ cabal, attoparsec, deepseq, lens, QuickCheck
-, random, text, time, transformers, vector
+{ cabal, attoparsec, Cabal, deepseq, filepath, lens, QuickCheck
+, random, systemPosixRedirect, text, time, transformers, vector
 , vectorSpace
 }:
 
 cabal.mkDerivation (self: {
   pname = "thyme";
-  version = "0.3.0.0";
-  sha256 = "0nv8kp5ax0088z0d9y93xkv59v1i8wrrdprsj7bknk3yn0gd2gb3";
+  version = "0.3.0.1";
+  sha256 = "086i8cadq2s894157s1bh3zhd9zb9apr7w39gnydywzgkx47478h";
   buildDepends = [
     attoparsec deepseq lens QuickCheck random text time transformers
     vector vectorSpace
   ];
-  # have some strange test depends
+  testDepends = [
+    attoparsec Cabal filepath lens QuickCheck random
+    systemPosixRedirect text time vectorSpace
+  ];
   doCheck = false;
   meta = {
     homepage = "https://github.com/liyang/thyme";
