@@ -395,6 +395,8 @@ let
   acoustidFingerprinter = callPackage
     ../tools/audio/acoustid-fingerprinter { };
 
+  actdiag = pythonPackages.actdiag;
+
   aefs = callPackage ../tools/filesystems/aefs { };
 
   aespipe = callPackage ../tools/security/aespipe { };
@@ -408,6 +410,8 @@ let
   analog = callPackage ../tools/admin/analog {};
 
   archivemount = callPackage ../tools/filesystems/archivemount { };
+
+  arandr = callPackage ../tools/X11/arandr { };
 
   arduino_core = callPackage ../development/arduino/arduino-core {
     jdk = jdk;
@@ -519,6 +523,8 @@ let
 
   bfr = callPackage ../tools/misc/bfr { };
 
+  blockdiag = pythonPackages.blockdiag;
+
   bmon = callPackage ../tools/misc/bmon { };
 
   boomerang = callPackage ../development/tools/boomerang {
@@ -558,7 +564,9 @@ let
 
   mcelog = callPackage ../os-specific/linux/mcelog { };
 
-  asciidoc = callPackage ../tools/typesetting/asciidoc { };
+  asciidoc = callPackage ../tools/typesetting/asciidoc {
+    inherit (pythonPackages) matplotlib numpy aafigure recursivePthLoader;
+  };
 
   autossh = callPackage ../tools/networking/autossh { };
 
@@ -1399,6 +1407,8 @@ let
 
   nssmdns = callPackage ../tools/networking/nss-mdns { };
 
+  nwdiag = pythonPackages.nwdiag;
+
   nylon = callPackage ../tools/networking/nylon { };
 
   nzbget = callPackage ../tools/networking/nzbget { };
@@ -1706,6 +1716,8 @@ let
   setserial = builderDefsPackage (import ../tools/system/setserial) {
     inherit groff;
   };
+
+  seqdiag = pythonPackages.seqdiag;
 
   sg3_utils = callPackage ../tools/system/sg3_utils { };
 
@@ -3211,6 +3223,8 @@ let
   });
 
   pythonLinkmeWrapper = callPackage ../development/interpreters/python/python-linkme-wrapper.nix { };
+
+  pypi2nix = python27Packages.pypi2nix;
 
   pyrex = pyrex095;
 
@@ -6560,6 +6574,19 @@ let
       ];
   };
 
+  linux_3_12 = makeOverridable (import ../os-specific/linux/kernel/linux-3.12.nix) {
+    inherit fetchurl stdenv perl mktemp bc kmod ubootChooser;
+    kernelPatches =
+      [
+        kernelPatches.sec_perm_2_6_24
+      ] ++ lib.optionals (platform.kernelArch == "mips")
+      [ kernelPatches.mips_fpureg_emu
+        kernelPatches.mips_fpu_sigill
+        kernelPatches.mips_ext3_n32
+      ];
+  };
+
+
   /* Linux kernel modules are inherently tied to a specific kernel.  So
      rather than provide specific instances of those packages for a
      specific kernel, we have a function that builds those packages
@@ -6612,6 +6639,8 @@ let
     atheros = callPackage ../os-specific/linux/atheros/0.9.4.nix { };
 
     broadcom_sta = callPackage ../os-specific/linux/broadcom-sta/default.nix { };
+
+    broadcom_sta6 = callPackage ../os-specific/linux/broadcom-sta-v6/default.nix { };
 
     nvidia_x11 = callPackage ../os-specific/linux/nvidia-x11 { };
 
@@ -6682,6 +6711,7 @@ let
   linuxPackages_3_9 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_9 linuxPackages_3_9);
   linuxPackages_3_10 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_10 linuxPackages_3_10);
   linuxPackages_3_11 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_11 linuxPackages_3_11);
+  linuxPackages_3_12 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_12 linuxPackages_3_12);
   # Update this when adding a new version!
   linuxPackages_latest = pkgs.linuxPackages_3_11;
 
@@ -8159,7 +8189,6 @@ let
   };
 
   mopidy = callPackage ../applications/audio/mopidy { };
-  mopidy_git = callPackage ../applications/audio/mopidy/git.nix { };
 
   mozilla = callPackage ../applications/networking/browsers/mozilla {
     inherit (gnome) libIDL;
@@ -9661,6 +9690,10 @@ let
   wxmaxima = callPackage ../applications/science/math/wxmaxima { };
 
   pari = callPackage ../applications/science/math/pari {};
+
+  pspp = callPackage ../applications/science/math/pssp {
+    inherit (gnome) libglade gtksourceview;
+  };
 
   R = callPackage ../applications/science/math/R {
     inherit (xlibs) libX11 libXt;

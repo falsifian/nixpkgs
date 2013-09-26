@@ -131,6 +131,61 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
   # packages defined here
 
+  aafigure = buildPythonPackage rec {
+    name = "aafigure-0.5";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/a/aafigure/${name}.tar.gz";
+      md5 = "5322888a21eb0bb2e749fbf98eddf574";
+    };
+
+    propagatedBuildInputs = [ pillow ];
+
+    # error: invalid command 'test'
+    doCheck = false;
+
+    # Fix impurity. TODO: Do the font lookup using fontconfig instead of this
+    # manual method. Until that is fixed, we get this whenever we run aafigure:
+    #   WARNING: font not found, using PIL default font
+    patchPhase = ''
+      sed -i "s|/usr/share/fonts|/nonexisting-fonts-path|" aafigure/PILhelper.py
+    '';
+
+    meta = with stdenv.lib; {
+      description = "ASCII art to image converter";
+      homepage = https://launchpad.net/aafigure/;
+      license = licenses.bsd2;
+      platforms = platforms.linux;
+      maintainers = [ maintainers.bjornfor ];
+    };
+  };
+
+
+  actdiag = buildPythonPackage rec {
+    name = "actdiag-0.4.3";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/a/actdiag/${name}.tar.gz";
+      md5 = "428aaab849f04668fa12388b964a56ea";
+    };
+
+    buildInputs = [ pep8 nose unittest2 docutils ];
+
+    propagatedBuildInputs = [ blockdiag ];
+
+    # One test fails, because of missing simple.diag input file
+    doCheck = false;
+
+    meta = with stdenv.lib; {
+      description = "Generate activity-diagram image from spec-text file (similar to Graphviz)";
+      homepage = http://blockdiag.com/;
+      license = licenses.asl20;
+      platforms = platforms.linux;
+      maintainers = [ maintainers.bjornfor ];
+    };
+  };
+
+
   afew = buildPythonPackage rec {
     rev = "6bb3915636aaf86f046a017ffffd9a4ef395e199";
     name = "afew-1.0_${rev}";
@@ -155,6 +210,25 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       homepage = https://github.com/teythoon/afew;
       description = "afew is an initial tagging script for notmuch mail.";
       maintainers = [ stdenv.lib.maintainers.garbas ];
+    };
+  };
+
+
+  alembic = buildPythonPackage rec {
+    name = "alembic-0.6.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/a/alembic/${name}.tar.gz";
+      md5 = "084fe81b48ebae43b0f6031af68a03d6";
+    };
+
+    buildInputs = [ nose ];
+    propagatedBuildInputs = [ Mako sqlalchemy ];
+
+    meta = {
+      homepage = http://bitbucket.org/zzzeek/alembic;
+      description = "A database migration tool for SQLAlchemy.";
+      license = stdenv.lib.licenses.mit;
     };
   };
 
@@ -490,6 +564,34 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       maintainers = [ maintainers.bjornfor ];
     };
   };
+
+
+  blockdiag = buildPythonPackage rec {
+    name = "blockdiag-1.2.4";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/b/blockdiag/${name}.tar.gz";
+      md5 = "244334f60cc10b0cb73b5df5279bcdd1";
+    };
+
+    buildInputs = [ pep8 nose unittest2 docutils ];
+
+    propagatedBuildInputs = [ pil webcolors funcparserlib ];
+
+    # One test fails:
+    #   ...
+    #   FAIL: test_auto_font_detection (blockdiag.tests.test_boot_params.TestBootParams)
+    doCheck = false;
+
+    meta = with stdenv.lib; {
+      description = "Generate block-diagram image from spec-text file (similar to Graphviz)";
+      homepage = http://blockdiag.com/;
+      license = licenses.asl20;
+      platforms = platforms.linux;
+      maintainers = [ maintainers.bjornfor ];
+    };
+  };
+
 
   bpython = buildPythonPackage rec {
      name = "bpython-0.12";
@@ -834,6 +936,29 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     };
   };
 
+
+  ColanderAlchemy = buildPythonPackage rec {
+    name = "ColanderAlchemy-0.2.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/C/ColanderAlchemy/${name}.tar.gz";
+      md5 = "b054837bd2753cbf15f7d5028cba421b";
+    };
+
+    buildInputs = [ unittest2 ];
+    propagatedBuildInputs = [ colander sqlalchemy8 ];
+
+    # string: argument name cannot be overridden via info kwarg.
+    doCheck = false;
+
+    meta = {
+      description = "Autogenerate Colander schemas based on SQLAlchemy models.";
+      homepage = https://github.com/stefanofontanelli/ColanderAlchemy;
+      license = pkgs.lib.licenses.mit;
+    };
+  };
+
+
   configobj = buildPythonPackage (rec {
     name = "configobj-4.7.2";
 
@@ -991,10 +1116,31 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       md5 = "18f150e7be96b5fe3c388b0e817b8087";
     };
 
-    buildInputs = [ py ];
+    propagatedBuildInputs = [ pythonPackages.py ]
+      ++ stdenv.lib.optional
+        pkgs.config.pythonPackages.pytest.selenium or false
+        pythonPackages.selenium;
+
+    meta = with stdenv.lib; {
+      maintainers = with maintainers; [ iElectric lovek323 ];
+      platforms   = platforms.unix;
+    };
+  };
+
+  pytest_xdist = buildPythonPackage rec {
+    name = "pytest-xdist-1.8";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/p/pytest-xdist/pytest-xdist-1.8.zip";
+      md5 = "9c0b8efe9d43b460f8cf049fa46ce14d";
+    };
+
+    buildInputs = [ pkgs.unzip pytest ];
+    propagatedBuildInputs = [ execnet ];
 
     meta = {
-      maintainers = [ stdenv.lib.maintainers.iElectric ];
+      description = "py.test xdist plugin for distributed testing and loop-on-failing modes";
+      homepage = http://bitbucket.org/hpk42/pytest-xdist;
     };
   };
 
@@ -1239,6 +1385,23 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
 
+  execnet = buildPythonPackage rec {
+    name = "execnet-1.1";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/e/execnet/${name}.zip";
+      md5 = "be885ccd9612966bb81839670d2da099";
+    };
+
+    buildInputs = [ pkgs.unzip ];
+
+    meta = {
+      description = "rapid multi-Python deployment";
+      license = stdenv.lib.licenses.gpl2;
+    };
+  };
+
+
   fabric = buildPythonPackage rec {
     name = "fabric-1.6.1";
     src = fetchurl {
@@ -1258,6 +1421,24 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     buildInputs = [ nose nosejs ];
     propagatedBuildInputs = [ sphinx ];
   };
+
+
+  funcparserlib = buildPythonPackage rec {
+    name = "funcparserlib-0.3.6";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/f/funcparserlib/${name}.tar.gz";
+      md5 = "3aba546bdad5d0826596910551ce37c0";
+    };
+
+    meta = with stdenv.lib; {
+      description = "Recursive descent parsing library based on functional combinators";
+      homepage = https://code.google.com/p/funcparserlib/;
+      license = licenses.mit;
+      platforms = platforms.linux;
+    };
+  };
+
 
   googlecl = buildPythonPackage rec {
     version = "0.9.14";
@@ -1351,11 +1532,11 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
 
   pudb = buildPythonPackage rec {
-    name = "pudb-2013.1";
+    name = "pudb-2013.3.6";
 
     src = fetchurl {
-      url = "http://pypi.python.org/packages/source/p/pudb/${name}.tar.gz";
-      md5 = "f94922aba7f862f13886457dc3fadc6a";
+      url = "https://pypi.python.org/packages/source/p/pudb/${name}.tar.gz";
+      md5 = "063030763bf914166a0b2bc8c011143b";
     };
 
     propagatedBuildInputs = [ pythonPackages.pygments pythonPackages.urwid ];
@@ -1477,6 +1658,24 @@ pythonPackages = modules // import ./python-packages-generated.nix {
         stdenv.lib.maintainers.iElectric
       ];
       platforms = stdenv.lib.platforms.all;
+    };
+  };
+
+
+  pyramid_multiauth = buildPythonPackage rec {
+    name = "pyramid_multiauth-${version}";
+    version = "0.3.2";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/p/pyramid_multiauth/${name}.tar.gz";
+      md5 = "044e423abc4fb76937ac0c21c1205e9c";
+    };
+
+    propagatedBuildInputs = [ pyramid ];
+
+    meta = with stdenv.lib; {
+      description = "Authentication policy for Pyramid that proxies to a stack of other authentication policies";
+      homepage = https://github.com/mozilla-services/pyramid_multiauth;
     };
   };
 
@@ -2509,6 +2708,28 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
 
+  htmllaundry = buildPythonPackage rec {
+    name = "htmllaundry-2.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/h/htmllaundry/${name}.tar.gz";
+      md5 = "6db6909de76c4b259e65d90b5debdbda";
+    };
+
+    buildInputs = [ nose ];
+    propagatedBuildInputs = [ six lxml ];
+
+    # some tests fail, probably because of changes in lxml
+    # not relevant for me, if releavnt for you, fix it...
+    doCheck = false;
+
+    meta = {
+      description = "Simple HTML cleanup utilities";
+      license = stdenv.lib.licenses.bsd3;
+    };
+  };
+
+
   html5lib = buildPythonPackage (rec {
     name = "html5lib-0.95";
 
@@ -3057,6 +3278,25 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     };
   };
 
+
+  memory_profiler = buildPythonPackage rec {
+    name = "memory_profiler-0.27";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/m/memory_profiler/memory_profiler-0.27.tar.gz";
+      md5 = "212c0d7452dbaffb6b09474ac07b0668";
+    };
+
+    # error: invalid command 'test'
+    doCheck = false;
+
+    meta = {
+      description = "A module for monitoring memory usage of a python program";
+      homepage = http://pypi.python.org/pypi/memory_profiler;
+    };
+  };
+
+
   mitmproxy = buildPythonPackage rec {
     baseName = "mitmproxy";
     name = "${baseName}-${meta.version}";
@@ -3547,6 +3787,32 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     };
   });
 
+
+  nwdiag = buildPythonPackage rec {
+    name = "nwdiag-0.9.4";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/n/nwdiag/${name}.tar.gz";
+      md5 = "199b22f66ec3012c3999177d376a3842";
+    };
+
+    buildInputs = [ pep8 nose unittest2 docutils ];
+
+    propagatedBuildInputs = [ blockdiag ];
+
+    # tests fail
+    doCheck = false;
+
+    meta = with stdenv.lib; {
+      description = "Generate network-diagram image from spec-text file (similar to Graphviz)";
+      homepage = http://blockdiag.com/;
+      license = licenses.asl20;
+      platforms = platforms.linux;
+      maintainers = [ maintainers.bjornfor ];
+    };
+  };
+
+
   oauth2 = buildPythonPackage (rec {
     name = "oauth2-1.5.211";
 
@@ -4020,12 +4286,15 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
 
   psutil = buildPythonPackage rec {
-    name = "psutil-0.6.1";
+    name = "psutil-1.0.1";
 
     src = fetchurl {
       url = "http://psutil.googlecode.com/files/${name}.tar.gz";
-      sha256 = "0vqarv63jqzghr4fi1fqdbvg847fq2gqdj8dzc3x59f9b36a8rfn";
+      sha256 = "1zrzh7hi0f79sf9axwrw3c2kl86qs72kvx8xbbrdwlp39rfa1i1f";
     };
+
+    # failed tests: https://code.google.com/p/psutil/issues/detail?id=434
+    doCheck = false;
 
     meta = {
       description = "Process and system utilization information interface for python";
@@ -4260,6 +4529,9 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       rev = "0f00109950b883d680bd85dc6e8a9c731a7d0d13";
       sha256 = "0mhg7f9y5zl0m2xgz3rf1yqjd6l8n0qhfk7bpf36r44jfnhj75ld";
     };
+
+    # error: (6, "Couldn't resolve host 'h.wrttn.me'")
+    doCheck = false;
 
     buildInputs = [ pkgs.curl simplejson unittest2 nose ];
 
@@ -5119,6 +5391,33 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
 
+  seqdiag = buildPythonPackage rec {
+    name = "seqdiag-0.8.2";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/s/seqdiag/${name}.tar.gz";
+      md5 = "61b3da29b5efaa89701b4db6d2d4d5fa";
+    };
+
+    buildInputs = [ pep8 nose unittest2 docutils ];
+
+    propagatedBuildInputs = [ blockdiag ];
+
+    # Some tests fail (because of missing input files?):
+    #   ...
+    #   IOError: [Errno 2] No such file or directory: '/tmp/nix-build-python2.7-seqdiag-0.8.2.drv-0/seqdiag-0.8.2/src/seqdiag/tests/diagrams/separators.diag'
+    doCheck = false;
+
+    meta = with stdenv.lib; {
+      description = "Generate sequence-diagram image from spec-text file (similar to Graphviz)";
+      homepage = http://blockdiag.com/;
+      license = licenses.asl20;
+      platforms = platforms.linux;
+      maintainers = [ maintainers.bjornfor ];
+    };
+  };
+
+
   scipy = buildPythonPackage rec {
     name = "scipy-0.9.0";
 
@@ -5187,7 +5486,11 @@ pythonPackages = modules // import ./python-packages-generated.nix {
         cp "${x_ignore_nofocus}/"* .
         sed -i 's|dlopen(library,|dlopen("libX11.so.6",|' x_ignore_nofocus.c
         gcc -c -fPIC x_ignore_nofocus.c -o x_ignore_nofocus.o
-        gcc -shared -Wl,-soname,x_ignore_nofocus.so -o x_ignore_nofocus.so  x_ignore_nofocus.o
+        gcc -shared \
+          -Wl,${if stdenv.isDarwin then "-install_name" else "-soname"},x_ignore_nofocus.so \
+          -o x_ignore_nofocus.so \
+          x_ignore_nofocus.o \
+          ${if stdenv.isDarwin then "-lx11" else ""}
         cp -v x_ignore_nofocus.so py/selenium/webdriver/firefox/${if pkgs.stdenv.is64bit then "amd64" else "x86"}/
       '';
     };
@@ -5510,6 +5813,44 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   });
 
 
+  sphinxcontrib_httpdomain = buildPythonPackage (rec {
+    name = "sphinxcontrib-httpdomain-1.1.9";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/s/sphinxcontrib-httpdomain/${name}.tar.gz";
+      md5 = "0f63aea612cc9e0b55a6c39e5b0f87b7";
+    };
+
+    propagatedBuildInputs = [sphinx];
+
+    meta = {
+      description = "Provides a Sphinx domain for describing RESTful HTTP APIs";
+
+      homepage = http://bitbucket.org/birkenfeld/sphinx-contrib;
+
+      license = "BSD";
+    };
+  });
+
+
+  sphinx_pypi_upload = buildPythonPackage (rec {
+    name = "Sphinx-PyPI-upload-0.2.1";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/S/Sphinx-PyPI-upload/${name}.tar.gz";
+      md5 = "b9f1df5c8443197e4d49abbba1cfddc4";
+    };
+
+    meta = {
+      description = "Setuptools command for uploading Sphinx documentation to PyPI";
+
+      homepage = http://bitbucket.org/jezdez/sphinx-pypi-upload/;
+
+      license = "BSD";
+    };
+  });
+
+
   sqlalchemy = buildPythonPackage rec {
     name = "sqlalchemy-${version}";
     version = "0.7.10";
@@ -5532,6 +5873,49 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     meta = {
       homepage = http://www.sqlalchemy.org/;
       description = "A Python SQL toolkit and Object Relational Mapper";
+    };
+  };
+
+
+  sqlalchemy8 = buildPythonPackage rec {
+    name = "SQLAlchemy-${version}";
+    version = "0.8.2";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/S/SQLAlchemy/${name}.tar.gz";
+      md5 = "5a33fb43dea93468dbb2a6562ee80b54";
+    };
+
+    buildInputs = [ nose mock ];
+
+    propagatedBuildInputs = [ modules.sqlite3 ];
+
+    meta = {
+      homepage = http://www.sqlalchemy.org/;
+      description = "A Python SQL toolkit and Object Relational Mapper";
+    };
+  };
+
+
+  sqlalchemy_imageattach = buildPythonPackage rec {
+    name = "SQLAlchemy-ImageAttach-${version}";
+    version = "0.8.1";
+
+    src = fetchgit {
+      url = https://github.com/crosspop/sqlalchemy-imageattach.git;
+      rev = "refs/tags/${version}";
+      md5 = "051dd9de0757714d33c3ecd5ab37b97d";
+    };
+
+    buildInputs = [ pytest webob pkgs.imagemagick ];
+    propagatedBuildInputs = [ sqlalchemy8 wand ];
+
+    checkPhase = "cd tests && LD_LIBRARY_PATH=${pkgs.imagemagick}/lib py.test";
+
+    meta = {
+      homepage = https://github.com/crosspop/sqlalchemy-imageattach;
+      description = "SQLAlchemy extension for attaching images to entity objects";
+      license = pkgs.lib.licenses.mit;
     };
   };
 
@@ -5561,6 +5945,26 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       description = "Schema migration tools for SQLAlchemy";
     };
   };
+
+
+  statd = buildPythonPackage rec {
+    name = "python-statsd-${version}";
+    version = "1.6.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/p/python-statsd/${name}.tar.gz";
+      md5 = "3a0c71a160b504b843703c3041c7d7fb";
+    };
+
+    buildInputs = [ mock nose coverage ];
+
+    meta = {
+      description = "A client for Etsy's node-js statsd server";
+      homepage = https://github.com/WoLpH/python-statsd;
+      license = pkgs.lib.licenses.bsd3;
+    };
+  };
+
 
   stompclient = buildPythonPackage (rec {
     name = "stompclient-0.3.2";
@@ -5974,6 +6378,45 @@ pythonPackages = modules // import ./python-packages-generated.nix {
        platforms = stdenv.lib.platforms.all;
     };
   };
+
+
+  webcolors = buildPythonPackage rec {
+    name = "webcolors-1.4";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/w/webcolors/${name}.tar.gz";
+      md5 = "35de9d785b5c04a9cc66a2eae0519254";
+    };
+
+    # error: invalid command 'test'
+    doCheck = false;
+
+    meta = with stdenv.lib; {
+      description = "Library for working with color names/values defined by the HTML and CSS specifications";
+      homepage = https://bitbucket.org/ubernostrum/webcolors/overview/;
+      license = licenses.bsd3;
+      platforms = platforms.linux;
+    };
+  };
+
+
+  wand = buildPythonPackage rec {
+    name = "Wand-0.3.5";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/W/Wand/${name}.tar.gz";
+      md5 = "10bab03bf86ce8da2a95a3b15197ae2e";
+    };
+
+    buildInputs = [ pkgs.imagemagick pytest psutil memory_profiler pytest_xdist ];
+
+    meta = {
+      description = "Ctypes-based simple MagickWand API binding for Python";
+      homepage = http://wand-py.org/;
+      platforms = stdenv.lib.platforms.all;
+    };
+  };
+
 
   webob = buildPythonPackage rec {
     version = "1.2.3";
@@ -7191,16 +7634,15 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 } // pkgs.lib.optionalAttrs (python.majorVersion == "2.7") {
 
   pypi2nix = pythonPackages.buildPythonPackage rec {
-    rev = "e85eb9e75e7290c17e89822d6a5c1c52c1b59269";
+    rev = "04a68d8577acbceb88bdf51b1231a9dbdead7003";
     name = "pypi2nix-1.0_${rev}";
 
     src = pkgs.fetchurl {
       url = "https://github.com/garbas/pypi2nix/tarball/${rev}";
       name = "${name}.tar.bz";
-      sha256 = "0wk9019pgpc2467819cz98fdvihjkpihlh1yywfxlvn04ymb315q";
+      sha256 = "1fv85x2bz442iyxsvka2g75zibjcq48gp2fc7szaqcfqxq42syy9";
     };
 
-    propagatedBuildInputs = [ pythonPackages."Distutils2-1.0a4" ];
     doCheck = false;
 
     meta = {

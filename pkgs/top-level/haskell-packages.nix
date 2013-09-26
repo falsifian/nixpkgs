@@ -169,7 +169,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     syb          = self.syb_0_4_1;
     text         = self.text_0_11_3_1;
     transformers = null;                        # this has become a core package in GHC 7.7
-    unorderedContainers = self.unorderedContainers_0_2_3_2;
+    unorderedContainers = self.unorderedContainers_0_2_3_3;
     vector       = self.vector_0_10_0_1;
     xhtml        = self.xhtml_3000_2_1;
     zlib         = self.zlib_0_5_4_1;
@@ -657,7 +657,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   Cabal_1_14_0 = callPackage ../development/libraries/haskell/Cabal/1.14.0.nix { cabal = self.cabal.override { Cabal = null; }; };
   Cabal_1_16_0_3 = callPackage ../development/libraries/haskell/Cabal/1.16.0.3.nix { cabal = self.cabal.override { Cabal = null; }; };
-  Cabal_1_18_0 = callPackage ../development/libraries/haskell/Cabal/1.18.0.nix {
+  Cabal_1_18_1 = callPackage ../development/libraries/haskell/Cabal/1.18.1.nix {
     cabal = self.cabal.override { Cabal = null; };
     deepseq = self.deepseq_1_3_0_1;
   };
@@ -693,6 +693,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   cgi_3001_1_7_5 = callPackage ../development/libraries/haskell/cgi/3001.1.7.5.nix {};
   cgi_3001_1_8_4 = callPackage ../development/libraries/haskell/cgi/3001.1.8.4.nix {};
   cgi = self.cgi_3001_1_8_4;
+
+  charset = callPackage ../development/libraries/haskell/charset {};
 
   Chart = callPackage ../development/libraries/haskell/Chart {};
   ChartCairo = callPackage ../development/libraries/haskell/Chart-cairo {};
@@ -832,6 +834,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   dataMemocombinators = callPackage ../development/libraries/haskell/data-memocombinators {};
 
+  dataPprint = callPackage ../development/libraries/haskell/data-pprint {};
+
   dataReify = callPackage ../development/libraries/haskell/data-reify {};
 
   dateCache = callPackage ../development/libraries/haskell/date-cache {};
@@ -932,6 +936,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   encoding = callPackage ../development/libraries/haskell/encoding {};
 
   enumerator = callPackage ../development/libraries/haskell/enumerator {};
+
+  enummapset = callPackage ../development/libraries/haskell/enummapset {};
 
   entropy = callPackage ../development/libraries/haskell/entropy {};
 
@@ -1346,6 +1352,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   kansasLava = callPackage ../development/libraries/haskell/kansas-lava {};
 
+  keys = callPackage ../development/libraries/haskell/keys {};
+
   knob = callPackage ../development/libraries/haskell/knob {};
 
   languageC = callPackage ../development/libraries/haskell/language-c {};
@@ -1465,8 +1473,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   monadLogger = callPackage ../development/libraries/haskell/monad-logger {};
 
   monadPar_0_1_0_3 = callPackage ../development/libraries/haskell/monad-par/0.1.0.3.nix {};
-  monadPar_0_3_4_4 = callPackage ../development/libraries/haskell/monad-par/0.3.4.4.nix {};
-  monadPar = self.monadPar_0_3_4_4;
+  monadPar_0_3_4_5 = callPackage ../development/libraries/haskell/monad-par/0.3.4.5.nix {};
+  monadPar = self.monadPar_0_3_4_5;
 
   monadParExtras = callPackage ../development/libraries/haskell/monad-par-extras {};
 
@@ -1634,6 +1642,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   parsec3 = self.parsec_3_1_3;
   parsec  = self.parsec3;
 
+  parsers = callPackage ../development/libraries/haskell/parsers {};
+
   parsimony = callPackage ../development/libraries/haskell/parsimony {};
 
   Pathfinder = callPackage ../development/libraries/haskell/Pathfinder {};
@@ -1679,6 +1689,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   pipesZlib = callPackage ../development/libraries/haskell/pipes-zlib {};
 
   polyparse = callPackage ../development/libraries/haskell/polyparse {};
+
+  pointed = callPackage ../development/libraries/haskell/pointed {};
 
   poolConduit = callPackage ../development/libraries/haskell/pool-conduit {};
 
@@ -1773,6 +1785,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   };
 
   recaptcha = callPackage ../development/libraries/haskell/recaptcha {};
+
+  reducers = callPackage ../development/libraries/haskell/reducers {};
 
   reflection = callPackage ../development/libraries/haskell/reflection {};
 
@@ -2091,6 +2105,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   transformersCompat = callPackage ../development/libraries/haskell/transformers-compat {};
 
+  trifecta = callPackage ../development/libraries/haskell/trifecta {};
+
   tuple = callPackage ../development/libraries/haskell/tuple {};
 
   typeEquality = callPackage ../development/libraries/haskell/type-equality {};
@@ -2118,8 +2134,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   unlambda = callPackage ../development/libraries/haskell/unlambda {};
 
   unorderedContainers_0_2_3_0 = callPackage ../development/libraries/haskell/unordered-containers/0.2.3.0.nix {};
-  unorderedContainers_0_2_3_2 = callPackage ../development/libraries/haskell/unordered-containers/0.2.3.2.nix {};
-  unorderedContainers = self.unorderedContainers_0_2_3_2;
+  unorderedContainers_0_2_3_3 = callPackage ../development/libraries/haskell/unordered-containers/0.2.3.3.nix {};
+  unorderedContainers = self.unorderedContainers_0_2_3_3;
 
   url = callPackage ../development/libraries/haskell/url {};
 
@@ -2443,7 +2459,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   cabalInstall_0_14_0 = callPackage ../tools/package-management/cabal-install/0.14.0.nix {};
   cabalInstall_1_16_0_2 = callPackage ../tools/package-management/cabal-install/1.16.0.2.nix {};
   cabalInstall_1_18_0_1 = callPackage ../tools/package-management/cabal-install/1.18.0.1.nix {
-    Cabal = self.Cabal_1_18_0;
+    Cabal = self.Cabal_1_18_1;
   };
   cabalInstall = self.cabalInstall_1_18_0;
 
