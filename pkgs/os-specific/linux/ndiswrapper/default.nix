@@ -1,0 +1,40 @@
+{ stdenv, fetchurl, kernelDev, perl }:
+
+stdenv.mkDerivation {
+  name = "ndiswrapper-1.56-${kernelDev.version}";
+
+  # need at least .config and include 
+  kernel = kernelDev;
+
+  buildPhase = "
+    echo make KBUILD=$(echo \$kernel/lib/modules/*/build);
+    echo -n $kernel/lib/modules/*/build > kbuild_path
+    make KBUILD=$(echo \$kernel/lib/modules/*/build);
+  ";
+
+  installPhase = ''
+    make install KBUILD=$(cat kbuild_path) DESTDIR=$out
+    mv $out/usr/sbin/* $out/sbin/
+    mv $out/usr/share $out/
+    rm -r $out/usr
+
+    patchShebangs $out/sbin
+  '';
+
+  # should we use unstable? 
+  src = fetchurl {
+    url = mirror://sourceforge/ndiswrapper/ndiswrapper-1.56.tar.gz;
+    sha256 = "10yqg1a08v6z1qm1qr1v4rbhl35c90gzrazapr09vp372hky8f57";
+  };
+
+  buildInputs = [ kernelDev perl ];
+
+  # this is a patch against svn head, not stable version
+  patches = [./prefix.patch];
+
+  meta = { 
+    description = "Ndis driver wrapper for the Linux kernel";
+    homepage = http://sourceforge.net/projects/ndiswrapper;
+    license = "GPL";
+  };
+}

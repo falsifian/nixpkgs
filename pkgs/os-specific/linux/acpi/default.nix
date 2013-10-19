@@ -1,0 +1,23 @@
+{ stdenv, fetchurl }:
+
+stdenv.mkDerivation rec {
+  name = "acpi-${version}";
+  version = "1.6";
+
+  src = fetchurl {
+    url = "mirror://sourceforge/acpiclient/${version}/${name}.tar.gz";
+    sha256 = "0cawznhkzb51yxa599d1xkw05nklmjrrmd79vmjkkzf4002d4qgd";
+  };
+
+  meta = {
+    description = "Show battery status and other ACPI information";
+    longDescription = ''
+      Linux ACPI client is a small command-line
+      program that attempts to replicate the functionality of
+      the "old" `apm' command on ACPI systems.  It includes
+      battery and thermal information.
+    '';
+    homepage = http://sourceforge.net/projects/acpiclient/;
+    license = "GPLv2+";
+  };
+}

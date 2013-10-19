@@ -1,0 +1,32 @@
+Without this patch `virtualenv --python=python2.7 .` fails with an error because it notices that the python readline.so is not in the same path as python2.7. I assume this is to avoid copying the wrong file on systems where it is possible to find incompatible libraries by accident. Adding "/nix/store" to the prefix fixes this problem. Unfortunately readline is still not available if you just run `virtualenv .`.
+
+--- virtualenv-1.8.4/virtualenv.py        2013-01-16 23:43:37.583615220 +0100
++++ virtualenv-1.8.4/virtualenv.py        2013-01-16 23:44:47.885973431 +0100
+@@ -1135,17 +1135,7 @@
+ 
+ 
+ def change_prefix(filename, dst_prefix):
+-    prefixes = [sys.prefix]
+-
+-    if is_darwin:
+-        prefixes.extend((
+-            os.path.join("/Library/Python", sys.version[:3], "site-packages"),
+-            os.path.join(sys.prefix, "Extras", "lib", "python"),
+-            os.path.join("~", "Library", "Python", sys.version[:3], "site-packages"),
+-            # Python 2.6 no-frameworks
+-            os.path.join("~", ".local", "lib","python", sys.version[:3], "site-packages"),
+-            # System Python 2.7 on OSX Mountain Lion
+-            os.path.join("~", "Library", "Python", sys.version[:3], "lib", "python", "site-packages")))
++    prefixes = ["/nix/store", sys.prefix]
+ 
+     if hasattr(sys, 'real_prefix'):
+         prefixes.append(sys.real_prefix)
+@@ -1162,6 +1152,8 @@
+             if src_prefix != os.sep: # sys.prefix == "/"
+                 assert relpath[0] == os.sep
+                 relpath = relpath[1:]
++                if src_prefix == "/nix/store":
++                    relpath = "/".join(relpath.split("/")[1:])
+             return join(dst_prefix, relpath)
+     assert False, "Filename %s does not start with any of these prefixes: %s" % \
+         (filename, prefixes)
