@@ -5,7 +5,7 @@ isPy26 = python.majorVersion == "2.6";
 isPy27 = python.majorVersion == "2.7";
 optional = pkgs.lib.optional;
 optionals = pkgs.lib.optionals;
-modules = python.modules or { readline = null; sqlite3 = null; curses = null; ssl = null; crypt = null; };
+modules = python.modules or { readline = null; sqlite3 = null; curses = null; curses_panel = null; ssl = null; crypt = null; };
 
 pythonPackages = modules // import ./python-packages-generated.nix {
   inherit pkgs python;
@@ -1347,6 +1347,7 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       homepage = http://pythonhosted.org/evdev;
       license = licenses.bsd3;
       maintainers = [ maintainers.goibhniu ];
+      platforms = stdenv.lib.platforms.linux;
     };
   };
 
@@ -2268,6 +2269,27 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
 
+  ecdsa = buildPythonPackage rec {
+    name = "ecdsa-${version}";
+    version = "0.9";
+
+    src = fetchurl {
+      url = "http://pypi.python.org/packages/source/e/ecdsa/${name}.tar.gz";
+      md5 = "2b9c35245ce391d6b7d8f991aad5c630";
+    };
+
+    # Only needed for tests
+    buildInputs = [ pkgs.openssl ];
+
+    meta = {
+      description = "ECDSA cryptographic signature library";
+      homepage = "https://github.com/warner/python-ecdsa";
+      license = stdenv.lib.licenses.mit;
+      maintainers = [ stdenv.lib.maintainers.aszlig ];
+    };
+  };
+
+
   elpy = buildPythonPackage rec {
     name = "elpy-1.0.1";
     src = fetchurl {
@@ -2646,6 +2668,31 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     };
   };
 
+  glances = buildPythonPackage rec {
+    name = "glances-${meta.version}";
+
+    src = fetchurl {
+      url = "https://github.com/nicolargo/glances/archive/v${meta.version}.tar.gz";
+      sha256 = "0g2yg9qf7qgjwv13x0rx51rzhn99pcmjpb3vk0g3gmmdsqyqi0d6";
+    };
+
+    buildInputs = [ pkgs.hddtemp ];
+
+    propagatedBuildInputs = [ psutil jinja2 modules.curses modules.curses_panel];
+
+    doCheck = false;
+
+    preConfigure = ''
+      sed -i -r -e '/data_files.append[(][(](conf|etc)_path/ietc_path="etc/glances"; conf_path="etc/glances"' setup.py;
+    '';
+
+    meta = {
+      version = "1.7.1";
+      homepage = "http://nicolargo.github.io/glances/";
+      description = "Cross-platform curses-based monitoring tool";
+    };
+  };
+
 
   greenlet = buildPythonPackage rec {
     name = "greenlet-0.3.1";
@@ -2663,24 +2710,23 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
 
   gyp = buildPythonPackage rec {
-    rev = "1635";
+    rev = "1738";
     name = "gyp-r${rev}";
 
     src = fetchsvn {
       url = "http://gyp.googlecode.com/svn/trunk";
       inherit rev;
-      sha256 = "1hn5gxgj2z399f71kz11m61ifds7mx4zkymnd1c87k1wyp7bs5k5";
+      sha256 = "155k7v6453j2kg02xqfqbkzkbaqc8aynxs2k462jmrp638vxia9s";
     };
 
-   patches = if pkgs.stdenv.isDarwin then [ ../development/python-modules/gyp/no-xcode.patch ../development/python-modules/gyp/no-darwin-cflags.patch ] else null;
-
-    # error: invalid command 'test'
-    doCheck = false;
-
-    postUnpack = "find . -print0 | xargs -0 touch";
+    patches = optionals pkgs.stdenv.isDarwin [
+      ../development/python-modules/gyp/no-xcode.patch
+      ../development/python-modules/gyp/no-darwin-cflags.patch
+    ];
 
     meta = {
       homepage = http://code.google.com/p/gyp;
+      license = stdenv.lib.licenses.bsd3;
       description = "Generate Your Projects";
     };
   };
@@ -2688,12 +2734,12 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
   hetzner = buildPythonPackage rec {
     name = "hetzner-${version}";
-    version = "0.5.0";
+    version = "0.6.0";
 
     src = fetchurl {
       url = "https://github.com/RedMoonStudios/hetzner/archive/"
           + "v${version}.tar.gz";
-      sha256 = "0i8b2nx4mf87qn4zz7kz321cl1bxlvjdwm7yh8md5hrhqbya4jw5";
+      sha256 = "1cgi77f453ahw3ad6hvqwbyp6fwnh90rlzfgl9cp79wg58wyar4w";
     };
 
     # not there yet, but coming soon.
@@ -3938,11 +3984,11 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   });
 
   pandas = buildPythonPackage rec {
-    name = "pandas-0.11.0";
+    name = "pandas-0.12.0";
 
     src = fetchurl {
       url = "https://pypi.python.org/packages/source/p/pandas/${name}.tar.gz";
-      sha256 = "1mwh783hcch6lywgjayj8aqmbfv6n8fd2qbf1xlwqk2913ad8x2d";
+      sha256 = "0vf865wh1kcq33189ykqgngb25nxhxxch6skfdl3c6w024v4r6xy";
     };
 
     buildInputs = [ nose ];
@@ -3961,33 +4007,29 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
   paramiko = buildPythonPackage rec {
-    name = "paramiko-1.11.0";
+    name = "paramiko-1.12.0";
 
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/p/paramiko/${name}.tar.gz";
-      md5 = "a2c55dc04904bd08d984533703177084";
+      md5 = "4187f77b1a5a313c899993930e30c321";
     };
 
-    propagatedBuildInputs = [ pycrypto ];
+    propagatedBuildInputs = [ pycrypto ecdsa ];
 
     checkPhase = "python test.py";
 
     meta = {
-      homepage = "http://www.lag.net/paramiko/";
-      description = "SSH2 protocol for python";
-      license = "LGPL";
+      homepage = "https://github.com/paramiko/paramiko/";
+      description = "Native Python SSHv2 protocol library";
+      license = stdenv.lib.licenses.lgpl21Plus;
+      maintainer = [ stdenv.lib.maintainers.aszlig ];
 
       longDescription = ''
-        paramiko is a module for python 2.2 (or higher) that implements the
-        SSH2 protocol for secure (encrypted and authenticated) connections to
-        remote machines. unlike SSL (aka TLS), SSH2 protocol does not require
-        heirarchical certificates signed by a powerful central authority. you
-        may know SSH2 as the protocol that replaced telnet and rsh for secure
-        access to remote shells, but the protocol also includes the ability
-        to open arbitrary channels to remote services across the encrypted
-        tunnel -- this is how sftp works, for example.  it is written
-        entirely in python (no C or platform-dependent code) and is released
-        under the GNU LGPL (lesser GPL).  '';
+        This is a library for making SSH2 connections (client or server).
+        Emphasis is on using SSH2 as an alternative to SSL for making secure
+        connections between python scripts. All major ciphers and hash methods
+        are supported. SFTP client and server mode are both supported too.
+      '';
     };
   };
 
@@ -4612,6 +4654,7 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       homepage = "http://www.pyglet.org/";
       description = "A cross-platform windowing and multimedia library";
       license = stdenv.lib.licenses.bsd3;
+      platforms = stdenv.lib.platforms.mesaPlatforms;
     };
   };
 
@@ -4779,7 +4822,8 @@ pythonPackages = modules // import ./python-packages-generated.nix {
     meta = {
       homepage = "https://fedorahosted.org/pyparted/";
       description = "Python interface for libparted";
-      license = pkgs.lib.licenses.gpl2Plus;
+      license = stdenv.lib.licenses.gpl2Plus;
+      platforms = stdenv.lib.platforms.linux;
     };
   };
 
@@ -4835,6 +4879,7 @@ pythonPackages = modules // import ./python-packages-generated.nix {
       homepage = "http://pyudev.readthedocs.org/";
       description = "Pure Python libudev binding";
       license = stdenv.lib.licenses.lgpl21Plus;
+      platforms = stdenv.lib.platforms.linux;
     };
   };
 
@@ -4958,6 +5003,7 @@ pythonPackages = modules // import ./python-packages-generated.nix {
           '';
 
           license = "BSD-style";
+          platforms = stdenv.lib.platforms.mesaPlatforms;
         };
       };
 
@@ -5267,6 +5313,37 @@ pythonPackages = modules // import ./python-packages-generated.nix {
   };
 
 
+  qutip = buildPythonPackage rec {
+    name = "qutip-2.2.0";
+
+    src = fetchurl {
+      url = "https://qutip.googlecode.com/files/QuTiP-2.2.0.tar.gz";
+      sha1 = "76ba4991322a991d580e78a197adc80d58bd5fb3";
+    };
+
+    propagatedBuildInputs = [ numpy scipy matplotlib pkgs.pyqt4
+      pkgs.cython ];
+
+    buildInputs = with pkgs; [ gcc qt4 blas ] ++ [ nose ];
+
+    meta = {
+      description = "QuTiP - Quantum Toolbox in Python";
+      longDescription = ''
+        QuTiP is open-source software for simulating the dynamics of
+        open quantum systems. The QuTiP library depends on the
+        excellent Numpy and Scipy numerical packages. In addition,
+        graphical output is provided by Matplotlib. QuTiP aims to
+        provide user-friendly and efficient numerical simulations of a
+        wide variety of Hamiltonians, including those with arbitrary
+        time-dependence, commonly found in a wide range of physics
+        applications such as quantum optics, trapped ions,
+        superconducting circuits, and quantum nanomechanical
+        resonators.
+      '';
+      homepage = http://qutip.org/;
+    };
+  };
+
   requests_oauth2 = buildPythonPackage rec {
     name = "requests-oauth2-0.1.1";
 
@@ -5419,11 +5496,11 @@ pythonPackages = modules // import ./python-packages-generated.nix {
 
 
   scipy = buildPythonPackage rec {
-    name = "scipy-0.9.0";
+    name = "scipy-0.12.0";
 
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/s/scipy/${name}.tar.gz";
-      md5 = "ebfef6e8e82d15c875a4ee6a46d4e1cd";
+      md5 = "8fb4da324649f655e8557ea92b998786";
     };
 
     buildInputs = [pkgs.gfortran];

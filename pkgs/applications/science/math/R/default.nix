@@ -55,9 +55,11 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
+  setupHook = ./setup-hook.sh;
+
   meta = {
     homepage = "http://www.r-project.org/";
-    description = "a free software environment for statistical computing and graphics";
+    description = "Free software environment for statistical computing and graphics";
     license = stdenv.lib.licenses.gpl2Plus;
 
     longDescription = ''
