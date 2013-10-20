@@ -22,14 +22,6 @@ let
 
   tincUser = "tinc";
 
-  startupScript = netName: pkgs.writeScript "start_tinc_${netName}.sh" ''
-    #! ${pkgs.stdenv.shell}
-    ${pkgs.tinc}/sbin/tincd -n ${netName} \
-      --no-detach \
-      --pidfile="${stateDir}/tinc.${netName}.pid"
-  '';
-
-
 in
 
 {
@@ -74,10 +66,10 @@ in
         description = "tinc daemon user";
       };
 
-    jobs = flip pkgs.lib.mapAttrs' cfg.networks (netName: netCfg:
+    systemd.services = flip pkgs.lib.mapAttrs' cfg.networks (netName: netCfg:
       nameValuePair
         "tinc_${netName}"
-        { description = "TODO";
+        { description = "tinc VPN daemon for network \"${netName}\"";
   
           wantedBy = [ "ip-up.target" ];
           partOf = [ "ip-up.target" ];
@@ -88,8 +80,21 @@ in
               chown ${tincUser} ${stateDir}
             '';
 
-          exec = "${startupScript netName} ";
+          serviceConfig.ExecStart = ''\
+            ${pkgs.tinc}/sbin/tincd -n ${netName} \
+              --no-detach \
+              --pidfile=${stateDir}/tinc.${netName}.pid \
+              --user=tinc
+          '';
         });
+
+    ## TODO copied from network-interfaces.nix
+    ## services.udev.extraRules =
+    ##   ''
+    ##     KERNEL=="tun", TAG+="systemd"
+    ##   '';
+    # TODO create /dev/net/tun
+    # TODO: should this do something when a configuration is changed?
 
   };
 
