@@ -4,7 +4,31 @@ with pkgs.lib;
 
 let
 
+  cfg = config.services.tinc;
+
+  ## configDir = pkgs.stdenv.mkDerivation {
+  ##   name = "tinc-conf";
+  ##   buildCommand = ''
+  ##     ensureDir "$out"
+  ##     TODO
+  ##   '';
+  ## };
+
+  ## networkOpts = { name, ... }: {
+  ##   options = TODO;
+  ## };
+
+  stateDir = "/var/run/tinc";
+
   tincUser = "tinc";
+
+  startupScript = netName: pkgs.writeScript "start_tinc_${netName}.sh" ''
+    #! ${pkgs.stdenv.shell}
+    ${pkgs.tinc}/sbin/tincd -n ${netName} \
+      --no-detach \
+      --pidfile="${stateDir}/tinc.${netName}.pid"
+  '';
+
 
 in
 
@@ -17,7 +41,15 @@ in
     services.tinc = {
 
       enable = mkOption {
-        default = true;
+        default = false;
+        description = "TODO";
+      };
+
+      networks = mkOption {
+        # TODO example
+        # TODO type
+        # TODO options = [ networkOpts ];
+        default = { };
         description = "TODO";
       };
 
@@ -30,33 +62,34 @@ in
 
   config = mkIf config.services.tinc.enable {
 
-    # Make tools such as ntpq available in the system path
-    environment.systemPackages = [ pkgs.tinc ];
+    ## TODO enable
+    ## environment.etc = singleton
+    ##   { source = configDir;
+    ##     target = "tinc";
+    ##   };
 
     users.extraUsers = singleton
       { name = tincUser;
         uid = config.ids.uids.tinc;
         description = "tinc daemon user";
-        home = TODO;
       };
 
-    jobs.tinc =
-      { description = "TODO";
+    jobs = flip pkgs.lib.mapAttrs' cfg.networks (netName: netCfg:
+      nameValuePair
+        "tinc_${netName}"
+        { description = "TODO";
+  
+          wantedBy = [ "ip-up.target" ];
+          partOf = [ "ip-up.target" ];
 
-        wantedBy = [ "ip-up.target" ];  # TODO check
-        partOf = [ "ip-up.target" ];  # TODO check
+          preStart =
+            ''
+              mkdir -m 0755 -p ${stateDir}
+              chown ${tincUser} ${stateDir}
+            '';
 
-        path = [ tinc ];  # TODO what is this?
-
-        preStart =
-          ''
-            # TODO change this
-            mkdir -m 0755 -p ${stateDir}
-            chown ${ntpUser} ${stateDir}
-          '';
-
-        exec = "tinc --TODO";
-      };
+          exec = "${startupScript netName} ";
+        });
 
   };
 
