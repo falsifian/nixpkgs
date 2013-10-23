@@ -65,6 +65,7 @@ in
         uid = config.ids.uids.tinc;
         description = "tinc daemon user";
       };
+    services.udev.extraRules = ''KERNEL=="tun", NAME="net/%k", TAGS+="systemd"'';
 
     systemd.services = flip pkgs.lib.mapAttrs' cfg.networks (netName: netCfg:
       nameValuePair
@@ -88,13 +89,7 @@ in
           '';
         });
 
-    ## TODO copied from network-interfaces.nix
-    ## services.udev.extraRules =
-    ##   ''
-    ##     KERNEL=="tun", TAG+="systemd"
-    ##   '';
-    # TODO create /dev/net/tun
-    # TODO: should this do something when a configuration is changed?
+    # TODO: should this do something on nixos-rebuild switch?
 
   };
 
