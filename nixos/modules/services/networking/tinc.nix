@@ -60,12 +60,13 @@ in
     ##     target = "tinc";
     ##   };
 
+    boot.kernelModules = [ "tun" ];
+
     users.extraUsers = singleton
       { name = tincUser;
         uid = config.ids.uids.tinc;
         description = "tinc daemon user";
       };
-    services.udev.extraRules = ''KERNEL=="tun", NAME="net/%k", TAGS+="systemd"'';
 
     systemd.services = flip pkgs.lib.mapAttrs' cfg.networks (netName: netCfg:
       nameValuePair
@@ -77,15 +78,13 @@ in
 
           preStart =
             ''
-              mkdir -m 0755 -p ${stateDir}
-              chown ${tincUser} ${stateDir}
+              mkdir -m 0755 -p '${stateDir}'
+              chown '${tincUser}' '${stateDir}'
             '';
 
-          serviceConfig.ExecStart = ''\
-            ${pkgs.tinc}/sbin/tincd -n ${netName} \
-              --no-detach \
-              --pidfile=${stateDir}/tinc.${netName}.pid \
-              --user=tinc
+          serviceConfig.ExecStart = ''
+            ${pkgs.tinc}/sbin/tincd -n ${netName} --no-detach
+              --pidfile=${stateDir}/tinc.${netName}.pid --user=tinc
           '';
         });
 
