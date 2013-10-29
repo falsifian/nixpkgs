@@ -58,7 +58,12 @@
 #
 # For most packages, however, we keep only one version, and use default.nix.
 
-{pkgs, newScope, ghc, prefFun, enableLibraryProfiling ? false, modifyPrio ? (x : x)}:
+{ pkgs, newScope, ghc, prefFun, modifyPrio ? (x : x)
+, enableLibraryProfiling ? false
+, enableSharedLibraries ? false
+, enableSharedExecutables ? false
+, enableCheckPhase ? pkgs.stdenv.lib.versionOlder "7.4" ghc.version
+}:
 
 # We redefine callPackage to take into account the new scope. The optional
 # modifyPrio argument can be set to lowPrio to make all Haskell packages have
@@ -91,16 +96,6 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     ghc = ghc; # refers to ghcPlain
   };
 
-  # The normal GHC wrapper doesn't create links to the documentation in
-  # ~/.nix-profile. Having this second wrapper allows us to remedy the
-  # situation without re-building all Haskell packages. At the next
-  # stdenv-updates merge, this second wrapper will go away.
-
-  ghcUserEnvWrapper = pkgs.appendToName "new" (callPackage ../development/compilers/ghc/wrapper.nix {
-    ghc = ghc; # refers to ghcPlain
-    forUserEnv = true;
-  });
-
   # An experimental wrapper around ghcPlain that does not automatically
   # pick up packages from the profile, but instead has a fixed set of packages
   # in its global database. The set of packages can be specified as an
@@ -115,8 +110,11 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   # packages. It isn't the Cabal library, which is spelled "Cabal".
 
   cabal = callPackage ../build-support/cabal {
-    enableLibraryProfiling = enableLibraryProfiling;
-    enableCheckPhase = pkgs.stdenv.lib.versionOlder "7.4" self.ghc.ghcVersion;
+    inherit enableLibraryProfiling;
+    inherit enableSharedLibraries;
+    inherit enableSharedExecutables;
+    inherit enableCheckPhase;
+    glibcLocales = if pkgs.stdenv.isLinux then pkgs.glibcLocales else null;
   };
 
   # A variant of the cabal build driver that disables unit testing.
@@ -143,7 +141,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     inherit (self) cabal ghc;
     async        = self.async_2_0_1_4;
     attoparsec   = self.attoparsec_0_10_4_0;
-    caseInsensitive = self.caseInsensitive_1_1;
+    caseInsensitive = self.caseInsensitive_1_1_0_1;
     cgi          = self.cgi_3001_1_7_5;
     fgl          = self.fgl_5_4_2_4;
     GLUT         = self.GLUT_2_5_0_1;
@@ -661,7 +659,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   Cabal_1_14_0 = callPackage ../development/libraries/haskell/Cabal/1.14.0.nix { cabal = self.cabal.override { Cabal = null; }; };
   Cabal_1_16_0_3 = callPackage ../development/libraries/haskell/Cabal/1.16.0.3.nix { cabal = self.cabal.override { Cabal = null; }; };
-  Cabal_1_18_1_1 = callPackage ../development/libraries/haskell/Cabal/1.18.1.1.nix {
+  Cabal_1_18_1_2 = callPackage ../development/libraries/haskell/Cabal/1.18.1.2.nix {
     cabal = self.cabal.override { Cabal = null; };
     deepseq = self.deepseq_1_3_0_1;
   };
@@ -679,8 +677,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   carray = callPackage ../development/libraries/haskell/carray {};
 
   caseInsensitive_1_0_0_1 = callPackage ../development/libraries/haskell/case-insensitive/1.0.0.1.nix {};
-  caseInsensitive_1_1 = callPackage ../development/libraries/haskell/case-insensitive/1.1.nix {};
-  caseInsensitive = self.caseInsensitive_1_1;
+  caseInsensitive_1_1_0_1 = callPackage ../development/libraries/haskell/case-insensitive/1.1.0.1.nix {};
+  caseInsensitive = self.caseInsensitive_1_1_0_1;
 
   cautiousFile = callPackage ../development/libraries/haskell/cautious-file {};
 
@@ -727,6 +725,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   classyPreludeConduit = callPackage ../development/libraries/haskell/classy-prelude-conduit {};
 
   clientsession = callPackage ../development/libraries/haskell/clientsession {};
+
+  clock = callPackage ../development/libraries/haskell/clock {};
 
   cmdargs = callPackage ../development/libraries/haskell/cmdargs {};
 
@@ -1170,6 +1170,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   hexpat = callPackage ../development/libraries/haskell/hexpat {};
 
+  HTF = callPackage ../development/libraries/haskell/HTF {};
+
   HTTP_4000_0_6 = callPackage ../development/libraries/haskell/HTTP/4000.0.6.nix {};
   HTTP_4000_0_9 = callPackage ../development/libraries/haskell/HTTP/4000.0.9.nix {};
   HTTP_4000_1_1 = callPackage ../development/libraries/haskell/HTTP/4000.1.1.nix {};
@@ -1257,9 +1259,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   hsemail = callPackage ../development/libraries/haskell/hsemail {};
 
-  hslua = callPackage ../development/libraries/haskell/hslua {
-    lua = pkgs.lua5_1;
-  };
+  hslua = callPackage ../development/libraries/haskell/hslua {};
 
   HSH = callPackage ../development/libraries/haskell/HSH {};
 
@@ -1367,6 +1367,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   languageC = callPackage ../development/libraries/haskell/language-c {};
 
   languageCQuote = callPackage ../development/libraries/haskell/language-c-quote {};
+
+  languageEcmascript = callPackage ../development/libraries/haskell/language-ecmascript {};
 
   languageJava = callPackage ../development/libraries/haskell/language-java {};
 
@@ -2077,6 +2079,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   text_0_11_3_1 = callPackage ../development/libraries/haskell/text/0.11.3.1.nix {};
   text = self.text_0_11_3_1;
 
+  textFormat = callPackage ../development/libraries/haskell/text-format {};
+
   textIcu = callPackage ../development/libraries/haskell/text-icu {};
 
   thespian = callPackage ../development/libraries/haskell/thespian {};
@@ -2276,6 +2280,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   xmlConduit = callPackage ../development/libraries/haskell/xml-conduit {};
 
+  xmlgen = callPackage ../development/libraries/haskell/xmlgen {};
+
   xmlHamlet = callPackage ../development/libraries/haskell/xml-hamlet {};
 
   xmlhtml = callPackage ../development/libraries/haskell/xmlhtml {};
@@ -2470,7 +2476,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   cabalInstall_0_14_0 = callPackage ../tools/package-management/cabal-install/0.14.0.nix {};
   cabalInstall_1_16_0_2 = callPackage ../tools/package-management/cabal-install/1.16.0.2.nix {};
   cabalInstall_1_18_0_2 = callPackage ../tools/package-management/cabal-install/1.18.0.2.nix {
-    Cabal = self.Cabal_1_18_1_1;
+    Cabal = self.Cabal_1_18_1_2;
   };
   cabalInstall = self.cabalInstall_1_18_0_2;
 

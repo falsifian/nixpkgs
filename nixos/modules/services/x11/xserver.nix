@@ -229,6 +229,17 @@ in
         '';
       };
 
+      s3tcSupport = mkOption {
+        default = false;
+        description = ''
+          Make S3TC(S3 Texture Compression) via libtxc_dxtn available
+          to OpenGL drivers. It is essential for many games to work
+          with FOSS GPU drivers.
+
+          Using this library may require a patent license depending on your location.
+        '';
+      };
+
       startOpenSSHAgent = mkOption {
         default = true;
         description = ''
@@ -410,7 +421,9 @@ in
       optionals (elem "nvidia" driverNames) [ "nouveau" "nvidiafb" ];
 
     environment.variables.LD_LIBRARY_PATH =
-      [ "/run/opengl-driver/lib" "/run/opengl-driver-32/lib" ];
+      [ "/run/opengl-driver/lib" "/run/opengl-driver-32/lib" ]
+      ++ pkgs.lib.optional cfg.s3tcSupport "${pkgs.libtxc_dxtn}/lib"
+      ++ pkgs.lib.optional (cfg.s3tcSupport && cfg.driSupport32Bit) "${pkgs_i686.libtxc_dxtn}/lib";
 
     environment.etc =
       (optionals cfg.exportConfiguration
