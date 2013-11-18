@@ -44,7 +44,9 @@ let
         # since presumably the desktop environment will handle these.
         if [ -z "$_INHIBITION_LOCK_TAKEN" ]; then
           export _INHIBITION_LOCK_TAKEN=1
-          exec ${config.systemd.package}/bin/systemd-inhibit --what=handle-lid-switch:handle-power-key "$0" "$sessionType"
+          if ! ${config.systemd.package}/bin/loginctl show-session $XDG_SESSION_ID | grep -q '^RemoteHost='; then
+            exec ${config.systemd.package}/bin/systemd-inhibit --what=handle-lid-switch:handle-power-key "$0" "$sessionType"
+          fi
         fi
 
       ''}
@@ -166,16 +168,19 @@ in
     services.xserver.displayManager = {
 
       xauthBin = mkOption {
+        internal = true;
         default = "${xorg.xauth}/bin/xauth";
         description = "Path to the <command>xauth</command> program used by display managers.";
       };
 
       xserverBin = mkOption {
+        type = types.path;
         default = "${xorg.xorgserver}/bin/X";
         description = "Path to the X server used by display managers.";
       };
 
       xserverArgs = mkOption {
+        type = types.listOf types.str;
         default = [];
         example = [ "-ac" "-logverbose" "-nolisten tcp" ];
         description = "List of arguments for the X server.";
@@ -183,16 +188,17 @@ in
       };
 
       sessionCommands = mkOption {
+        type = types.lines;
         default = "";
         example =
           ''
             xmessage "Hello World!" &
           '';
-        type = types.string;
         description = "Shell commands executed just before the window or desktop manager is started.";
       };
 
       desktopManagerHandlesLidAndPower = mkOption {
+        type = types.bool;
         default = true;
         description = ''
           Whether the display manager should prevent systemd from handling
@@ -204,16 +210,17 @@ in
 
       session = mkOption {
         default = [];
-        example = [
-          {
-            manage = "desktop";
-            name = "xterm";
-            start = "
-              ${pkgs.xterm}/bin/xterm -ls &
-              waitPID=$!
-            ";
-          }
-        ];
+        example = literalExample
+          ''
+            [ { manage = "desktop";
+                name = "xterm";
+                start = '''
+                  ''${pkgs.xterm}/bin/xterm -ls &
+                  waitPID=$!
+                ''';
+              }
+            ]
+          '';
         description = ''
           List of sessions supported with the command used to start each
           session.  Each session script can set the
@@ -249,12 +256,13 @@ in
         };
 
         execCmd = mkOption {
-          type = types.uniq types.string;
+          type = types.str;
           example = "${pkgs.slim}/bin/slim";
           description = "Command to start the display manager.";
         };
 
         environment = mkOption {
+          type = types.attrsOf types.unspecified;
           default = {};
           example = { SLIM_CFGFILE = /etc/slim.conf; };
           description = "Additional environment variables needed by the display manager.";

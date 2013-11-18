@@ -1,4 +1,4 @@
-# Upstart jobs for libvirtd.
+# Systemd services for libvirtd.
 
 { config, pkgs, ... }:
 
@@ -82,8 +82,11 @@ in
             mkdir -p /var/log/libvirt/qemu -m 755
             rm -f /var/run/libvirtd.pid
 
-            mkdir -p /var/lib/libvirt -m 700
-            mkdir -p /var/lib/libvirt/dnsmasq -m 700
+            mkdir -p /var/lib/libvirt
+            mkdir -p /var/lib/libvirt/dnsmasq
+
+            chmod 755 /var/lib/libvirt
+            chmod 755 /var/lib/libvirt/dnsmasq
 
             # Libvirt unfortunately writes mutable state (such as
             # runtime changes to VM, network or filter configurations)
@@ -121,9 +124,6 @@ in
         wantedBy = [ "multi-user.target" ];
         wants = [ "libvirtd.service" ];
         after = [ "libvirtd.service" ];
-
-        # We want to suspend VMs only on shutdown, but Upstart is broken.
-        #stopOn = "";
 
         restartIfChanged = false;
 

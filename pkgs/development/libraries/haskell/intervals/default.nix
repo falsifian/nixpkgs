@@ -1,10 +1,11 @@
-{ cabal, numericExtras }:
+{ cabal, distributive, doctest, filepath }:
 
 cabal.mkDerivation (self: {
   pname = "intervals";
-  version = "0.2.2.1";
-  sha256 = "0kbsms3742ppmzbmrfp94aq4wvwrayx5ppsyk7pd1mj7y47aay0f";
-  buildDepends = [ numericExtras ];
+  version = "0.4";
+  sha256 = "0w33arfv1hd3a3l4rvn67nh5q6w05jj6hjlbjmbmrjyhwg35jnac";
+  buildDepends = [ distributive ];
+  testDepends = [ doctest filepath ];
   meta = {
     homepage = "http://github.com/ekmett/intervals";
     description = "Interval Arithmetic";

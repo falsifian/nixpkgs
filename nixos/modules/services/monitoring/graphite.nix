@@ -15,6 +15,7 @@ let
     PYTHONPATH = "${pkgs.python27Packages.carbon}/lib/python2.7/site-packages";
     GRAPHITE_ROOT = dataDir;
     GRAPHITE_CONF_DIR = "/etc/graphite/";
+    GRAPHITE_STORAGE_DIR = dataDir;
   };
 
 in {
@@ -32,13 +33,13 @@ in {
       host = mkOption {
         description = "Graphite web frontend listen address";
         default = "127.0.0.1";
-        types = type.uniq types.string;
+        type = types.str;
       };
 
       port = mkOption {
         description = "Graphite web frontend port";
         default = "8080";
-        types = type.uniq types.string;
+        type = types.str;
       };
     };
 
@@ -56,7 +57,7 @@ in {
           LOG_UPDATES = False
           LOG_CACHE_HITS = False
         '';
-        type = types.uniq types.string;
+        type = types.str;
       };
 
       enableCache = mkOption {
@@ -171,7 +172,7 @@ in {
     ];
 
     systemd.services.carbonCache = mkIf cfg.carbon.enableCache {
-      description = "Graphite data storage backend";
+      description = "Graphite Data Storage Backend";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-interfaces.target" ];
       environment = carbonEnv;
@@ -189,7 +190,7 @@ in {
     };
 
     systemd.services.carbonAggregator = mkIf cfg.carbon.enableAggregator {
-      description = "Carbon data aggregator";
+      description = "Carbon Data Aggregator";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-interfaces.target" ];
       environment = carbonEnv;
@@ -200,7 +201,7 @@ in {
     };
 
     systemd.services.carbonRelay = mkIf cfg.carbon.enableRelay {
-      description = "Carbon data relay";
+      description = "Carbon Data Relay";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-interfaces.target" ];
       environment = carbonEnv;
@@ -211,7 +212,7 @@ in {
     };
 
     systemd.services.graphiteWeb = mkIf cfg.web.enable {
-      description = "Graphite web interface";
+      description = "Graphite Web Interface";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-interfaces.target" ];
       environment = {

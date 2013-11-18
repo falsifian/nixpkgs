@@ -1,7 +1,7 @@
 # Operations on attribute sets.
 
 with {
-  inherit (builtins) head tail isString;
+  inherit (builtins) head tail;
   inherit (import ./trivial.nix) or;
   inherit (import ./default.nix) fold;
   inherit (import ./strings.nix) concatStringsSep;
@@ -20,7 +20,7 @@ rec {
     let attr = head attrPath;
     in
       if attrPath == [] then e
-      else if builtins ? hasAttr && hasAttr attr e
+      else if hasAttr attr e
       then attrByPath (tail attrPath) default (getAttr attr e)
       else default;
 
@@ -29,9 +29,8 @@ rec {
      ["x" "y"] applied with some value v returns `x.y = v;' */
   setAttrByPath = attrPath: value:
     if attrPath == [] then value
-    else listToAttrs [(
-      nameValuePair (head attrPath) (setAttrByPath (tail attrPath) value)
-    )];
+    else listToAttrs
+      [ { name = head attrPath; value = setAttrByPath (tail attrPath) value; } ];
 
 
   getAttrFromPath = attrPath: set:
@@ -101,7 +100,7 @@ rec {
          (AttrSet -> Bool) -> AttrSet -> AttrSet
 
      Example:
-       collect builtins.isList { a = { b = ["b"]; }; c = [1]; }
+       collect isList { a = { b = ["b"]; }; c = [1]; }
        => [["b"] [1]]
 
        collect (x: x ? outPath)
@@ -111,7 +110,7 @@ rec {
   collect = pred: attrs:
     if pred attrs then
       [ attrs ]
-    else if builtins.isAttrs attrs then
+    else if isAttrs attrs then
       concatMap (collect pred) (attrValues attrs)
     else
       [];
@@ -133,7 +132,7 @@ rec {
        => { x = "x-foo"; y = "y-bar"; }
   */
   mapAttrs = f: set:
-    listToAttrs (map (attr: nameValuePair attr (f attr (getAttr attr set))) (attrNames set));
+    listToAttrs (map (attr: { name = attr; value = f attr (getAttr attr set); }) (attrNames set));
 
 
   /* Like `mapAttrs', but allows the name of each attribute to be
@@ -240,7 +239,7 @@ rec {
   # names, hopefully this does not affect the system because the maximal
   # laziness avoid computing twice the same expression and listToAttrs does
   # not care about duplicated attribute names.
-  zipAttrsWith = f: sets: zipWithNames (concatMap attrNames sets) f sets;
+  zipAttrsWith = f: sets: zipAttrsWithNames (concatMap attrNames sets) f sets;
 
   zipAttrs = zipAttrsWith (name: values: values);
 

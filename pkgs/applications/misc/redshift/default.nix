@@ -1,6 +1,6 @@
 { fetchurl, stdenv, libX11, libXrandr, libXxf86vm, libxcb, pkgconfig, python
 , randrproto, xcbutil, xf86vidmodeproto, autoconf, automake, gettext, glib
-, GConf, dbus, dbus_glib, makeWrapper, gtk, pygtk, pyxdg }:
+, GConf, dbus, dbus_glib, makeWrapper, gtk, pygtk, pyxdg, geoclue }:
 
 stdenv.mkDerivation rec {
   version = "1.8";
@@ -13,9 +13,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     libX11 libXrandr libXxf86vm libxcb pkgconfig python randrproto xcbutil
     xf86vidmodeproto autoconf automake gettext glib GConf dbus dbus_glib
-    makeWrapper gtk pygtk pyxdg
-    # TODO: 
-    # geoclue
+    makeWrapper gtk pygtk pyxdg geoclue
   ];
 
   preConfigure = ''
@@ -30,7 +28,7 @@ stdenv.mkDerivation rec {
     wrapProgram "$out/bin/redshift-gtk" --prefix PYTHONPATH : $PYTHONPATH:${pygtk}/lib/${python.libPrefix}/site-packages/gtk-2.0:${pyxdg}/lib/${python.libPrefix}/site-packages/pyxdg:$out/lib/${python.libPrefix}/site-packages
   '';
 
-  meta = {
+  meta = with stdenv.lib; {
     description = "changes the color temperature of your screen gradually";
     longDescription = ''
       The color temperature is set according to the position of the
@@ -41,5 +39,6 @@ stdenv.mkDerivation rec {
       '';
     license = "GPLv3+";
     homepage = "http://jonls.dk/redshift";
+    platforms = platforms.linux;
   }; 
 }

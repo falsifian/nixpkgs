@@ -55,11 +55,12 @@ in
           cp -v ${kernel.zfs}/sbin/zfs $out/bin
           cp -v ${kernel.zfs}/sbin/zdb $out/bin
           cp -v ${kernel.zfs}/sbin/zpool $out/bin
+          cp -pdv ${kernel.zfs}/lib/lib*.so* $out/lib
+          cp -pdv ${pkgs.zlib}/lib/lib*.so* $out/lib
         '';
       postDeviceCommands =
         ''
           zpool import -f -a -d /dev
-          zfs mount -a
         '';
     };
 
@@ -75,7 +76,7 @@ in
     };
 
     systemd.services."zfs-mount" = {
-      description = "Mount zfs volumes";
+      description = "Mount ZFS Volumes";
       after = [ "zpool-import.service" ];
       wantedBy = [ "local-fs.target" ];
       serviceConfig = {

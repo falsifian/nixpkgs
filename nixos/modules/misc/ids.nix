@@ -7,12 +7,14 @@
   options = {
 
     ids.uids = pkgs.lib.mkOption {
+      internal = true;
       description = ''
         The user IDs used in NixOS.
       '';
     };
 
     ids.gids = pkgs.lib.mkOption {
+      internal = true;
       description = ''
         The group IDs used in NixOS.
       '';
@@ -102,6 +104,9 @@
       tcpcryptd = 93; # tcpcryptd uses a hard-coded uid. We patch it in Nixpkgs to match this choice.
       zope2 = 94;
       firebird = 95;
+      redis = 96;
+      haproxy = 97;
+      mongodb = 98;
 
       # When adding a uid, make sure it doesn't match an existing gid.
 
@@ -136,7 +141,7 @@
       tape = 25;
       video = 26;
       dialout = 27;
-      polkituser = 28;
+      #polkituser = 28; # currently unused, polkitd doesn't need a group
       utmp = 29;
       davfs2 = 31;
       privoxy = 32;
@@ -188,6 +193,7 @@
       quassel = 89;
       amule = 90;
       minidlna = 91;
+      haproxy = 92;
 
       # When adding a gid, make sure it doesn't match an existing uid.
 

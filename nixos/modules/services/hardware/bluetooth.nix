@@ -9,6 +9,7 @@ with pkgs.lib;
   options = {
 
     hardware.bluetooth.enable = mkOption {
+      type = types.bool;
       default = false;
       description = "Whether to enable support for Bluetooth.";
     };
@@ -27,7 +28,7 @@ with pkgs.lib;
     services.dbus.packages = [ pkgs.bluez ];
 
     systemd.services."dbus-org.bluez" = {
-      description = "Bluetooth service";
+      description = "Bluetooth Service";
       serviceConfig = {
         Type = "dbus";
         BusName = "org.bluez";

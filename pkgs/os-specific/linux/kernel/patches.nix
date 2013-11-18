@@ -68,20 +68,6 @@ rec {
       features.secPermPatch = true;
     };
 
-  aufs3_0 = rec {
-    name = "aufs3.0";
-    version = "3.0.20121210";
-    utilRev = "91af15f977d12e02165759620005f6ce1a4d7602";
-    utilHash = "dda4df89828dcf0e4012d88b4aa3eda8c30af69d6530ff5fedc2411de872c996";
-    patch = makeAufs3StandalonePatch {
-      inherit version;
-      rev = "0627c706d69778f5c74be982f28c746153b8cdf7";
-      sha256 = "7008ff64f5adc2b3a30fcbb090bcbfaac61b778af38493b6144fc7d768a6514d";
-    };
-    features.aufsBase = true;
-    features.aufs3 = true;
-  };
-
   aufs3_2 = rec {
     name = "aufs3.2";
     version = "3.2.20121210";
@@ -131,13 +117,13 @@ rec {
       patch = ./mips-ext3-n32.patch;
     };
 
-  grsecurity_2_9_1_3_2_51 =
-    { name = "grsecurity-2.9.1-3.2.51";
+  grsecurity_2_9_1_3_2_52 =
+    { name = "grsecurity-2.9.1-3.2.52";
       patch = fetchurl {
-        url = http://grsecurity.net/stable/grsecurity-2.9.1-3.2.51-201309281102.patch;
-        sha256 = "0mwwdmccihzhl25c9q92x0k33c5kxbz6mikid9diramvki7sk0l8";
+        url = http://grsecurity.net/stable/grsecurity-2.9.1-3.2.52-201310271550.patch;
+        sha256 = "08y4y323y2lfvdj67gmg3ca8gaf3snhr3pyrmgvj877avaz0475m";
       };
-      # The grsec kernel patch seems to include the apparmor patches as of 2.9.1-3.2.51
+      # The grsec kernel patch seems to include the apparmor patches as of 2.9.1-3.2.52
       features.apparmor = true;
     };
 

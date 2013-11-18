@@ -102,9 +102,12 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   # argument to this function.
 
   ghcWithPackages = pkgs : callPackage ../development/compilers/ghc/with-packages.nix {
-    ghc = ghc; # refers to ghcPlain
+    ghc = ghc;                  # refers to ghcPlain
     packages = pkgs self;
+    ignoreCollisions = false;
   };
+
+  ghcWithPackagesOld = pkgs : (self.ghcWithPackages pkgs).override { ignoreCollisions = true; };
 
   # This is the Cabal builder, the function we use to build most Haskell
   # packages. It isn't the Cabal library, which is spelled "Cabal".
@@ -153,9 +156,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     HUnit        = self.HUnit_1_2_5_2;
     mtl          = self.mtl_2_1_2;
     network      = self.network_2_4_2_0;
-    OpenGL       = self.OpenGL_2_8_0_0;
+    OpenGL       = self.OpenGL_2_9_1_0;
     OpenGLRaw    = self.OpenGLRaw_1_4_0_0;
-    parallel     = self.parallel_3_2_0_3;
+    parallel     = self.parallel_3_2_0_4;
     parsec       = self.parsec_3_1_3;
     QuickCheck   = self.QuickCheck_2_6;
     random       = self.random_1_0_1_1;
@@ -659,10 +662,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   Cabal_1_14_0 = callPackage ../development/libraries/haskell/Cabal/1.14.0.nix { cabal = self.cabal.override { Cabal = null; }; };
   Cabal_1_16_0_3 = callPackage ../development/libraries/haskell/Cabal/1.16.0.3.nix { cabal = self.cabal.override { Cabal = null; }; };
-  Cabal_1_18_1_2 = callPackage ../development/libraries/haskell/Cabal/1.18.1.2.nix {
-    cabal = self.cabal.override { Cabal = null; };
-    deepseq = self.deepseq_1_3_0_1;
-  };
+  Cabal_1_18_1_2 = callPackage ../development/libraries/haskell/Cabal/1.18.1.2.nix { cabal = self.cabal.override { Cabal = null; }; };
   Cabal = null; # core package in GHC
 
   cabalFileTh = callPackage ../development/libraries/haskell/cabal-file-th {};
@@ -757,6 +757,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   connection = callPackage ../development/libraries/haskell/connection {};
 
   constraints = callPackage ../development/libraries/haskell/constraints {};
+
+  controlMonadLoop = callPackage ../development/libraries/haskell/control-monad-loop {};
 
   convertible = callPackage ../development/libraries/haskell/convertible {};
 
@@ -855,7 +857,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   deepseq_1_1_0_0 = callPackage ../development/libraries/haskell/deepseq/1.1.0.0.nix {};
   deepseq_1_1_0_2 = callPackage ../development/libraries/haskell/deepseq/1.1.0.2.nix {};
   deepseq_1_2_0_1 = callPackage ../development/libraries/haskell/deepseq/1.2.0.1.nix {};
-  deepseq_1_3_0_1 = callPackage ../development/libraries/haskell/deepseq/1.3.0.1.nix {};
+  deepseq_1_3_0_2 = callPackage ../development/libraries/haskell/deepseq/1.3.0.2.nix {};
   deepseq = null; # a core package in recent GHCs
 
   deepseqTh = callPackage ../development/libraries/haskell/deepseq-th {};
@@ -896,6 +898,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   dimensional = callPackage ../development/libraries/haskell/dimensional {};
 
   dimensionalTf = callPackage ../development/libraries/haskell/dimensional-tf {};
+
+  directSqlite = callPackage ../development/libraries/haskell/direct-sqlite {};
 
   directoryTree = callPackage ../development/libraries/haskell/directory-tree {};
 
@@ -1074,10 +1078,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   GlomeVec = callPackage ../development/libraries/haskell/GlomeVec {};
 
-  gloss = callPackage ../development/libraries/haskell/gloss {
-    OpenGL = self.OpenGL_2_6_0_1;
-    GLUT   = self.GLUT_2_3_1_0;
-  };
+  gloss = callPackage ../development/libraries/haskell/gloss {};
 
   glpkHs = callPackage ../development/libraries/haskell/glpk-hs {};
 
@@ -1098,7 +1099,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     OpenGL = self.OpenGL_2_8_0_0;
   };
   GLUT_2_5_0_1 = callPackage ../development/libraries/haskell/GLUT/2.5.0.1.nix {
-    OpenGL = self.OpenGL_2_9_0_0;
+    OpenGL = self.OpenGL_2_9_0_1;
   };
   GLUT = self.GLUT_2_5_0_1;
 
@@ -1259,7 +1260,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   hsemail = callPackage ../development/libraries/haskell/hsemail {};
 
-  hslua = callPackage ../development/libraries/haskell/hslua {};
+  hslua = callPackage ../development/libraries/haskell/hslua {
+    lua = pkgs.lua5_1;
+  };
 
   HSH = callPackage ../development/libraries/haskell/HSH {};
 
@@ -1608,8 +1611,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   OpenGL_2_4_0_2 = callPackage ../development/libraries/haskell/OpenGL/2.4.0.2.nix {};
   OpenGL_2_6_0_1 = callPackage ../development/libraries/haskell/OpenGL/2.6.0.1.nix {};
   OpenGL_2_8_0_0 = callPackage ../development/libraries/haskell/OpenGL/2.8.0.0.nix {};
-  OpenGL_2_9_0_0 = callPackage ../development/libraries/haskell/OpenGL/2.9.0.0.nix {};
-  OpenGL = self.OpenGL_2_9_0_0;
+  OpenGL_2_9_0_1 = callPackage ../development/libraries/haskell/OpenGL/2.9.1.0.nix {};
+  OpenGL = self.OpenGL_2_9_1_0;
 
   OpenGLRaw_1_3_0_0 = callPackage ../development/libraries/haskell/OpenGLRaw/1.3.0.0.nix {};
   OpenGLRaw_1_4_0_0 = callPackage ../development/libraries/haskell/OpenGLRaw/1.4.0.0.nix {};
@@ -1637,7 +1640,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   parallel_3_1_0_1 = callPackage ../development/libraries/haskell/parallel/3.1.0.1.nix {};
   parallel_3_2_0_2 = callPackage ../development/libraries/haskell/parallel/3.2.0.2.nix {};
   parallel_3_2_0_3 = callPackage ../development/libraries/haskell/parallel/3.2.0.3.nix {};
-  parallel = self.parallel_3_2_0_3;
+  parallel_3_2_0_4 = callPackage ../development/libraries/haskell/parallel/3.2.0.4.nix {};
+  parallel = self.parallel_3_2_0_4;
 
   parallelIo = callPackage ../development/libraries/haskell/parallel-io {};
 
@@ -1651,7 +1655,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   parsec3 = self.parsec_3_1_3;
   parsec  = self.parsec3;
 
-  parsers = callPackage ../development/libraries/haskell/parsers {};
+  parsers_0_9 = callPackage ../development/libraries/haskell/parsers/0.9.nix {};
+  parsers_0_10_1_1 = callPackage ../development/libraries/haskell/parsers/0.10.1.1.nix {};
+  parsers = self.parsers_0_10_1_1;
 
   parsimony = callPackage ../development/libraries/haskell/parsimony {};
 
@@ -1728,6 +1734,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   profunctorExtras = callPackage ../development/libraries/haskell/profunctor-extras {};
 
   projectTemplate = callPackage ../development/libraries/haskell/project-template {};
+
+  processConduit = callPackage ../development/libraries/haskell/process-conduit {};
 
   processExtras = callPackage ../development/libraries/haskell/process-extras {};
 
@@ -2038,9 +2046,19 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   tasty = callPackage ../development/libraries/haskell/tasty {};
 
+  tastyAntXml = callPackage ../development/libraries/haskell/tasty-ant-xml {};
+
+  tastyGolden = callPackage ../development/libraries/haskell/tasty-golden {};
+
+  tastyHspec = callPackage ../development/libraries/haskell/tasty-hspec {};
+
   tastyHunit = callPackage ../development/libraries/haskell/tasty-hunit {};
 
+  tastyQuickcheck = callPackage ../development/libraries/haskell/tasty-quickcheck {};
+
   tastySmallcheck = callPackage ../development/libraries/haskell/tasty-smallcheck {};
+
+  tastyTh = callPackage ../development/libraries/haskell/tasty-th {};
 
   templateDefault = callPackage ../development/libraries/haskell/template-default {};
 
@@ -2117,7 +2135,11 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   transformersCompat = callPackage ../development/libraries/haskell/transformers-compat {};
 
-  trifecta = callPackage ../development/libraries/haskell/trifecta {};
+  trifecta_1_1 = callPackage ../development/libraries/haskell/trifecta/1.1.nix {
+    parsers = self.parsers_0_9;
+  };
+  trifecta_1_2 = callPackage ../development/libraries/haskell/trifecta/1.2.nix {};
+  trifecta = self.trifecta_1_2;
 
   tuple = callPackage ../development/libraries/haskell/tuple {};
 
@@ -2237,6 +2259,10 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
     WebBits = self.WebBits_2_0;
   };
   WebBitsHtml = self.WebBitsHtml_1_0_2;
+
+  webRoutes = callPackage ../development/libraries/haskell/web-routes {};
+
+  webRoutesBoomerang = callPackage ../development/libraries/haskell/web-routes-boomerang {};
 
   CouchDB = callPackage ../development/libraries/haskell/CouchDB {};
 
@@ -2443,7 +2469,10 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   darcs = callPackage ../applications/version-management/darcs {};
 
-  idris_plain = callPackage ../development/compilers/idris {};
+  idris_plain = callPackage ../development/compilers/idris {
+    parsers = self.parsers_0_9;
+    trifecta = self.trifecta_1_1;
+  };
 
   idris = callPackage ../development/compilers/idris/wrapper.nix {};
 
