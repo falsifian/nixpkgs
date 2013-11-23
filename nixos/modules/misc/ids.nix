@@ -107,6 +107,7 @@
       redis = 96;
       haproxy = 97;
       mongodb = 98;
+      tinc = 200;
 
       # When adding a uid, make sure it doesn't match an existing gid.
 

@@ -183,6 +183,7 @@
   ./services/networking/supybot.nix
   ./services/networking/ssh/lshd.nix
   ./services/networking/ssh/sshd.nix
+  ./services/networking/tinc.nix
   ./services/networking/tftpd.nix
   ./services/networking/unbound.nix
   ./services/networking/vsftpd.nix
