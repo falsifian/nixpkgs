@@ -83,7 +83,7 @@ in
             '';
 
           serviceConfig.ExecStart = ''
-            ${pkgs.tinc}/sbin/tincd -n ${netName} --no-detach
+            ${pkgs.tinc}/sbin/tincd -n ${netName} --no-detach \
               --pidfile=${stateDir}/tinc.${netName}.pid --user=tinc
           '';
         });
