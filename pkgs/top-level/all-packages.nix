@@ -2817,6 +2817,8 @@ let
 
   oraclejdk = pkgs.jdkdistro true false;
 
+  oraclejdk7 = pkgs.oraclejdk7distro true false;
+
   oraclejre = lowPrio (pkgs.jdkdistro false false);
 
   jrePlugin = lowPrio (pkgs.jdkdistro false true);
@@ -2829,6 +2831,11 @@ let
     assert supportsJDK;
     (if pluginSupport then appendToName "plugin" else x: x)
       (callPackage ../development/compilers/jdk/jdk6-linux.nix { });
+
+  oraclejdk7distro = installjdk: pluginSupport:
+    assert supportsJDK;
+    (if pluginSupport then appendToName "plugin" else x: x)
+      (callPackage ../development/compilers/jdk/jdk7-linux.nix { inherit installjdk; });
 
   jikes = callPackage ../development/compilers/jikes { };
 
@@ -3641,10 +3648,11 @@ let
 
   gnum4 = callPackage ../development/tools/misc/gnum4 { };
 
-  gnumake = callPackage ../development/tools/build-managers/gnumake { };
-
-  gnumake380 = callPackage ../development/tools/build-managers/gnumake-3.80 { };
-  gnumake381 = callPackage ../development/tools/build-managers/gnumake/3.81.nix { };
+  gnumake380 = callPackage ../development/tools/build-managers/gnumake/3.80 { };
+  gnumake381 = callPackage ../development/tools/build-managers/gnumake/3.81 { };
+  gnumake382 = callPackage ../development/tools/build-managers/gnumake/3.82 { };
+  gnumake40  = callPackage ../development/tools/build-managers/gnumake/4.0  { };
+  gnumake = gnumake382;
 
   gob2 = callPackage ../development/tools/misc/gob2 { };
 
@@ -6013,7 +6021,9 @@ let
 
   ### DEVELOPMENT / LISP MODULES
 
-  asdf = callPackage ../development/lisp-modules/asdf {};
+  asdf = callPackage ../development/lisp-modules/asdf {
+    texLive = null;
+  };
   clwrapperFunction = callPackage ../development/lisp-modules/clwrapper;
   wrapLisp = lisp: clwrapperFunction {lisp=lisp;};
   lispPackagesFor = clwrapper: callPackage ../development/lisp-modules/lisp-packages.nix{
@@ -8492,7 +8502,7 @@ let
     jackSupport = config.mumble.jackSupport or false;
   };
 
-  murmur = callPackage ../applications/networking/mumble/murmur.nix { 
+  murmur = callPackage ../applications/networking/mumble/murmur.nix {
     avahi = avahi.override {
       withLibdnssdCompat = true;
     };
@@ -9599,10 +9609,10 @@ let
 
 
   ### DESKTOP ENVIRONMENTS
-  
+
    cinnamon = recurseIntoAttrs {
     cinnamon-translations  = callPackage ../desktops/cinnamon/cinnamon-translations.nix { };
-    }; 
+    };
 
   enlightenment = callPackage ../desktops/enlightenment { };
 
