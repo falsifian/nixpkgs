@@ -7521,9 +7521,13 @@ let
 
   bibletime = callPackage ../applications/misc/bibletime { };
 
-  bitcoin = callPackage ../applications/misc/bitcoin {
-    db4 = db48;
-  };
+  bitcoinWallets = recurseIntoAttrs (
+    callPackage ../applications/misc/bitcoin {
+      db4 = db48;
+    }
+  );
+
+  bitcoin = bitcoinWallets.bitcoin-qt;
 
   bitlbee = callPackage ../applications/networking/instant-messengers/bitlbee {
     # For some reason, TLS support is broken when using GnuTLS 3.0 (can't
