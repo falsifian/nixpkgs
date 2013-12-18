@@ -4,8 +4,9 @@ stdenv.mkDerivation rec {
   name = "gnupg-1.4.15";
 
   src = fetchurl {
-    url = "mirror://gnupg/gnupg/${name}.tar.bz2";
-    sha1 = "63ebf0ab375150903c65738070e4105200197fd4";
+    url = "mirror://gnupg/gnupg/${name}.tar.bz2_maybe_vulnerable";
+    #sha1 = "63ebf0ab375150903c65738070e4105200197fd4";
+    sha1 = "0000000000000000000000000000000000000000"; # CVE-2013-4576?
   };
 
   buildInputs = [ readline bzip2 ];
