@@ -14,8 +14,8 @@
 
 cabal.mkDerivation (self: {
   pname = "git-annex";
-  version = "5.20131213";
-  sha256 = "0mwslkz0kklp4phlsf8hibh97sabdnigls7hr9725wb0ncfa85yn";
+  version = "5.20140108";
+  sha256 = "17j1avmg66lda52p93689n4mas46rfbjdvss1rvmdh10cj7hg8jy";
   isLibrary = false;
   isExecutable = true;
   buildDepends = [
@@ -42,11 +42,14 @@ cabal.mkDerivation (self: {
                     -fDNS
                     -fProduction
                     -fTDFA";
-  preConfigure = "patchShebangs .";
-  installPhase = "./Setup install";
-  checkPhase = ''
+  preConfigure = ''
     export HOME="$NIX_BUILD_TOP/tmp"
     mkdir "$HOME"
+  '';
+  installPhase = "./Setup install";
+  checkPhase = ''
+    cp dist/build/git-annex/git-annex git-annex
+    ./git-annex test
   '';
   meta = {
     homepage = "http://git-annex.branchable.com/";

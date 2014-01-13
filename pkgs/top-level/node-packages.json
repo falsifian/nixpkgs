@@ -110,4 +110,9 @@
 , "meat"
 , "hipache"
 , "posix"
+, "node-protobuf"
+, "rethinkdb"
+, "bower2nix"
+, "fetch-bower"
+, "titanium"
 ]

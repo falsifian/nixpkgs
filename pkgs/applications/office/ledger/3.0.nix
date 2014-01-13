@@ -1,15 +1,15 @@
 { stdenv, fetchgit, cmake, boost, gmp, mpfr, libedit, python, texinfo }:
 
 let
-  rev = "0e5867bc5c";
+  rev = "3b5f496536";
 in
 stdenv.mkDerivation {
-  name = "ledger3-2013.11.${rev}";
+  name = "ledger3-2013.12.${rev}";
 
   src = fetchgit {
     url = "https://github.com/ledger/ledger.git";
     inherit rev;
-    sha256 = "16aa63z24rp5vin7al8b6nzdi4kqpawbzvh148wfr2wj60vdb1n5";
+    sha256 = "0r36zsdsyy6aylfcwyqra4796y4abi3b27wv5fvk3g2bmyzqzx4j";
   };
 
   buildInputs = [ cmake boost gmp mpfr libedit python texinfo ];
