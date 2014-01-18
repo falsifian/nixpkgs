@@ -7742,6 +7742,8 @@ let
 
     cua = callPackage ../applications/editors/emacs-modes/cua { };
 
+    darcsum = callPackage ../applications/editors/emacs-modes/darcsum { };
+
     # ecb = callPackage ../applications/editors/emacs-modes/ecb { };
 
     jabber = callPackage ../applications/editors/emacs-modes/jabber { };
