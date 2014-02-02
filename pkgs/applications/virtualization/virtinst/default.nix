@@ -2,14 +2,14 @@
 
 with stdenv.lib;
 
-let version = "0.600.1"; in
+let version = "0.600.4"; in
 
 stdenv.mkDerivation rec {
   name = "virtinst-${version}";
 
   src = fetchurl {
     url = "http://virt-manager.org/download/sources/virtinst/virtinst-${version}.tar.gz";
-    sha256 = "db342cf93aae1f23df02001bdb0b0cc2c5bf675dca37b4417f5a79bf5a374716";
+    sha256 = "175laiy49dni8hzi0cn14bbsdsigvgr9h6d9z2bcvbpa29spldvf";
   };
 
   pythonPath = with pythonPackages;
@@ -40,6 +40,6 @@ stdenv.mkDerivation rec {
     homepage = http://virt-manager.org;
     license = "GPLv2+";
     maintainers = with stdenv.lib.maintainers; [qknight];
-    description = "The Virt Install tool (virt-install for short command name, virtinst for package name) is a command line tool which provides an easy way to provision operating systems into virtual machines.";
+    description = "Command line tool which provides an easy way to provision operating systems into virtual machines";
   };
 }

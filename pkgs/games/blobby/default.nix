@@ -1,6 +1,6 @@
 {stdenv, fetchurl, SDL, SDL_image, mesa, cmake, physfs, boost, zip, zlib}:
 stdenv.mkDerivation rec {
-  version = "2.0-rc3";
+  version = "1.0-rc3";
   name = "blobby-volley-${version}";
 
   src = fetchurl {
@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   '';
 
   meta = {
-    description = ''A blobby volleyball game.'';
+    description = ''A blobby volleyball game'';
     license = with stdenv.lib.licenses; bsd3;
     platforms = with stdenv.lib.platforms; linux;
     maintainers = with stdenv.lib.maintainers; [raskin];

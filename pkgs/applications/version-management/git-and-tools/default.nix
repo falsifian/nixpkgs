@@ -66,12 +66,12 @@ rec {
   };
 
   tig = import ./tig {
-    inherit stdenv fetchurl ncurses asciidoc xmlto docbook_xsl;
+    inherit stdenv fetchurl ncurses asciidoc xmlto docbook_xsl docbook_xml_dtd_45;
   };
 
   hub = import ./hub {
     inherit (rubyLibs) rake;
-    inherit stdenv fetchgit groff makeWrapper;
+    inherit stdenv fetchurl groff makeWrapper;
   };
 
   gitFastExport = import ./fast-export {
@@ -83,15 +83,13 @@ rec {
   };
 
   svn2git = import ./svn2git {
-    inherit stdenv fetchgit ruby makeWrapper;
+    inherit stdenv fetchurl ruby makeWrapper;
     git = gitSVN;
   };
 
   svn2git_kde = callPackage ./svn2git-kde { };
 
-  gitSubtree = import ./git-subtree {
-    inherit stdenv fetchurl git asciidoc xmlto docbook_xsl docbook_xml_dtd_45 libxslt;
-  };
-
   darcsToGit = callPackage ./darcs-to-git { };
+
+  gitflow = callPackage ./gitflow { };
 }

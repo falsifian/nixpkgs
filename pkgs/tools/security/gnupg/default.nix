@@ -13,11 +13,11 @@ assert useUsb -> (libusb != null);
 assert useCurl -> (curl != null);
 
 stdenv.mkDerivation rec {
-  name = "gnupg-2.0.20";
+  name = "gnupg-2.0.22";
 
   src = fetchurl {
     url = "mirror://gnupg/gnupg/${name}.tar.bz2";
-    sha256 = "16mp0j5inrcqcb3fxbn0b3aamascy3n923wiy0y8marc0rzrp53f";
+    sha256 = "0lg210acj2rxq291q4cwamg9gx6gh2prb1xa93y5jhw5b6r0lza3";
   };
 
   buildInputs
@@ -39,7 +39,7 @@ stdenv.mkDerivation rec {
 
   meta = {
     homepage = "http://gnupg.org/";
-    description = "GNU Privacy Guard (GnuPG), GNU Project's implementation of the OpenPGP standard";
+    description = "free implementation of the OpenPGP standard for encrypting and signing data";
     license = stdenv.lib.licenses.gpl3Plus;
 
     longDescription = ''
@@ -54,7 +54,7 @@ stdenv.mkDerivation rec {
       S/MIME.
     '';
 
-    maintainers = with stdenv.lib.maintainers; [ ludo urkud ];
+    maintainers = with stdenv.lib.maintainers; [ urkud ];
     platforms = stdenv.lib.platforms.all;
   };
 }

@@ -1,11 +1,11 @@
 
 args : with args; 
-let version="0.14.0"; in
+let version="0.16.2"; in
 rec {
   src = /* Here a fetchurl expression goes */
   fetchurl {
-    url = "http://downloads.sourceforge.net/aria2/aria2c-${version}.tar.bz2";
-    sha256 = "0d6vpy7f4228byahsg4dlhalfkbscx941klhdlxd0y5c3mxxwkfr";
+    url = "mirror://sourceforge/aria2/aria2c-${version}.tar.bz2";
+    sha256 = "02qj3j7a1r477pmk969nd3aa93m33kh4101azy001i9jacpjvzrp";
   };
 
   buildInputs = [];
@@ -16,6 +16,6 @@ rec {
       
   name = "aria-" + version;
   meta = {
-    description = "aria - multiprotocol DL manager";
+    description = "Multiprotocol download manager";
   };
 }

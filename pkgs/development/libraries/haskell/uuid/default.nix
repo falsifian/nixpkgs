@@ -1,15 +1,20 @@
-{ cabal, binary, criterion, cryptohash, deepseq, HUnit, maccatcher
-, mersenneRandomPure64, QuickCheck, random, time
+{ cabal, binary, cryptohash, deepseq, hashable, HUnit, networkInfo
+, QuickCheck, random, testFramework, testFrameworkHunit
+, testFrameworkQuickcheck2, time
 }:
 
 cabal.mkDerivation (self: {
   pname = "uuid";
-  version = "1.2.13";
-  sha256 = "0y9r71iqvabmvyrglw42g37skgisyknkv3pkfih2qfrfkk75zw0s";
-  buildDepends = [ binary cryptohash maccatcher random time ];
-  testDepends = [
-    criterion deepseq HUnit mersenneRandomPure64 QuickCheck random
+  version = "1.3.3";
+  sha256 = "12sfspmrnpqbwwscv3w41pkkdbfvy1aaa84y7is0d3ffk5rll80m";
+  buildDepends = [
+    binary cryptohash deepseq hashable networkInfo random time
   ];
+  testDepends = [
+    HUnit QuickCheck random testFramework testFrameworkHunit
+    testFrameworkQuickcheck2
+  ];
+  jailbreak = true;
   doCheck = false;
   meta = {
     homepage = "http://projects.haskell.org/uuid/";

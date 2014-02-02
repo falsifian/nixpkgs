@@ -14,9 +14,9 @@ let
     else if stdenv.system == "i686-linux" then "ld-linux.so.2"
     else throw "Bittorrent Sync for: ${stdenv.system} not supported!";
 
-  version = "1.0.134";
-  sha256 = if stdenv.system == "x86_64-linux" then "1kyxiqjabqgsg7n0a8snh03axxzpniazp93shb2l1b6x0f7d24n7"
-    else if stdenv.system == "i686-linux" then "02wb8pqcb1rk108r49cqyg7s14grmjnkr6p3068pkiwdwwgi8jak"
+  version = "1.2.82";
+  sha256 = if stdenv.system == "x86_64-linux" then "0cqrscav57xwz7rag6wy06xw6z7ca97xailprgg6jdjv4pnc91ra"
+    else if stdenv.system == "i686-linux" then "1b9rnfk0wkhj1zybvfqwgd9dcqnxwdnp7m0vf6lhrgi75cydj7is"
     else throw "Bittorrent Sync for: ${stdenv.system} not supported!";
 
 in stdenv.mkDerivation {
@@ -40,7 +40,7 @@ in stdenv.mkDerivation {
 
   meta = {
     homepage = "http://labs.bittorrent.com/experiments/sync.html";
-    description = "Automatically sync files via secure, distributed technology.";
+    description = "Automatically sync files via secure, distributed technology";
     license = stdenv.lib.licenses.unfree;
     maintainers = [ stdenv.lib.maintainers.iElectric ];
   };

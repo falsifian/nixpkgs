@@ -3,11 +3,11 @@ let
   s = # Generated upstream information
   rec {
     baseName="zpaq";
-    version="625";
+    version="643";
     name="${baseName}-${version}";
-    hash="0d3ly8l6mzbqxkg68yz7mid3dr056fgr5n49rlkjwcfg533c5gwx";
-    url="http://mattmahoney.net/dc/zpaq625.zip";
-    sha256="0d3ly8l6mzbqxkg68yz7mid3dr056fgr5n49rlkjwcfg533c5gwx";
+    hash="1sgrhvvzrjb9gm9lffs1ai602v8p1mav0kc2sa7wlcx7kj1d3hxr";
+    url="http://mattmahoney.net/dc/zpaq643.zip";
+    sha256="1sgrhvvzrjb9gm9lffs1ai602v8p1mav0kc2sa7wlcx7kj1d3hxr";
   };
   buildInputs = [
     unzip
@@ -29,14 +29,13 @@ stdenv.mkDerivation {
   };
   sourceRoot = ".";
   buildPhase = ''
-    g++ -shared -O3 libzpaq.cpp divsufsort.c ${compileFlags} -o libzpaq.so
-    g++ -O3 -L. -L"$out/lib" -lzpaq zpaq.cpp -o zpaq
-    g++ -O3 -L. -L"$out/lib" -lzpaq zpaqd.cpp -o zpaqd
+    g++ -shared -O3 libzpaq.cpp ${compileFlags} -o libzpaq.so
+    g++ -O3 -L. -L"$out/lib" -lzpaq divsufsort.c zpaq.cpp -o zpaq
   '';
   installPhase = ''
     mkdir -p "$out"/{bin,include,lib,share/doc/zpaq}
     cp libzpaq.so "$out/lib"
-    cp zpaq zpaqd "$out/bin"
+    cp zpaq "$out/bin"
     cp libzpaq.h divsufsort.h "$out/include"
     cp readme.txt "$out/share/doc/zpaq"
   '';

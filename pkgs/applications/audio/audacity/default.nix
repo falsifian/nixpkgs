@@ -4,12 +4,12 @@
   }:
 
 stdenv.mkDerivation rec {
-  version = "2.0.3";
+  version = "2.0.5";
   name = "audacity-${version}";
 
   src = fetchurl {
     url = "http://audacity.googlecode.com/files/audacity-minsrc-${version}.tar.xz";
-    sha256 = "1k4bbxhpfl80vm3gm3jxqly0syqjij5kwziy4xyq2c8aj2miwj1f";
+    sha256 = "0y9bvc3a3zxsk31yg7bha029mzkjiw5i9m86kbyj7x8ps0fm91z2";
   };
 
   preConfigure = /* we prefer system-wide libs */ ''
@@ -33,5 +33,6 @@ stdenv.mkDerivation rec {
     homepage = http://audacity.sourceforge.net;
     license = "GPLv2+";
     platforms = with stdenv.lib.platforms; linux;
+    maintainers = with stdenv.lib.maintainers; [ the-kenny ];
   };
 }

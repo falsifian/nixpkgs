@@ -36,9 +36,9 @@ stdenv.mkDerivation rec {
     homepage = http://www.gnu.org/software/libiconv/;
     license = "LGPLv2+";
 
-    maintainers = [ stdenv.lib.maintainers.ludo ];
+    maintainers = [ ];
 
     # This library is not needed on GNU platforms.
-    platforms = [ "i686-cygwin" ];
+    hydraPlatforms = stdenv.lib.platforms.cygwin ++ stdenv.lib.platforms.darwin ++ stdenv.lib.platforms.freebsd;
   };
 }

@@ -2,8 +2,8 @@
 
 cabal.mkDerivation (self: {
   pname = "unix-time";
-  version = "0.1.9";
-  sha256 = "0z4761g7rkw771r9828h1l37pp3brrra9ihjg203h66jc1wlvb72";
+  version = "0.2.2";
+  sha256 = "0xnl12mscc5nwjl9s2lx4xr8q8agzcpxh3bmxxidfjrg19drfwrm";
   testDepends = [ doctest hspec QuickCheck time ];
   meta = {
     description = "Unix time parser/formatter and utilities";

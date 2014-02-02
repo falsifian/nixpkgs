@@ -1,13 +1,11 @@
-{ cabal, cairo, colour, dataAccessor, dataAccessorTemplate, mtl
-, time
-}:
+{ cabal, colour, dataDefaultClass, lens, mtl, operational, time }:
 
 cabal.mkDerivation (self: {
   pname = "Chart";
-  version = "0.17";
-  sha256 = "1ip1a61ryypwfzj6dc6n6pl92rflf7lqf1760ppjyg05q5pn6qxg";
+  version = "1.2";
+  sha256 = "0cvp2j2hgsdk93f4rbd8y7s11hlr3zg15qkpxhd7p7sl2k6j2r5x";
   buildDepends = [
-    cairo colour dataAccessor dataAccessorTemplate mtl time
+    colour dataDefaultClass lens mtl operational time
   ];
   meta = {
     homepage = "https://github.com/timbod7/haskell-chart/wiki";

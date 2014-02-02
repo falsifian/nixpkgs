@@ -1,14 +1,14 @@
 {stdenv, fetchurl, unzip, makeWrapper, python, jdk}:
 
 stdenv.mkDerivation {
-  name = "titanium-mobilesdk-3.1.1.v20130612114553";
+  name = "mobilesdk-3.1.4.v20130926144546";
   src = if (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux") then fetchurl {
-    url = http://builds.appcelerator.com.s3.amazonaws.com/mobile/3_1_X/mobilesdk-3.1.1.v20130612114553-linux.zip;
-    sha1 = "410ba7e8171a887b6a4b3173116430657c3d84aa";
+    url = http://builds.appcelerator.com.s3.amazonaws.com/mobile/3_1_X/mobilesdk-3.1.4.v20130926144546-linux.zip;
+    sha1 = "da4a03ced67f0e8f442d551bbd41ea01fceeee00";
   }
   else if stdenv.system == "x86_64-darwin" then fetchurl {
-    url = http://builds.appcelerator.com.s3.amazonaws.com/mobile/3_1_X/mobilesdk-3.1.1.v20130612114553-osx.zip;
-    sha1 = "0893a1560ac6fb63369fc9f6ea9550b6649438fa";
+    url = http://builds.appcelerator.com.s3.amazonaws.com/mobile/3_1_X/mobilesdk-3.1.4.v20130926144546-osx.zip;
+    sha1 = "55f604c8edb989ba214c8ed7538d1b416df0419e";
   }
   else throw "Platform: ${stdenv.system} not supported!";
   
@@ -26,10 +26,15 @@ stdenv.mkDerivation {
         sed -i -e "s|#!/usr/bin/env python|#!${python}/bin/python|" $i
     done
    
+    # Rename ugly version number
+    cd mobilesdk/*
+    mv 3.1.4.v20130926144546 3.1.4.GA
+    cd 3.1.4.GA
+    
     # Zip files do not support timestamps lower than 1980. We have to apply a few work-arounds to cope with that
     # Yes, I know it's nasty :-)
     
-    cd mobilesdk/*/*/android
+    cd android
     
     sed -i -f ${./fixtiverify.sed} builder.py
     sed -i -f ${./fixtiprofiler.sed} builder.py
@@ -50,12 +55,24 @@ stdenv.mkDerivation {
     
     # Wrap builder script
     
-    wrapProgram `pwd`/builder.py \
-      --prefix PYTHONPATH : ${python.modules.sqlite3}/lib/python*/site-packages \
-      --prefix PATH : ${jdk}/bin \
-      --prefix JAVA_HOME : ${jdk}
+    mv builder.py .builder.py
+    cat > builder.py <<EOF
+    #!${python}/bin/python
+    
+    import os, sys
+    
+    os.environ['PYTHONPATH'] = '$(echo ${python.modules.sqlite3}/lib/python*/site-packages)'
+    os.environ['JAVA_HOME'] = '${if stdenv.system == "x86_64-darwin" then jdk else "${jdk}/lib/openjdk"}'
+    
+    os.execv('$(pwd)/.builder.py', sys.argv)
+    EOF
+    
+    chmod +x builder.py
+    
   '' + stdenv.lib.optionalString (stdenv.system == "x86_64-darwin") ''
     # 'ditto' utility is needed to copy stuff to the Xcode organizer. Dirty, but this allows it to work.
     sed -i -e "s|ditto|/usr/bin/ditto|g" $out/mobilesdk/osx/*/iphone/builder.py
+    
+    sed -i -e "s|--xcode|--xcode '+process.env['NIX_TITANIUM_WORKAROUND']+'|" $out/mobilesdk/osx/*/iphone/cli/commands/_build.js
   '';
 }

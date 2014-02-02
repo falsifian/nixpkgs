@@ -12,7 +12,7 @@ let
 in
 rec {
   src = fetchurl {
-    url = "http://downloads.sourceforge.net/extremetuxracer/extremetuxracer-${version}.tar.gz";
+    url = "mirror://sourceforge/extremetuxracer/extremetuxracer-${version}.tar.gz";
     sha256 = "04d99fsfna5mc9apjxsiyw0zgnswy33kwmm1s9d03ihw6rba2zxs";
   };
 
@@ -26,6 +26,9 @@ rec {
 
   name = "extremetuxracer-" + version;
   meta = {
-    description = "ExtremeTuxRacer - Tux lies on his belly and accelerates down ice slopes..";
+    description = "High speed arctic racing game based on Tux Racer";
+    longDescription = ''
+      ExtremeTuxRacer - Tux lies on his belly and accelerates down ice slopes.
+    '';
   };
 }

@@ -4,8 +4,8 @@
 
 cabal.mkDerivation (self: {
   pname = "mueval";
-  version = "0.9";
-  sha256 = "1y6n3zvdlzxl5hi1raz7ac6fgy9321ilka3g2pk7p1ss9d10k8pb";
+  version = "0.9.1.1";
+  sha256 = "0p9qf8lb3c1y87qpl9b4n6v6bjrb9fw3yfg4p7niqdz31454d2pz";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
@@ -13,7 +13,7 @@ cabal.mkDerivation (self: {
     utf8String
   ];
   meta = {
-    homepage = "http://code.haskell.org/mubot/";
+    homepage = "https://github.com/gwern/mueval";
     description = "Safely evaluate pure Haskell expressions";
     license = self.stdenv.lib.licenses.bsd3;
     platforms = self.ghc.meta.platforms;

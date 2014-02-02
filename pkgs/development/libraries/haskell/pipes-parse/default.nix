@@ -1,13 +1,14 @@
-{ cabal, pipes }:
+{ cabal, free, pipes, transformers }:
 
 cabal.mkDerivation (self: {
   pname = "pipes-parse";
-  version = "1.0.0";
-  sha256 = "0fk39a6d0ik5ghwyj6yyi9d0cj2sp22812fin7amcxcafrplf88w";
-  buildDepends = [ pipes ];
+  version = "2.0.2";
+  sha256 = "1jcws5i9jhh4i6bh2j6m9pz1462qm05byibkkxfqvyx392sxy4wz";
+  buildDepends = [ free pipes transformers ];
   meta = {
     description = "Parsing infrastructure for the pipes ecosystem";
     license = self.stdenv.lib.licenses.bsd3;
     platforms = self.ghc.meta.platforms;
+    maintainers = [ self.stdenv.lib.maintainers.ocharles ];
   };
 })

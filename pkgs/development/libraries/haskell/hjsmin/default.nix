@@ -1,12 +1,17 @@
-{ cabal, blazeBuilder, Cabal, HUnit, languageJavascript, QuickCheck
-, testFramework, testFrameworkHunit, text
+{ cabal, blazeBuilder, Cabal, HUnit, languageJavascript
+, optparseApplicative, QuickCheck, testFramework
+, testFrameworkHunit, text
 }:
 
 cabal.mkDerivation (self: {
   pname = "hjsmin";
-  version = "0.1.4.1";
-  sha256 = "0r73hd6kn37mdbm2i3g6v3qqm696kyflqs6ajq68qr5sr62sjb1a";
-  buildDepends = [ blazeBuilder languageJavascript text ];
+  version = "0.1.4.5";
+  sha256 = "0lzqs20kyngbjc7wqq347b1caj0hbf29dvdpxghfpjbrgyvyqh74";
+  isLibrary = true;
+  isExecutable = true;
+  buildDepends = [
+    blazeBuilder languageJavascript optparseApplicative text
+  ];
   testDepends = [
     blazeBuilder Cabal HUnit languageJavascript QuickCheck
     testFramework testFrameworkHunit text

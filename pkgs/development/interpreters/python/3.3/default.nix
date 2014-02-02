@@ -17,7 +17,7 @@ with stdenv.lib;
 
 let
   majorVersion = "3.3";
-  version = "${majorVersion}.1";
+  version = "${majorVersion}.3";
 
   buildInputs = filter (p: p != null) [
     zlib bzip2 gdbm sqlite db4 readline ncurses openssl tcl tk libX11 xproto
@@ -28,9 +28,11 @@ stdenv.mkDerivation {
   inherit majorVersion version;
 
   src = fetchurl {
-    url = "http://www.python.org/ftp/python/3.3.1/Python-${version}.tar.bz2";
-    sha256 = "0mm7nvdd85p6b26jwshy2dhicf0b06mb5lrl564i3c5q7jgs1vll";
+    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.bz2";
+    sha256 = "1jwd9pw7vx6xpjyi7iv5j3rwwkf3vzrwj36kcj1qh8zn2avfj9p5";
   };
+
+  NIX_LDFLAGS = stdenv.lib.optionalString stdenv.isLinux "-lgcc_s";
 
   preConfigure = ''
     for i in /usr /sw /opt /pkg; do	# improve purity
@@ -49,6 +51,7 @@ stdenv.mkDerivation {
 
   postInstall = ''
     rm -rf "$out/lib/python${majorVersion}/test"
+    ln -s "$out/include/python${majorVersion}m" "$out/include/python${majorVersion}"
   '';
 
   passthru = {
@@ -58,14 +61,16 @@ stdenv.mkDerivation {
     readlineSupport = readline != null;
     opensslSupport = openssl != null;
     tkSupport = (tk != null) && (tcl != null) && (libX11 != null) && (xproto != null);
-    libPrefix = "python${majorVersion}m";
+    libPrefix = "python${majorVersion}";
+    executable = "python3.3m";
+    is_py3k = true;
   };
 
   enableParallelBuilding = true;
 
   meta = {
-    homepage = "http://python.org";
-    description = "a high-level dynamically-typed programming language";
+    homepage = http://python.org;
+    description = "A high-level dynamically-typed programming language";
     longDescription = ''
       Python is a remarkably powerful dynamic programming language that
       is used in a wide variety of application domains. Some of its key
@@ -76,7 +81,7 @@ stdenv.mkDerivation {
       high level dynamic data types.
     '';
     license = stdenv.lib.licenses.psfl;
-    platforms = stdenv.lib.platforms.all;
+    platforms = stdenv.lib.platforms.linux;
     maintainers = with stdenv.lib.maintainers; [ simons chaoflow ];
   };
 }

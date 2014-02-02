@@ -1,15 +1,14 @@
-{ stdenv, fetchurl, emacs }:
+{ stdenv, fetchurl, emacs, texinfo }:
 
 stdenv.mkDerivation rec {
-  name = "haskell-mode-2.9.1-102-g8d4b965";
+  name = "haskell-mode-13.10";
 
   src = fetchurl {
-    url = "https://github.com/haskell/haskell-mode/tarball/8d4b9651a69b62fcbedbac63de29a1e87ff0e97f";
-    sha256 = "02sil43885xjbfqakrxkm7bjnjd930lx6845fc2rxmkq5plkq85a";
-    name = "${name}.tar.gz";
+    url = "https://github.com/haskell/haskell-mode/archive/v13.10.tar.gz";
+    sha256 = "0hcg7wpalcdw8j36m8vd854zrrgym074r7m903rpwfrhx9mlg02b";
   };
 
-  buildInputs = [emacs];
+  buildInputs = [ emacs texinfo ];
 
   installPhase = ''
     mkdir -p "$out/share/emacs/site-lisp"

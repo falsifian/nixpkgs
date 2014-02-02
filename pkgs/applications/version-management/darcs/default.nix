@@ -15,16 +15,19 @@ cabal.mkDerivation (self: {
     utf8String vector zlib
   ];
   extraLibraries = [ curl ];
+  doCheck = false;
   postInstall = ''
     mkdir -p $out/etc/bash_completion.d
     mv contrib/darcs_completion $out/etc/bash_completion.d/darcs
   '';
-  doCheck = false;
   meta = {
-    homepage = "http://darcs.net/";
-    description = "a distributed, interactive, smart revision control system";
+    homepage = http://darcs.net/;
+    description = "A distributed, interactive, smart revision control system";
     license = "GPL";
-    platforms = self.ghc.meta.platforms;
+    # FIXME: this gives an infinite recursion in the "darcs" attribute
+    # in all-packages.nix.
+    #platforms = self.ghc.meta.platforms;
+    platforms = [ "x86_64-linux" "i686-linux" "x86_64-darwin" ];
     maintainers = [ self.stdenv.lib.maintainers.andres ];
   };
 })

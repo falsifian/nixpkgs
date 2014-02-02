@@ -3,11 +3,11 @@ let
   s = # Generated upstream information
   rec {
     baseName="ekrhyper";
-    version="1_4_08022013";
+    version="1_4_20112013";
     name="${baseName}-${version}";
-    hash="0vni5pq1p99428ii3g13chiqxcs8k1fm6jlvg1jqh4qdcs42w7yb";
-    url="http://userpages.uni-koblenz.de/~bpelzer/ekrhyper/ekrh_1_4_08022013.tar.gz";
-    sha256="0vni5pq1p99428ii3g13chiqxcs8k1fm6jlvg1jqh4qdcs42w7yb";
+    hash="08qrsahlgqq29zyrcc8435bymj3jvxaailbgjy47jzj1ki2i0vgm";
+    url="http://userpages.uni-koblenz.de/~bpelzer/ekrhyper/ekrh_1_4_20112013.tar.gz";
+    sha256="08qrsahlgqq29zyrcc8435bymj3jvxaailbgjy47jzj1ki2i0vgm";
   };
   buildInputs = [
     ocaml perl

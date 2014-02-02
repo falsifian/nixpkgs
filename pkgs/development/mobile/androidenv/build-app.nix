@@ -1,6 +1,7 @@
 { stdenv, androidsdk, jdk, ant }:
-{ name, src, platformVersions ? [ "8" ], useGoogleAPIs ? false
+args@{ name, src, platformVersions ? [ "8" ], useGoogleAPIs ? false, antFlags ? ""
 , release ? false, keyStore ? null, keyAlias ? null, keyStorePassword ? null, keyAliasPassword ? null
+, ...
 }:
 
 assert release -> keyStore != null && keyAlias != null && keyStorePassword != null && keyAliasPassword != null;
@@ -10,11 +11,13 @@ let
     else if stdenv.system == "x86_64-darwin" then "macosx"
     else throw "Platform: ${stdenv.system} is not supported!";
 
-  androidsdkComposition = androidsdk { inherit platformVersions useGoogleAPIs; };
+  androidsdkComposition = androidsdk {
+    inherit platformVersions useGoogleAPIs;
+    abiVersions = [];
+  };
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation ({
   name = stdenv.lib.replaceChars [" "] [""] name;
-  inherit src;
   
   ANDROID_HOME = "${androidsdkComposition}/libexec/android-sdk-${platformName}";
 
@@ -32,7 +35,7 @@ stdenv.mkDerivation {
     ''}
   
     export ANDROID_SDK_HOME=`pwd` # Key files cannot be stored in the user's home directory. This overrides it.
-    ant ${if release then "release" else "debug"}
+    ant ${antFlags} ${if release then "release" else "debug"}
   '';
   
   installPhase = ''
@@ -42,4 +45,5 @@ stdenv.mkDerivation {
     mkdir -p $out/nix-support
     echo "file binary-dist \"$(echo $out/*.apk)\"" > $out/nix-support/hydra-build-products
   '';
-}
+} //
+builtins.removeAttrs args ["name"])

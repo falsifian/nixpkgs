@@ -4,12 +4,12 @@
 
 cabal.mkDerivation (self: {
   pname = "mime-mail";
-  version = "0.4.2";
-  sha256 = "1v9qdj53swhg8xg9s2x0m6d6xaff5ya6bpdifya2vsp08fmgn4l9";
+  version = "0.4.3";
+  sha256 = "0xh6j4vdg2ispr9f41s8pvx5rb08zqapkqxyvykvjg2ibmczzg4f";
   buildDepends = [
     base64Bytestring blazeBuilder filepath random text
   ];
-  testDepends = [ blazeBuilder hspec ];
+  testDepends = [ blazeBuilder hspec text ];
   meta = {
     homepage = "http://github.com/snoyberg/mime-mail";
     description = "Compose MIME email messages";

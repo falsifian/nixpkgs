@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
 
     license = "LGPLv2+";
 
-    platforms = stdenv.lib.platforms.gnu;  # arbitrary choice
-    maintainers = [ stdenv.lib.maintainers.ludo ];
+    hydraPlatforms = stdenv.lib.platforms.linux;
+    maintainers = [ ];
   };
 }

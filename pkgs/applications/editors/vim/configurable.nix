@@ -1,6 +1,6 @@
 # TODO tidy up eg The patchelf code is patching gvim even if you don't build it..
 # but I have gvim with python support now :) - Marc
-args@{source ? "latest", ...}: with args;
+args@{source ? "default", ...}: with args;
 
 
 let inherit (args.composableDerivation) composableDerivation edf; in
@@ -11,7 +11,7 @@ composableDerivation {
                    else stdenv ).mkDerivation;
 } (fix: {
 
-    name = "vim_configurable-7.3";
+    name = "vim_configurable-7.4.23";
 
     enableParallelBuilding = true; # test this
 
@@ -19,10 +19,12 @@ composableDerivation {
       builtins.getAttr source {
       "default" =
         # latest release
-        args.fetchurl {
-            url = ftp://ftp.vim.org/pub/vim/unix/vim-7.3.tar.bz2;
-            sha256 = "079201qk8g9yisrrb0dn52ch96z3lzw6z473dydw9fzi0xp5spaw";
-          };
+      args.fetchhg {
+            url = "https://vim.googlecode.com/hg/";
+            tag = "v7-4-131";
+            sha256 = "1akr0i4pykbrkqwrglm0dfn5nwpncb9pgg4h7fl6a8likbr5f3wb";
+      };
+
       "vim-nox" =
           {
             # vim nox branch: client-server without X by uing sockets
@@ -31,22 +33,17 @@ composableDerivation {
             name = "vim-nox-hg-2082fc3";
             # END
           }.src;
-      "latest" = {
-        # vim latest usually is vim + bug fixes. So it should be very stable
-         # REGION AUTO UPDATE: { name="vim"; type="hg"; url="https://vim.googlecode.com/hg"; }
-         src = (fetchurl { url = "http://mawercer.de/~nix/repos/vim-hg-7f98896.tar.bz2"; sha256 = "efcb8cc5924b530631a8e5fc2a0622045c2892210d32d300add24aded51866f1"; });
-         name = "vim-hg-7f98896";
-         # END
-      }.src;
-    };
+      };
 
     # if darwin support is enabled, we want to make sure we're not building with
     # OS-installed python framework
     preConfigure
       = stdenv.lib.optionalString
         (stdenv.isDarwin && (config.vim.darwin or true)) ''
-          sed -i "5387,5390d" src/auto/configure
-          sed -i "5394d" src/auto/configure
+          # TODO: we should find a better way of doing this as, if the configure
+          # file changes, we need to change these line numbers
+          sed -i "5641,5644d" src/auto/configure
+          sed -i "5648d" src/auto/configure
         '';
 
     configureFlags
@@ -56,10 +53,18 @@ composableDerivation {
       = [ ncurses pkgconfig gtk libX11 libXext libSM libXpm libXt libXaw libXau
           libXmu glib libICE ];
 
+    prePatch = "cd src";
+    
     # most interpreters aren't tested yet.. (see python for example how to do it)
     flags = {
         ftNix = {
-          patches = [ ./ft-nix-support.patch ];
+          # because we cd to src in the main patch phase, we can't just add this
+          # patch to the list, we have to apply it manually
+          postPatch = ''
+            cd ../runtime
+            patch -p2 < ${./ft-nix-support.patch}
+            cd ..
+          '';
         };
       }
       // edf { name = "darwin"; } #Disable Darwin (Mac OS X) support.
@@ -82,7 +87,17 @@ composableDerivation {
 
       // edf { name = "tcl"; enable = { nativeBuildInputs = [tcl]; }; } #Include Tcl interpreter.
       // edf { name = "ruby"; feat = "rubyinterp"; enable = { nativeBuildInputs = [ruby]; };} #Include Ruby interpreter.
-      // edf { name = "lua" ; feat = "luainterp"; enable = { nativeBuildInputs = [lua]; configureFlags = ["--with-lua-prefix=${args.lua}"];};}
+      // edf {
+        name = "lua";
+        feat = "luainterp";
+        enable = {
+          nativeBuildInputs = [lua];
+          configureFlags = [
+            "--with-lua-prefix=${args.lua}"
+            "--enable-luainterp"
+          ];
+        };
+      }
       // edf { name = "cscope"; } #Include cscope interface.
       // edf { name = "workshop"; } #Include Sun Visual Workshop support.
       // edf { name = "netbeans"; } #Disable NetBeans integration support.
@@ -97,6 +112,7 @@ composableDerivation {
       ;
 
   cfg = {
+    luaSupport       = config.vim.lua or true;
     pythonSupport    = config.vim.python or true;
     rubySupport      = config.vim.ruby or true;
     nlsSupport       = config.vim.nls or false;
@@ -138,10 +154,11 @@ composableDerivation {
 
   dontStrip = 1;
 
-  meta = {
+  meta = with stdenv.lib; {
     description = "The most popular clone of the VI editor";
-    homepage    = "www.vim.org";
-    platforms   = lib.platforms.unix;
+    homepage    = http://www.vim.org;
+    maintainers = with maintainers; [ lovek323 ];
+    platforms   = platforms.unix;
   };
 })
 

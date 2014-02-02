@@ -1,25 +1,25 @@
-{ stdenv, fetchurl, kernelDev }:
+{ stdenv, fetchurl, kernel }:
 
 let baseName = "frandom-1.1";
 in
 
 stdenv.mkDerivation rec {
-  name = "${baseName}-${kernelDev.version}";
+  name = "${baseName}-${kernel.version}";
 
   src = fetchurl {
-    url = "http://sourceforge.net/projects/frandom/files/${baseName}.tar.gz";
+    url = "mirror://sourceforge/frandom/${baseName}.tar.gz";
     sha256 = "15rgyk4hfawqg7z1spk2xlk1nn6rcdls8gdhc70f91shrc9pvlls";
   };
 
   preBuild = ''
-    kernelVersion=$(cd ${kernelDev}/lib/modules && ls)
+    kernelVersion=${kernel.modDirVersion}
     substituteInPlace Makefile \
       --replace "\$(shell uname -r)" "$kernelVersion" \
-      --replace "/lib/modules" "${kernelDev}/lib/modules"
+      --replace "/lib/modules" "${kernel.dev}/lib/modules"
   '';
  
   installPhase = ''
-    kernelVersion=$(cd ${kernelDev}/lib/modules && ls)
+    kernelVersion=${kernel.modDirVersion}
     ensureDir $out/lib/modules/$kernelVersion/misc
     cp frandom.ko $out/lib/modules/$kernelVersion/misc
 

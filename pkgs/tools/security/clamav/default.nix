@@ -1,11 +1,11 @@
 { stdenv, fetchurl, zlib, bzip2, libiconv }:
 stdenv.mkDerivation rec {
   name = "clamav-${version}";
-  version = "0.97.5";
+  version = "0.98.1";
 
   src = fetchurl {
-    url = "http://tenet.dl.sourceforge.net/project/clamav/clamav/${version}/clamav-${version}.tar.gz";
-    sha256 = "039wm64wl2sx7k019g5ll5dkdlsq64fnd0ng0s00pjn8bqd5wv6v";
+    url = "mirror://sourceforge/clamav/clamav-${version}.tar.gz";
+    sha256 = "1p13n8g3b88cxwxj07if9z1d2cav1ib94v6cq4r4bpacfd6yix9m";
   };
 
   buildInputs = [ zlib bzip2 libiconv ];
@@ -18,7 +18,7 @@ stdenv.mkDerivation rec {
 
   meta = with stdenv.lib; {
     homepage = http://www.clamav.net;
-    description = "an open source (GPL) antivirus engine designed for detecting Trojans, viruses, malware and other malicious threats.";
+    description = "Antivirus engine designed for detecting Trojans, viruses, malware and other malicious threats";
     license = licenses.gpl2;
     maintainers = [ maintainers.phreedom ];
     platforms = platforms.linux;

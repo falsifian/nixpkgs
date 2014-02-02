@@ -5,12 +5,14 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "nix-1.5.3";
+  name = "nix-1.6.1";
 
   src = fetchurl {
     url = "http://nixos.org/releases/nix/${name}/${name}.tar.xz";
-    sha256 = "070e82a155851900768eb4a638aa50a6df9a8475c6dbc78a3b4a7dea75d64201";
+    sha256 = "31d15f99b2405924a4be278334cc973a71999303631e6798c1d294db9be4bf84";
   };
+
+  patches = [ ./hash-check.patch ];
 
   nativeBuildInputs = [ perl pkgconfig ];
 
@@ -69,5 +71,7 @@ stdenv.mkDerivation rec {
     description = "The Nix Deployment System";
     homepage = http://nixos.org/;
     license = "LGPLv2+";
+    maintainers = [ stdenv.lib.maintainers.eelco ];
+    platforms = stdenv.lib.platforms.all;
   };
 }

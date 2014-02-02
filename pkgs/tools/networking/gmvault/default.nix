@@ -24,10 +24,11 @@ buildPythonPackage rec {
   patchPhase = ''
     cat ${startScript} > etc/scripts/gmvault
     chmod +x etc/scripts/gmvault
+    substituteInPlace setup.py --replace "Logbook==0.4.1" "Logbook==0.4.2"
   '';
 
   meta = {
-    description = "Gmvault Gmail Backup - Backup and restore your gmail account at will.";
+    description = "Backup and restore your gmail account";
     homepage = "http://gmvault.org";
     license = pkgs.lib.licenses.agpl3Plus;
   };

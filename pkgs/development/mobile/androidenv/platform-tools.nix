@@ -1,15 +1,15 @@
-{stdenv, stdenv_32bit, fetchurl, unzip, zlib, ncurses}:
+{stdenv, stdenv_32bit, fetchurl, unzip}:
 
 stdenv.mkDerivation {
-  name = "android-platform-tools-r16";
+  name = "android-platform-tools-r19";
   src = if (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux")
     then fetchurl {
-      url = https://dl-ssl.google.com/android/repository/platform-tools_r16-linux.zip;
-      sha1 = "84d563ae5e324f223f335f11bf511bf6207c05fb";
+      url = https://dl-ssl.google.com/android/repository/platform-tools_r19-linux.zip;
+      sha1 = "66ee37daf8a2a8f1aa8939ccd4093658e30aa49b";
     }
     else if stdenv.system == "x86_64-darwin" then fetchurl {
-      url = https://dl-ssl.google.com/android/repository/platform-tools_r16-macosx.zip;
-      sha1 = "fbb0f8d2786a83b8c3eb6df402e706e136db8fed";
+      url = https://dl-ssl.google.com/android/repository/platform-tools_r19-macosx.zip;
+      sha1 = "69af30f488163dfc3da8cef1bb6cc7e8a6df5681";
     }
     else throw "System ${stdenv.system} not supported!";
   
@@ -21,20 +21,12 @@ stdenv.mkDerivation {
     
     ${stdenv.lib.optionalString (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux")
       ''
-        for i in aapt adb aidl dexdump fastboot llvm-rs-cc
+        for i in adb fastboot
         do
             patchelf --set-interpreter ${stdenv_32bit.gcc.libc}/lib/ld-linux.so.2 $i
+            patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib $i
         done
-    
-        patchelf --set-rpath ${zlib}/lib:${stdenv_32bit.gcc.gcc}/lib aapt
-        patchelf --set-rpath ${ncurses}/lib:${stdenv_32bit.gcc.gcc}/lib adb
-        patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib aidl
-        patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib fastboot
-        patchelf --set-rpath ${zlib}/lib:${stdenv_32bit.gcc.gcc}/lib dexdump
-        patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib llvm-rs-cc
     ''}
-    
-    patchShebangs .
   '';
   
   buildInputs = [ unzip ];

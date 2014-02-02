@@ -1,16 +1,18 @@
 { cabal, aeson, attoparsec, caseInsensitive, conduit, dataDefault
-, failure, HTTP, httpConduit, httpTypes, network, text, time
-, unorderedContainers, vector
+, failure, hashable, HTTP, httpConduit, httpTypes, network, text
+, time, unorderedContainers, vector
 }:
 
 cabal.mkDerivation (self: {
   pname = "github";
-  version = "0.7.0";
-  sha256 = "0r803hpyyd0nfhlk5jn4ripzi2cpj708zp9g961g7wvvvi66013p";
+  version = "0.7.4";
+  sha256 = "1yalhixisjv1n9ihik3h6ya25f0066dd422nbpfysj9093hv3a5w";
   buildDepends = [
-    aeson attoparsec caseInsensitive conduit dataDefault failure HTTP
-    httpConduit httpTypes network text time unorderedContainers vector
+    aeson attoparsec caseInsensitive conduit dataDefault failure
+    hashable HTTP httpConduit httpTypes network text time
+    unorderedContainers vector
   ];
+  jailbreak = true;
   meta = {
     homepage = "https://github.com/fpco/github";
     description = "Access to the Github API, v3";

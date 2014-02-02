@@ -2,7 +2,7 @@
 , libSM, libX11, libXext, libXcomposite, libXcursor, libXdamage
 , libXfixes, libXi, libXinerama, libXrandr, libXrender
 , dbus, dbus_glib, fontconfig, gcc, patchelf
-, atk, glib, gdk_pixbuf, gtk, pango
+, atk, glib, gdk_pixbuf, gtk, pango, zlib
 }:
 
 # this package contains the daemon version of dropbox
@@ -20,14 +20,14 @@ let
   arch = if stdenv.system == "x86_64-linux" then "x86_64"
     else if stdenv.system == "i686-linux" then "x86"
     else throw "Dropbox client for: ${stdenv.system} not supported!";
-    
+
   interpreter = if stdenv.system == "x86_64-linux" then "ld-linux-x86-64.so.2"
     else if stdenv.system == "i686-linux" then "ld-linux.so.2"
     else throw "Dropbox client for: ${stdenv.system} not supported!";
 
-  version = "1.4.21";
-  sha256 = if stdenv.system == "x86_64-linux" then "94073842f4a81feee80bca590e1df73fc3cab47ba879407ceba2de48f30d84e2"
-    else if stdenv.system == "i686-linux" then "121v92m20l73xjmzng3vmcp4zsp9mlbcfia73f5py5y74kndb2ap"
+  version = "2.6.2";
+  sha256 = if stdenv.system == "x86_64-linux" then "0j511nglqg2xngyl78ww7xk09v8yzhghk5cnj6slr9sldy83n7g9"
+    else if stdenv.system == "i686-linux" then "0n0y0wf313yjas4b89ag613jb80skby1qmfkyy1aazgjancf7v5i"
     else throw "Dropbox client for: ${stdenv.system} not supported!";
 
   # relative location where the dropbox libraries are stored
@@ -40,7 +40,7 @@ let
       libSM libX11 libXext libXcomposite libXcursor libXdamage
       libXfixes libXi libXinerama libXrandr libXrender
       atk dbus dbus_glib glib fontconfig gcc gdk_pixbuf
-      gtk pango
+      gtk pango zlib
     ];
 
   desktopItem = makeDesktopItem {

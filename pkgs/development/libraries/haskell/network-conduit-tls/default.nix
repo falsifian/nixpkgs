@@ -1,17 +1,19 @@
-{ cabal, aeson, certificate, conduit, cryptoApi, cryptoRandomApi
+{ cabal, aeson, certificate, conduit, connection, cprngAes
+, cryptoApi, cryptoRandomApi, dataDefault, HUnit, monadControl, mtl
 , network, networkConduit, pem, systemFileio, systemFilepath, tls
-, tlsExtra, transformers
+, transformers
 }:
 
 cabal.mkDerivation (self: {
   pname = "network-conduit-tls";
-  version = "1.0.0.2";
-  sha256 = "1vzhalz6hxal73rxm6f2l9m7j34mldamz16wrb6ay67wg6giq55z";
+  version = "1.0.4.1";
+  sha256 = "1l79v4ippyfw6pl4h3vqswh79vcif80phf6kq5fr4xmv3b6nbc06";
   buildDepends = [
-    aeson certificate conduit cryptoApi cryptoRandomApi network
-    networkConduit pem systemFileio systemFilepath tls tlsExtra
-    transformers
+    aeson certificate conduit connection cprngAes cryptoApi
+    cryptoRandomApi dataDefault monadControl network networkConduit pem
+    systemFileio systemFilepath tls transformers
   ];
+  testDepends = [ conduit connection HUnit mtl networkConduit ];
   meta = {
     homepage = "https://github.com/snoyberg/conduit";
     description = "Create TLS-aware network code with conduits";

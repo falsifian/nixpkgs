@@ -1,5 +1,5 @@
-{ stdenv, fetchurl, pkgconfig, gettext, perl, libiconvOrEmpty, zlib, libffi
-, python, pcre, libelf }:
+{ stdenv, fetchurl, pkgconfig, gettext, perl, python, autoconf, automake, libtool
+, libiconvOrEmpty, libintlOrEmpty, zlib, libffi, pcre, libelf, dbus }:
 
 # TODO:
 # * Add gio-module-fam
@@ -10,42 +10,63 @@
 #     Possible solution: disable compilation of this example somehow
 #     Reminder: add 'sed -e 's@python2\.[0-9]@python@' -i
 #       $out/bin/gtester-report' to postInstall if this is solved
+/*
+  * Use --enable-installed-tests for GNOME-related packages,
+      and use them as a separately installed tests runned by Hydra
+      (they should test an already installed package)
+      https://wiki.gnome.org/GnomeGoals/InstalledTests
+  * Support org.freedesktop.Application, including D-Bus activation from desktop files
+*/
 
 let
-  # some packages don't get "Cflags" from pkgconfig correctly
-  # and then fail to build when directly including like <glib/...>
+  # Some packages don't get "Cflags" from pkgconfig correctly
+  # and then fail to build when directly including like <glib/...>.
+  # This is intended to be run in postInstall of any package
+  # which has $out/include/ containing just some disjunct directories.
   flattenInclude = ''
-    for dir in $out/include/*; do
-      cp -r $dir/* "$out/include/"
+    for dir in "$out"/include/*; do
+      cp -r "$dir"/* "$out/include/"
       rm -r "$dir"
       ln -s . "$dir"
     done
-    ln -sr -t "$out/include/" $out/lib/*/include/* 2>/dev/null || true
+    ln -sr -t "$out/include/" "$out"/lib/*/include/* 2>/dev/null || true
   '';
+
+  ver_maj = "2.38";
+  ver_min = "2";
 in
+with { inherit (stdenv.lib) optional optionalString; };
 
 stdenv.mkDerivation rec {
-  name = "glib-2.36.1";
+  name = "glib-${ver_maj}.${ver_min}";
 
   src = fetchurl {
-    url = "mirror://gnome/sources/glib/2.36/${name}.tar.xz";
-    sha256 = "090bw5par3dfy5m6dhq393pmy92zpw3d7rgbzqjc14jfg637bqvx";
+    url = "mirror://gnome/sources/glib/${ver_maj}/${name}.tar.xz";
+    sha256 = "0d2px8m77603s5pm3md4bcm5d0ksbcsb6ik1w52hjslnq1a9hsh5";
   };
 
-  # configure script looks for d-bus but it is only needed for tests
+  # configure script looks for d-bus but it is (probably) only needed for tests
   buildInputs = [ libelf ];
 
-  nativeBuildInputs = [ perl pkgconfig gettext python ];
+  # I don't know why the autotools are needed now, even without modifying configure scripts
+  nativeBuildInputs = [ pkgconfig gettext perl python ] ++ [ autoconf automake libtool ];
 
-  propagatedBuildInputs = [ pcre zlib libffi ] ++ libiconvOrEmpty;
+  propagatedBuildInputs = [ pcre zlib libffi ] ++ libiconvOrEmpty ++ libintlOrEmpty;
 
-  configureFlags = stdenv.lib.optional stdenv.isSunOS "--disable-modular-tests";
+  preConfigure = "autoreconf -fi";
 
-  CPPFLAGS = stdenv.lib.optionalString stdenv.isSunOS "-DBSD_COMP";
+  configureFlags =
+    optional stdenv.isDarwin "--disable-compile-warnings"
+    ++ optional stdenv.isSunOS "--disable-modular-tests";
 
-  postConfigure = "sed '/SANE_MALLOC_PROTOS/s,^,//,' -i config.h";
+  CPPFLAGS = optionalString stdenv.isSunOS "-DBSD_COMP";
+
+  NIX_CFLAGS_COMPILE = optionalString stdenv.isDarwin "-lintl";
 
   enableParallelBuilding = true;
+
+  doCheck = false; # ToDo: fix the remaining problems, so we have checked glib by default
+  LD_LIBRARY_PATH = optionalString doCheck "${stdenv.gcc.gcc}/lib";
 
   postInstall = ''rm -rvf $out/share/gtk-doc'';
 
@@ -69,4 +90,3 @@ stdenv.mkDerivation rec {
     '';
   };
 }
-

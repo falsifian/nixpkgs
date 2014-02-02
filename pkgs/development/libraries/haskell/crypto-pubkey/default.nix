@@ -1,18 +1,19 @@
-{ cabal, cryptohash, cryptoNumbers, cryptoPubkeyTypes
-, cryptoRandomApi, HUnit, QuickCheck, testFramework
+{ cabal, byteable, cryptohash, cryptoNumbers, cryptoPubkeyTypes
+, cryptoRandom, HUnit, QuickCheck, testFramework
 , testFrameworkHunit, testFrameworkQuickcheck2
 }:
 
 cabal.mkDerivation (self: {
   pname = "crypto-pubkey";
-  version = "0.1.4";
-  sha256 = "13ah3ip6gdv7b1zz5qwi7515a3k8pp3l0jr1kq4q2a0vqy24gkn1";
+  version = "0.2.4";
+  sha256 = "0mdjr6zma2q7r2z9qibp2bwf73bis6zrv7ss62i4pz42kndb9hh4";
   buildDepends = [
-    cryptohash cryptoNumbers cryptoPubkeyTypes cryptoRandomApi
+    byteable cryptohash cryptoNumbers cryptoPubkeyTypes cryptoRandom
   ];
   testDepends = [
-    cryptohash cryptoNumbers cryptoRandomApi HUnit QuickCheck
-    testFramework testFrameworkHunit testFrameworkQuickcheck2
+    byteable cryptohash cryptoNumbers cryptoPubkeyTypes cryptoRandom
+    HUnit QuickCheck testFramework testFrameworkHunit
+    testFrameworkQuickcheck2
   ];
   meta = {
     homepage = "http://github.com/vincenthz/hs-crypto-pubkey";

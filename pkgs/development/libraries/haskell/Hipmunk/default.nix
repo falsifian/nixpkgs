@@ -2,14 +2,11 @@
 
 cabal.mkDerivation (self: {
   pname = "Hipmunk";
-  version = "5.2.0.10";
-  sha256 = "0kq6dlx1g7dra7nsfmrc13yvnl7wh00fadmgln9v2vyf0ww82x95";
+  version = "5.2.0.12";
+  sha256 = "0gybmwwij6gs3gsklcvck0nc1niyh6pvirnxgrcwclrz94ivpj42";
   buildDepends = [ StateVar transformers ];
-  patchPhase = ''
-    sed -i -e 's|containers.*,|containers,|' Hipmunk.cabal
-  '';
   meta = {
-    homepage = "http://patch-tag.com/r/felipe/hipmunk/home";
+    homepage = "https://github.com/meteficha/Hipmunk";
     description = "A Haskell binding for Chipmunk";
     license = "unknown";
     platforms = self.ghc.meta.platforms;

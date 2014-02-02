@@ -2,10 +2,10 @@
 
 cabal.mkDerivation (self: {
   pname = "th-orphans";
-  version = "0.6";
-  sha256 = "1ablf4c8vp9kzvr75ngl5yz3ip5klk6zmq7bcqcvks758b9c6qgj";
+  version = "0.8";
+  sha256 = "0kzzcicn6pggvvblhbrs3vh0bf71izlb99lb0f5qww7ymi4smldr";
   buildDepends = [ thLift ];
-  noHaddock = true;
+  jailbreak = true;
   meta = {
     description = "Orphan instances for TH datatypes";
     license = self.stdenv.lib.licenses.bsd3;

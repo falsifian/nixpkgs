@@ -2,13 +2,13 @@
 , fetchurl
 }:
 
-let version = "3.0s"; in stdenv.mkDerivation {
+let version = "3.0u"; in stdenv.mkDerivation {
 
   name = "gnu-efi-${version}";
 
   src = fetchurl {
     url = "mirror://sourceforge/gnu-efi/gnu-efi_${version}.orig.tar.gz";
-    sha256 = "18bpswzkj81dadq1b7n2s9g0cz60l34ggzxlq21mb8va10j9zmhh";
+    sha256 = "0klkdxh1aqwwfm393q67nxww6liffyp2lfybbnh4q819b06la39w";
   };
 
   meta = {
@@ -19,8 +19,8 @@ let version = "3.0s"; in stdenv.mkDerivation {
     platforms = ["x86_64-linux" "i686-linux"];
   };
 
-  buildFlags = [
-    "CC=cc"
+  makeFlags = [
+    "CC=gcc"
     "AS=as"
     "LD=ld"
     "AR=ar"
@@ -29,12 +29,12 @@ let version = "3.0s"; in stdenv.mkDerivation {
   ];
 
   buildPhase = ''
-    make $buildFlags
-    make $buildFlags -C apps clean all
+    make $makeFlags
+    make $makeFlags -C apps clean all
   '';
 
   installPhase = ''
-    make INSTALLROOT="$out" install
+    make PREFIX="$out" $makeFlags install
     mkdir -pv $out/share/gnu-efi
     install -D -m644 apps/*.efi $out/share/gnu-efi
   '';

@@ -1,9 +1,10 @@
 { monolithic ? true # build monolithic Quassel
 , daemon ? false # build Quassel daemon
 , client ? false # build Quassel client
-, withKDE ? true # enable KDE integration
+, withKDE ? stdenv.isLinux # enable KDE integration
 , ssl ? true # enable SSL support
 , previews ? false # enable webpage previews on hovering over URLs
+, tag ? "" # tag added to the package name
 , stdenv, fetchurl, cmake, qt4, kdelibs, automoc4, phonon }:
 
 let
@@ -11,12 +12,15 @@ let
 
 in with stdenv; mkDerivation rec {
 
-  name = "quassel-0.7.4";
+  version = "0.9.2";
+  name = "quassel${tag}-${version}";
 
   src = fetchurl {
-    url = "http://quassel-irc.org/pub/${name}.tar.bz2";
-    sha256 = "08f4m35bkmp9p1n560a3fg711s9izb25ddx2az03xzf1jl8qdrg7";
+    url = "http://quassel-irc.org/pub/quassel-${version}.tar.bz2";
+    sha256 = "1h2kzi4pgfv3qmvhxix9fffdjixs3bsya0i5c18dkh894mh02kgh";
   };
+
+  enableParallelBuilding = true;
 
   buildInputs = [ cmake qt4 ]
     ++ lib.optional withKDE kdelibs
@@ -48,6 +52,7 @@ in with stdenv; mkDerivation rec {
     '';
     license = "GPLv3";
     maintainers = [ maintainers.phreedom ];
+    repositories.git = https://github.com/quassel/quassel.git;
     inherit (qt4.meta) platforms;
   };
 }

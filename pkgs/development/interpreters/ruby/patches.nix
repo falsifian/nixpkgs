@@ -1,5 +1,6 @@
 { fetchurl, writeScript, ruby, ncurses, sqlite, libxml2, libxslt, libffi
-, zlib, libuuid, gems, jdk, python, stdenv, libiconvOrEmpty }:
+, zlib, libuuid, gems, jdk, python, stdenv, libiconvOrEmpty, imagemagick
+, pkgconfig }:
 
 let
 
@@ -76,6 +77,12 @@ in
     NIX_POST_EXTRACT_FILES_HOOK = patchUsrBinEnv;
   };
 
+  rmagick = {
+    buildInputs = [ imagemagick pkgconfig ];
+
+    NIX_CFLAGS_COMPILE = "-I${imagemagick}/include/ImageMagick-6";
+  };
+
   xrefresh_server =
     let
       patch = fetchurl {
@@ -116,4 +123,12 @@ in
     extraWrapperFlags = "--prefix RUBYLIB : .";
   };
   
+  pry = { gemFlags = "--no-ri --no-rdoc"; };
+
+  fakes3 = {
+    postInstall = ''
+      cd $out/${ruby.gemPath}/gems/*
+      patch -Np1 -i ${../../ruby-modules/fake-s3-list-bucket.patch}
+    '';
+  };
 }

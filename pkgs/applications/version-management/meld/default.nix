@@ -9,7 +9,7 @@ stdenv.mkDerivation {
   name = "meld-${version}";
 
   src = fetchurl {
-    url = "http://ftp.gnome.org/pub/gnome/sources/meld/${minor}/meld-${version}.tar.xz";
+    url = "mirror://gnome/sources/meld/${minor}/meld-${version}.tar.xz";
     sha256 = "00rsff0yl5qwzh0igkdns6ry2xsbxad70avpqpkbd2bldi94v76y";
   };
 
@@ -24,9 +24,10 @@ stdenv.mkDerivation {
     wrapProgram $out/bin/meld --prefix PYTHONPATH : $PYTHONPATH:${pygtk}/lib/${python.libPrefix}/site-packages/gtk-2.0
   '';
 
-  meta = {
+  meta = with stdenv.lib; {
     description = "Visual diff and merge tool";
     homepage = http://meld.sourceforge.net;
     license = "GPLv2+";
+    platforms = platforms.linux;
   };
 }

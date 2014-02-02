@@ -1,23 +1,28 @@
 { stdenv, fetchurl, zlib, openssl, perl, libedit, pkgconfig, pam
 , etcDir ? null
 , hpnSupport ? false
+, withKerberos ? false
+, kerberos
 }:
+
+assert withKerberos -> kerberos != null;
 
 let
 
   hpnSrc = fetchurl {
-    url = http://tarballs.nixos.org/openssh-6.1p1-hpn13v14.diff.gz;
-    sha256 = "14das6lim6fxxnx887ssw76ywsbvx3s4q3n43afgh5rgvs4xmnnq";
+    url = mirror://sourceforge/hpnssh/openssh-6.3p1-hpnssh14v2.diff.gz;
+    sha256 = "1jldqjwry9qpxxzb3mikfmmmv90mfb7xkmcfdbvwqac6nl3r7bi3";
   };
+  optionalString = stdenv.lib.optionalString;
 
 in
 
 stdenv.mkDerivation rec {
-  name = "openssh-6.2p1";
+  name = "openssh-6.5p1";
 
   src = fetchurl {
     url = "ftp://ftp.nl.uu.net/pub/OpenBSD/OpenSSH/portable/${name}.tar.gz";
-    sha1 = "8824708c617cc781b2bb29fa20bd905fd3d2a43d";
+    sha256 = "09wh7mi65aahyxd2xvq1makckhd5laid8c0pb8njaidrbpamw6d1";
   };
 
   prePatch = stdenv.lib.optionalString hpnSupport
@@ -26,13 +31,10 @@ stdenv.mkDerivation rec {
       export NIX_LDFLAGS="$NIX_LDFLAGS -lgcc_s"
     '';
 
-  patches =
-    [ ./locale_archive.patch
-      # Upstream fix for gratuitous "no such identity" warnings.
-      ./fix-identity-warnings.patch
-    ];
+  patches = [ ./locale_archive.patch ];
 
-  buildInputs = [ zlib openssl libedit pkgconfig pam ];
+  buildInputs = [ zlib openssl libedit pkgconfig pam ]
+    ++ stdenv.lib.optional withKerberos [ kerberos ];
 
   # I set --disable-strip because later we strip anyway. And it fails to strip
   # properly when cross building.
@@ -42,7 +44,8 @@ stdenv.mkDerivation rec {
       --with-libedit=yes
       --disable-strip
       ${if pam != null then "--with-pam" else "--without-pam"}
-      ${if etcDir != null then "--sysconfdir=${etcDir}" else ""}
+      ${optionalString (etcDir != null) "--sysconfdir=${etcDir}"}
+      ${optionalString withKerberos "--with-kerberos5=${kerberos}"}
     '';
 
   preConfigure =
@@ -64,11 +67,12 @@ stdenv.mkDerivation rec {
 
   installTargets = "install-nosysconf";
 
-  meta = {
-    homepage = http://www.openssh.org/;
+  meta = with stdenv.lib; {
+    homepage = "http://www.openssh.org/";
     description = "An implementation of the SSH protocol";
     license = "bsd";
-    platforms = stdenv.lib.platforms.linux;
-    maintainers = stdenv.lib.maintainers.eelco;
+    platforms = platforms.unix;
+    maintainers = with maintainers; [ eelco ];
+    broken = hpnSupport; # cf. https://github.com/NixOS/nixpkgs/pull/1640
   };
 }

@@ -1,19 +1,25 @@
-{ stdenv, fetchurl, pkgconfig }:
+{ stdenv, fetchurl, pkgconfig, udev }:
 
+let
+  version = "1.0.17";
+in
 stdenv.mkDerivation rec {
-  name = "libusb-1.0.9";
+  name = "libusbx-${version}"; # it's a fork of original libusb1; should be mostly compatible
 
   src = fetchurl {
-    url = "mirror://sourceforge/libusb/${name}.tar.bz2";
-    sha256 = "16sz34ix6hw2wwl3kqx6rf26fg210iryr68wc439dc065pffw879";
+    url = "mirror://sourceforge/libusbx/libusbx-${version}.tar.bz2";
+    sha256 = "1f25a773x9x5n48a0mcigyk77ay0hkiz6y6bi4588wzf7wn8svw7";
   };
 
   buildInputs = [ pkgconfig ];
+  propagatedBuildInputs = stdenv.lib.optional (stdenv.isLinux) udev;
+
+  NIX_LDFLAGS = stdenv.lib.optionalString stdenv.isLinux "-lgcc_s";
 
   meta = {
     homepage = http://www.libusb.org;
     description = "User-space USB library";
-    platforms = stdenv.lib.platforms.linux;
+    platforms = stdenv.lib.platforms.unix;
     maintainers = [ stdenv.lib.maintainers.urkud ];
   };
 }

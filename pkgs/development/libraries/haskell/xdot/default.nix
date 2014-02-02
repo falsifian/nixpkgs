@@ -2,8 +2,8 @@
 
 cabal.mkDerivation (self: {
   pname = "xdot";
-  version = "0.2.3.1";
-  sha256 = "1gricrnssxgzaq1z7nnyppmz284nix0m89477x22mal125pkcf7n";
+  version = "0.2.4.2";
+  sha256 = "0a5wmwcl3akw1n9xgdhvlrbvphvy9s528daax28137ixaphvrl0f";
   buildDepends = [ cairo graphviz gtk mtl polyparse text ];
   meta = {
     description = "Parse Graphviz xdot files and interactively view them using GTK and Cairo";

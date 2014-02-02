@@ -1,10 +1,12 @@
-{ cabal, doctest, filepath, transformers, transformersCompat }:
+{ cabal, doctest, filepath, tagged, transformers
+, transformersCompat
+}:
 
 cabal.mkDerivation (self: {
   pname = "distributive";
-  version = "0.3.1";
-  sha256 = "0zf3wq1xz9sbb0g6fg852jckrwkffsfkghq3zx03d2q9ginc6jbc";
-  buildDepends = [ transformers transformersCompat ];
+  version = "0.4";
+  sha256 = "11zln3h7pflv1f6jfma5b505p4wnr9xrs711mhh3a8xi20n4r318";
+  buildDepends = [ tagged transformers transformersCompat ];
   testDepends = [ doctest filepath ];
   meta = {
     homepage = "http://github.com/ekmett/distributive/";

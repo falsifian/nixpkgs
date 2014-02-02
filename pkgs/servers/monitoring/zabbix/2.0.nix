@@ -1,15 +1,16 @@
 { stdenv, fetchurl, pkgconfig, postgresql, curl, openssl, zlib, gettext
-, enableJabber ? false, iksemel ? null }:
+, enableJabber ? false, minmay ? null }:
 
-assert enableJabber -> iksemel != null;
+assert enableJabber -> minmay != null;
 
 let
 
-  version = "2.0.6";
+  version = "2.0.10";
+  branch = "2.0";
 
   src = fetchurl {
     url = "mirror://sourceforge/zabbix/zabbix-${version}.tar.gz";
-    sha256 = "1y7dp9rqxkn8ik7bvk2qysz3zp3r07kmax5avlf9jf1x7pkagps6";
+    sha256 = "0p86m634j08w0gbr2rwqr3h5p6md7k0c688w5yxc1ii3l9fmnhbi";
   };
 
   preConfigure =
@@ -37,7 +38,15 @@ in
       "--with-postgresql"
       "--with-libcurl"
       "--with-gettext"
-    ] ++ stdenv.lib.optional enableJabber "--with-jabber=${iksemel}";
+    ] ++ stdenv.lib.optional enableJabber "--with-jabber=${minmay}";
+
+    postPatch = ''
+      sed -i -e 's/iksemel/minmay/g' configure src/libs/zbxmedia/jabber.c
+      sed -i \
+        -e '/^static ikstransport/,/}/d' \
+        -e 's/iks_connect_with\(.*\), &zbx_iks_transport/mmay_connect_via\1/' \
+        -e 's/iks/mmay/g' -e 's/IKS/MMAY/g' src/libs/zbxmedia/jabber.c
+    '';
 
     buildInputs = [ pkgconfig postgresql curl openssl zlib ];
 
@@ -53,6 +62,7 @@ in
       '';
 
     meta = {
+      inherit branch;
       description = "An enterprise-class open source distributed monitoring solution";
       homepage = http://www.zabbix.com/;
       license = "GPL";
@@ -69,11 +79,12 @@ in
     configureFlags = "--enable-agent";
 
     meta = {
+      inherit branch;
       description = "An enterprise-class open source distributed monitoring solution (client-side agent)";
       homepage = http://www.zabbix.com/;
       license = "GPL";
       maintainers = [ stdenv.lib.maintainers.eelco ];
-      platforms = stdenv.lib.platforms.all;
+      platforms = stdenv.lib.platforms.linux ++ stdenv.lib.platforms.darwin;
     };
   };
 

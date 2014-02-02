@@ -1,7 +1,7 @@
 { stdenv, fetchurl, perlSupport, libX11, libXt, libXft, ncurses, perl,
-  fontconfig, freetype, pkgconfig, libXrender }:
+  fontconfig, freetype, pkgconfig, libXrender, gdkPixbufSupport, gdk_pixbuf }:
 
-let 
+let
   name = "rxvt-unicode";
   version = "9.16";
   n = "${name}-${version}";
@@ -17,14 +17,18 @@ stdenv.mkDerivation (rec {
   };
 
   buildInputs =
-    [ libX11 libXt libXft ncurses /* required to build the terminfo file */ 
+    [ libX11 libXt libXft ncurses /* required to build the terminfo file */
       fontconfig freetype pkgconfig libXrender ]
-    ++ stdenv.lib.optional perlSupport perl;
+    ++ stdenv.lib.optional perlSupport perl
+    ++ stdenv.lib.optional gdkPixbufSupport gdk_pixbuf;
+
+  outputs = [ "out" "terminfo" ];
 
   preConfigure =
     ''
-      configureFlags="--with-terminfo=$out/share/terminfo ${if perlSupport then "--enable-perl" else "--disable-perl"}";
-      export TERMINFO=$out/share/terminfo # without this the terminfo won't be compiled by tic, see man tic
+      mkdir -p $terminfo/share/terminfo
+      configureFlags="--with-terminfo=$terminfo/share/terminfo --enable-256-color ${if perlSupport then "--enable-perl" else "--disable-perl"}";
+      export TERMINFO=$terminfo/share/terminfo # without this the terminfo won't be compiled by tic, see man tic
       NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -I${freetype}/include/freetype2"
       NIX_LDFLAGS="$NIX_LDFLAGS -lfontconfig -lXrender "
     ''
@@ -37,5 +41,6 @@ stdenv.mkDerivation (rec {
   meta = {
     description = "A clone of the well-known terminal emulator rxvt";
     homepage = "http://software.schmorp.de/pkg/rxvt-unicode.html";
+    maintainers = stdenv.lib.maintainers.mornfall;
   };
 })

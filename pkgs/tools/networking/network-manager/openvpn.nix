@@ -4,11 +4,11 @@
 stdenv.mkDerivation rec {
   name = "${pname}${if withGnome then "-gnome" else ""}-${version}";
   pname = "NetworkManager-openvpn";
-  version = "0.9.8.0";
+  version = "0.9.8.4";
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/0.9/${pname}-${version}.tar.xz";
-    sha256 = "1klmhcizp6fmbxjbyihsk2w0alnkyiw2a3ldgijq8s224k0z95j1";
+    sha256 = "11v63s1f3bsa7pmkvr7x65rsigh48wfqzsnixrwc3wqslsv5535g";
   };
 
   buildInputs = [ openvpn networkmanager ]
@@ -41,7 +41,7 @@ stdenv.mkDerivation rec {
   '';
 
   meta = {
-    description = "TODO";
+    description = "NetworkManager's OpenVPN plugin";
     inherit (networkmanager.meta) maintainers platforms;
   };
 }

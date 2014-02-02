@@ -49,6 +49,7 @@ in
 
   libxcb = attrs : attrs // {
     nativeBuildInputs = [ args.python ];
+    configureFlags = "--enable-xkb";
   };
 
   xcbproto = attrs : attrs // {
@@ -116,13 +117,6 @@ in
   libSM = attrs: attrs
     // { propagatedBuildInputs = [ xorg.libICE ]; };
 
-  libXi = gitRelease {
-    libName = "libXi";
-    version = "1.7.1.91";
-    rev = "661c45ca17c434dbd342a46fd3fb813852ae0ca9";
-    sha256 = "01wx8fgjjfqm0sm9anj6rmz72yvjyb4y3ifjk2q4ixd7pdp63bx6";
-  };
-
   libXrender = attrs: attrs
     // { preConfigure = setMalloc0ReturnsNullCrossCompiling; };
 
@@ -171,6 +165,13 @@ in
     ];
   };
 
+  xf86videonv = attrs: attrs // {
+    patches = [( args.fetchurl {
+      url = http://cgit.freedesktop.org/xorg/driver/xf86-video-nv/patch/?id=fc78fe98222b0204b8a2872a529763d6fe5048da;
+      sha256 = "0ikbnz6048ygs1qahb6ylnxkyjhfjcqr2gm9bk95ca90v57j7i0f";
+    })];
+  };
+
   xf86videovmware = attrs: attrs // {
     buildInputs =  attrs.buildInputs ++ [ args.mesa_drivers ]; # for libxatracker
   };
@@ -191,13 +192,20 @@ in
     buildInputs = attrs.buildInputs ++ [args.intltool];
   };
 
+  xmodmap = attrs: attrs // {
+    patches = [(args.fetchurl {
+      url = http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/x11-apps/xmodmap/files/xmodmap-1.0.7-_GNU_SOURCE.patch;
+      sha256 = "0q3zhy0wy1kkbpagzav8869fais4lw5q5vybgjj7wkmak06c5648";
+      name = "new-gcc.patch";
+    })];
+  };
   xorgserver = with xorg; attrs: attrs // {
     configureFlags = [
       "--enable-xcsecurity" # enable SECURITY extension
       "--with-default-font-path= "  # there were only paths containing "${prefix}",
                                     # and there are no fonts in this package anyway
     ];
-    patches = [./xorgserver-dri-path.patch ./xorgserver-xkbcomp-path.patch];
+    patches = [ ./xorgserver-xkbcomp-path.patch ];
     buildInputs = attrs.buildInputs ++ [ xtrans ];
     propagatedBuildInputs =
       [ args.zlib args.udev args.mesa args.dbus.libs

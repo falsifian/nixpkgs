@@ -1,24 +1,14 @@
 { stdenv, fetchurl, scons, boost, v8, gperftools, pcre, snappy }:
 
-with stdenv.lib;
-
-let installerPatch = fetchurl {
-      url = "https://jira.mongodb.org/secure/attachment/18160/SConscript.client.patch";
-      sha256 = "0n60fh2r8i7m6g113k0iw4adc8jv2by4ahrd780kxg47kzfgw06a";
-    };
-
-in
-stdenv.mkDerivation rec {
-  name = "mongodb-2.4.3";
+let version = "2.4.8"; in stdenv.mkDerivation rec {
+  name = "mongodb-${version}";
 
   src = fetchurl {
-    url = http://downloads.mongodb.org/src/mongodb-src-r2.4.3.tar.gz;
-    sha256 = "1k653xmwphdk88z2byz5fglr8xcsm8nw13prls1rx16qnc6h1pb1";
+    url = "http://downloads.mongodb.org/src/mongodb-src-r${version}.tar.gz";
+    sha256 = "1p6gnharypglfp39halp72fig96fqjhakyy7m76a1prxwpjkqw7x";
   };
 
   nativeBuildInputs = [ scons boost v8 gperftools pcre snappy ];
-
-  patches = [ installerPatch ];
 
   postPatch = ''
     substituteInPlace SConstruct \

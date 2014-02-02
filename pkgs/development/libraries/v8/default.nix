@@ -26,7 +26,7 @@ stdenv.mkDerivation {
       ln -sv ${gyp}/bin/gyp build/gyp/gyp
     '';
 
-    nativeBuildInputs = stdenv.lib.optional (system == "i686-linux") which;
+    nativeBuildInputs = [ which ];
     buildInputs = [ readline python ];
 
     buildFlags = [
@@ -34,6 +34,9 @@ stdenv.mkDerivation {
       "console=readline"
       "${arch}.release"
     ];
+
+    # http://code.google.com/p/v8/issues/detail?id=2149
+    NIX_CFLAGS_COMPILE = "-Wno-unused-local-typedefs -Wno-aggressive-loop-optimizations";
 
     enableParallelBuilding = true;
 
@@ -53,4 +56,10 @@ stdenv.mkDerivation {
       install_name_tool -change /usr/local/lib/libv8.dylib $out/lib/libv8.dylib -change /usr/lib/libgcc_s.1.dylib ${stdenv.gcc.gcc}/lib/libgcc_s.1.dylib $out/bin/d8
       install_name_tool -id $out/lib/libv8.dylib -change /usr/lib/libgcc_s.1.dylib ${stdenv.gcc.gcc}/lib/libgcc_s.1.dylib $out/lib/libv8.dylib
     '' else null;
+
+    meta = with stdenv.lib; {
+      description = "V8 is Google's open source JavaScript engine";
+      platforms = platforms.linux ++ platforms.darwin;
+      license = licenses.bsd3;
+    };
 }

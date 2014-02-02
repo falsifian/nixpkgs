@@ -1,5 +1,6 @@
-{ stdenv, fetchurl, pkgconfig, gettext
-, expat, glib, cairo, pango, gdk_pixbuf, atk, at_spi2_atk, xlibs, x11
+{ stdenv, fetchurl, pkgconfig, gettext, perl
+, expat, glib, cairo, pango, gdk_pixbuf, atk, at_spi2_atk, gobjectIntrospection
+, xlibs, x11, wayland, libxkbcommon
 , xineramaSupport ? stdenv.isLinux
 , cupsSupport ? stdenv.isLinux, cups ? null
 }:
@@ -7,23 +8,29 @@
 assert xineramaSupport -> xlibs.libXinerama != null;
 assert cupsSupport -> cups != null;
 
+let
+  ver_maj = "3.10";
+  ver_min = "6";
+in
 stdenv.mkDerivation rec {
-  name = "gtk+-3.8.2";
+  name = "gtk+-${ver_maj}.${ver_min}";
 
   src = fetchurl {
-    url = "mirror://gnome/sources/gtk+/3.8/${name}.tar.xz";
-    sha256 = "15zjmyky4yw70ipi12dllira4av8wjpw5f7g9kbrbpx12nf0ra0w";
+    url = "mirror://gnome/sources/gtk+/${ver_maj}/${name}.tar.xz";
+    sha256 = "12i6n2vijglqgc7z5migllhpygg65fqzfgrsknimwynbqmzwa91w";
   };
 
   enableParallelBuilding = true;
 
-  nativeBuildInputs = [ pkgconfig gettext ];
+  nativeBuildInputs = [ pkgconfig gettext gobjectIntrospection perl ];
+
+  buildInputs = [ libxkbcommon ];
   propagatedBuildInputs = with xlibs; with stdenv.lib;
     [ expat glib cairo pango gdk_pixbuf atk at_spi2_atk ]
-    ++ optionals stdenv.isLinux [ libXrandr libXrender libXcomposite libXi libXcursor ]
+    ++ optionals stdenv.isLinux [ libXrandr libXrender libXcomposite libXi libXcursor wayland ]
     ++ optional stdenv.isDarwin x11
-    ++ stdenv.lib.optional xineramaSupport libXinerama
-    ++ stdenv.lib.optionals cupsSupport [ cups ];
+    ++ optional xineramaSupport libXinerama
+    ++ optional cupsSupport cups;
 
   postInstall = "rm -rf $out/share/gtk-doc";
 
@@ -45,7 +52,7 @@ stdenv.mkDerivation rec {
 
     license = "LGPLv2+";
 
-    maintainers = with stdenv.lib.maintainers; [urkud raskin];
+    maintainers = with stdenv.lib.maintainers; [ urkud raskin vcunat];
     platforms = stdenv.lib.platforms.all;
   };
 }

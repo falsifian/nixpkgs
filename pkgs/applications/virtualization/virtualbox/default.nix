@@ -1,5 +1,5 @@
 { stdenv, fetchurl, lib, iasl, dev86, pam, libxslt, libxml2, libX11, xproto, libXext
-, libXcursor, libXmu, qt4, libIDL, SDL, libcap, zlib, libpng, glib, kernelDev, lvm2
+, libXcursor, libXmu, qt4, libIDL, SDL, libcap, zlib, libpng, glib, kernel, lvm2
 , which, alsaLib, curl, gawk
 , xorriso, makeself, perl, pkgconfig
 , javaBindings ? false, jdk ? null
@@ -11,7 +11,7 @@ with stdenv.lib;
 
 let
 
-  version = "4.2.14"; # changes ./guest-additions as well
+  version = "4.2.18"; # changes ./guest-additions as well
 
   forEachModule = action: ''
     for mod in \
@@ -30,30 +30,45 @@ let
     done
   '';
 
-  extensionPack = fetchurl {
-    url = "http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack";
-    # Has to be base16 because it's used as an input to VBoxExtPackHelperApp!
-    sha256 = "5813cae72790de4893cadb839ffbd148290a44ec6913d901d84c9b3740ab1b1e";
+  # See https://github.com/NixOS/nixpkgs/issues/672 for details
+  extpackRevision = "88780";
+  extensionPack = requireFile rec {
+    name = "Oracle_VM_VirtualBox_Extension_Pack-${version}-${extpackRevision}.vbox-extpack";
+    # IMPORTANT: Hash must be base16 encoded because it's used as an input to
+    # VBoxExtPackHelperApp!
+    # Tip: see http://dlc.sun.com.edgesuite.net/virtualbox/4.2.18/SHA256SUMS
+    sha256 = "1d1737b59d0f30f5d42beeabaff168bdc0a75b8b28df685979be6173e5adbbba";
+    message = ''
+      In order to use the extension pack, you need to comply with the VirtualBox Personal Use
+      and Evaluation License (PUEL) by downloading the related binaries from:
+
+      https://www.virtualbox.org/wiki/Downloads
+
+      Once you have downloaded the file, please use the following command and re-run the
+      installation:
+
+      nix-prefetch-url file://${name}
+    '';
   };
 
 in stdenv.mkDerivation {
-  name = "virtualbox-${version}-${kernelDev.version}";
+  name = "virtualbox-${version}-${kernel.version}";
 
   src = fetchurl {
     url = "http://download.virtualbox.org/virtualbox/${version}/VirtualBox-${version}.tar.bz2";
-    sha256 = "038k65cdvr80da5nfan5r3rjrnxqab2fbf2pr2jq8g1gc4cxrxpq";
+    sha256 = "9dbddf393b029c549249f627d12040c1d257972bc09292969b8819a31ab78d74";
   };
 
   buildInputs =
     [ iasl dev86 libxslt libxml2 xproto libX11 libXext libXcursor qt4 libIDL SDL
-      libcap glib kernelDev lvm2 python alsaLib curl pam xorriso makeself perl
+      libcap glib lvm2 python alsaLib curl pam xorriso makeself perl
       pkgconfig which libXmu ]
     ++ optional javaBindings jdk
     ++ optional pythonBindings python;
 
   prePatch = ''
     set -x
-    MODULES_BUILD_DIR=`echo ${kernelDev}/lib/modules/*/build`
+    MODULES_BUILD_DIR=`echo ${kernel.dev}/lib/modules/*/build`
     sed -e 's@/lib/modules/`uname -r`/build@'$MODULES_BUILD_DIR@ \
         -e 's@MKISOFS --version@MKISOFS -version@' \
         -e 's@PYTHONDIR=.*@PYTHONDIR=${if pythonBindings then python else ""}@' \

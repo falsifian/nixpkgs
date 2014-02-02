@@ -1,14 +1,14 @@
 { stdenv, fetchurl, python, zip }:
 
 let
-  version = "2013.06.21";
+  version = "2014.01.23.4";
 in
 stdenv.mkDerivation rec {
   name = "youtube-dl-${version}";
 
   src = fetchurl {
     url = "http://youtube-dl.org/downloads/${version}/${name}.tar.gz";
-    sha256 = "3d4e9cc38af3c2fccfafd83d0c6382080531fd03e9067ceccc6864dfbea92b1e";
+    sha256 = "0wnw11s3k191wqf3h13ibdbkgdyabv3gigsjk5xq3sqswlmmcvd9";
   };
 
   buildInputs = [ python ];
@@ -24,6 +24,7 @@ stdenv.mkDerivation rec {
 
   meta = {
     homepage = "http://rg3.github.com/youtube-dl/";
+    repositories.git = https://github.com/rg3/youtube-dl.git;
     description = "Command-line tool to download videos from YouTube.com and other sites";
 
     platforms = with stdenv.lib.platforms; linux ++ darwin;

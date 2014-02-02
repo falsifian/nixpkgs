@@ -1,16 +1,20 @@
-{ cabal, binary, ConfigFile, filepath, gtk, miniutter, mtl, random
-, text, zlib
+{ cabal, assertFailure, binary, ConfigFile, deepseq, enummapsetTh
+, filepath, gtk, hashable, keys, miniutter, mtl, prettyShow, random
+, stm, text, transformers, unorderedContainers, zlib
 }:
 
 cabal.mkDerivation (self: {
   pname = "LambdaHack";
-  version = "0.2.6.5";
-  sha256 = "114s3adqs5mh566dbn0bb20v088wgg8arsm6m8hs9vx8j3jc8nx5";
+  version = "0.2.10.6";
+  sha256 = "19ak0ygw38b51wkm4p10xgdk3h9mh5vvb8c60qhs7cmgzjcph38n";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
-    binary ConfigFile filepath gtk miniutter mtl random text zlib
+    assertFailure binary ConfigFile deepseq enummapsetTh filepath gtk
+    hashable keys miniutter mtl prettyShow random stm text transformers
+    unorderedContainers zlib
   ];
+  jailbreak = true;
   meta = {
     homepage = "http://github.com/kosmikus/LambdaHack";
     description = "A roguelike game engine in early and active development";

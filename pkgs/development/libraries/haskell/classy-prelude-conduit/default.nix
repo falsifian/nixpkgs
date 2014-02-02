@@ -1,14 +1,14 @@
 { cabal, classyPrelude, conduit, hspec, monadControl, QuickCheck
-, resourcet, transformers, void, xmlConduit
+, resourcet, systemFileio, transformers, void
 }:
 
 cabal.mkDerivation (self: {
   pname = "classy-prelude-conduit";
-  version = "0.5.3";
-  sha256 = "1rmx439kdjipyz2s3v2s1xv1mb55kb4njl9k6f8mfhykgac39rhz";
+  version = "0.7.0";
+  sha256 = "0njhfqbcbsy1rv61fc4xqzqlb68hzqg9cr31f8bs6h7pa12n38zq";
   buildDepends = [
-    classyPrelude conduit monadControl resourcet transformers void
-    xmlConduit
+    classyPrelude conduit monadControl resourcet systemFileio
+    transformers void
   ];
   testDepends = [ conduit hspec QuickCheck transformers ];
   meta = {

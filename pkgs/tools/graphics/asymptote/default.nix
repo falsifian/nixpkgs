@@ -1,7 +1,7 @@
 a @ {
   freeglut,ghostscriptX,imagemagick,fftw,
   boehmgc,mesa,ncurses,readline,gsl,libsigsegv,
-  python,zlib, perl, texLive, texinfo, lzma,
+  python,zlib, perl, texLive, texinfo, xz,
 
   noDepEntry, fullDepEntry, fetchUrlFromSrcInfo,
   lib,
@@ -11,16 +11,16 @@ let
   s = # Generated upstream information
   rec {
     baseName="asymptote";
-    version="2.21";
-    name="asymptote-2.21";
-    hash="07lkj0xnxpanfscmbm30lw6j9484rlmmqpnl0mhs7nx9h2lczrjz";
-    url="mirror://sourceforge/project/asymptote/2.21/asymptote-2.21.src.tgz";
-    sha256="07lkj0xnxpanfscmbm30lw6j9484rlmmqpnl0mhs7nx9h2lczrjz";
+    version="2.24";
+    name="asymptote-2.24";
+    hash="0iypv3n89h8mx46b0c3msl0ldmg7fxf8v9fl4zy4sxfszazrvivl";
+    url="mirror://sourceforge/project/asymptote/2.24/asymptote-2.24.src.tgz";
+    sha256="0iypv3n89h8mx46b0c3msl0ldmg7fxf8v9fl4zy4sxfszazrvivl";
   };
   buildInputs = with a; [
     freeglut ghostscriptX imagemagick fftw boehmgc
     mesa ncurses readline gsl libsigsegv python zlib
-    perl texLive texinfo lzma
+    perl texLive texinfo xz
   ];
 in
 rec {
@@ -54,7 +54,7 @@ rec {
   '';
 
   extractTexinfoTex = a.fullDepEntry ''
-    lzma -d < ${a.texinfo.src} | tar --wildcards -x texinfo-'*'/doc/texinfo.tex
+    xz -d < ${a.texinfo.src} | tar --wildcards -x texinfo-'*'/doc/texinfo.tex
     cp texinfo-*/doc/texinfo.tex doc/
   '' ["minInit" "addInputs" "doUnpack"];
 

@@ -1,35 +1,11 @@
-{ pkgs, stdenv, nodejs, fetchurl, neededNatives, self }:
+{ pkgs, stdenv, nodejs, fetchurl, fetchgit, neededNatives, self, generated ? ./node-packages-generated.nix }:
 
-let
-  inherit (self) buildNodePackage patchLatest;
-
-  importGeneratedPackages = generated: nativeDeps: self:
-    let
-      all = pkgs.lib.fold (pkg: { top-level, full }: {
-        top-level = top-level ++ pkgs.lib.optional pkg.topLevel {
-          name = pkg.baseName;
-          value = builtins.getAttr pkg.fullName self.full;
-        };
-        full = [ {
-          name = pkg.fullName;
-          value = pkgs.lib.makeOverridable buildNodePackage rec {
-            name = "${pkg.baseName}-${pkg.version}";
-            src = (if pkg.patchLatest then patchLatest else fetchurl) {
-              url = "http://registry.npmjs.org/${pkg.baseName}/-/${name}.tgz";
-              sha256 = pkg.hash;
-            };
-            deps = map (dep: builtins.getAttr "${dep.name}-${dep.range}" self.full) pkg.dependencies;
-            buildInputs = if builtins.hasAttr name nativeDeps then builtins.getAttr name nativeDeps else [];
-          };
-        } ] ++ full;
-      } ) { top-level = []; full = []; } generated;
-    in builtins.listToAttrs all.top-level // { full = builtins.listToAttrs all.full; };
-in {
-  inherit importGeneratedPackages;
-
+rec {
   nativeDeps = {
-    "node-expat-*" = [ pkgs.expat ];
-    "rbytes-0.0.2" = [ pkgs.openssl ];
+    "node-expat" = [ pkgs.expat ];
+    "rbytes" = [ pkgs.openssl ];
+    "phantomjs" = [ pkgs.phantomjs ];
+    "node-protobuf" = [ pkgs.protobuf ];
   };
 
   buildNodePackage = import ../development/web/nodejs/build-node-package.nix {
@@ -37,15 +13,19 @@ in {
     inherit (pkgs) runCommand;
   };
 
-  patchLatest = srcAttrs:
-    let src = fetchurl srcAttrs; in pkgs.runCommand src.name {} ''
+  patchSource = fn: srcAttrs:
+    let src = fn srcAttrs; in pkgs.runCommand src.name {} ''
       mkdir unpack
       cd unpack
-      tar xf ${src}
+      unpackFile ${src}
+      chmod -R +w */
       mv */ package 2>/dev/null || true
-      sed -i -e "s/: \"latest\"/: \"*\"/" package/package.json
-      tar cf $out *
+      sed -i -e "s/:\s*\"latest\"/:  \"*\"/" -e "s/:\s*\"\(https\?\|git\(\+\(ssh\|http\|https\)\)\?\):\/\/[^\"]*\"/: \"*\"/" package/package.json
+      mv */ $out
     '';
 
+  # Backwards compat
+  patchLatest = patchSource fetchurl;
+
   /* Put manual packages below here (ideally eventually managed by npm2nix */
-} // importGeneratedPackages (import ./node-packages-generated.nix) self.nativeDeps self
+} // import generated { inherit self fetchurl fetchgit; inherit (pkgs) lib; }

@@ -1,5 +1,5 @@
 { cabal, attoparsec, base64Bytestring, blazeBuilder, Cabal, conduit
-, fileEmbed, filepath, fsnotify, ghcPaths, httpConduit
+, dataDefault, fileEmbed, filepath, fsnotify, ghcPaths, httpConduit
 , httpReverseProxy, httpTypes, liftedBase, network, networkConduit
 , optparseApplicative, parsec, projectTemplate, resourcet
 , shakespeare, shakespeareCss, shakespeareJs, shakespeareText
@@ -10,17 +10,18 @@
 
 cabal.mkDerivation (self: {
   pname = "yesod-bin";
-  version = "1.2.1";
-  sha256 = "0qag1phagcdn1zq3kgxbxynqdy5grj8icifz896v0n6bzjsn102b";
+  version = "1.2.5.7";
+  sha256 = "0vxkwdqmfi2ccknmgx0xh6w1p7bw3wi24w3c3fw80g72j9sxr5hn";
   isLibrary = false;
   isExecutable = true;
   buildDepends = [
-    attoparsec base64Bytestring blazeBuilder Cabal conduit fileEmbed
-    filepath fsnotify ghcPaths httpConduit httpReverseProxy httpTypes
-    liftedBase network networkConduit optparseApplicative parsec
-    projectTemplate resourcet shakespeare shakespeareCss shakespeareJs
-    shakespeareText split systemFileio systemFilepath tar text time
-    transformers unixCompat unorderedContainers wai warp yaml zlib
+    attoparsec base64Bytestring blazeBuilder Cabal conduit dataDefault
+    fileEmbed filepath fsnotify ghcPaths httpConduit httpReverseProxy
+    httpTypes liftedBase network networkConduit optparseApplicative
+    parsec projectTemplate resourcet shakespeare shakespeareCss
+    shakespeareJs shakespeareText split systemFileio systemFilepath tar
+    text time transformers unixCompat unorderedContainers wai warp yaml
+    zlib
   ];
   meta = {
     homepage = "http://www.yesodweb.com/";

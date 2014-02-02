@@ -3,8 +3,8 @@
 , freetype, fontconfig, file, alsaLib, nspr, nss, libnotify
 , yasm, mesa, sqlite, unzip, makeWrapper, pysqlite
 , hunspell, libevent, libstartup_notification, libvpx
-, cairo ? null
-, useSystemCairo ? false
+, cairo, gstreamer, gst_plugins_base, icu
+, debugBuild ? false
 , # If you want the resulting program to call itself "Firefox" instead
   # of "Shiretoko" or whatever, enable this option.  However, those
   # binaries may not be distributed without permission from the
@@ -14,14 +14,12 @@
 }:
 
 assert stdenv.gcc ? libc && stdenv.gcc.libc != null;
-assert useSystemCairo -> cairo != null;
 
-let optional = stdenv.lib.optional;
-in rec {
+rec {
 
-  firefoxVersion = "22.0";
+  firefoxVersion = "26.0";
 
-  xulVersion = "22.0"; # this attribute is used by other packages
+  xulVersion = "26.0"; # this attribute is used by other packages
 
 
   src = fetchurl {
@@ -29,17 +27,13 @@ in rec {
         # It is better to use this url for official releases, to take load off Mozilla's ftp server.
         "http://releases.mozilla.org/pub/mozilla.org/firefox/releases/${firefoxVersion}/source/firefox-${firefoxVersion}.source.tar.bz2"
         # Fall back to this url for versions not available at releases.mozilla.org.
-        "ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${firefoxVersion}/source/firefox-${firefoxVersion}.source.tar.bz2"
+        "http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${firefoxVersion}/source/firefox-${firefoxVersion}.source.tar.bz2"
     ];
-    sha1 = "db2d5b028b6ea95b5f006b46e153f50f7a52bf80";
+    sha1 = "f7c6642d6f62aea8d4eced48dd27aba0634edcd5";
   };
 
   commonConfigureFlags =
-    [ "--enable-optimize"
-      #"--enable-profiling"
-      "--disable-debug"
-      "--enable-strip"
-      "--with-system-jpeg"
+    [ "--with-system-jpeg"
       "--with-system-zlib"
       "--with-system-bz2"
       "--with-system-nspr"
@@ -47,17 +41,24 @@ in rec {
       "--with-system-libevent"
       "--with-system-libvpx"
       "--with-system-png"
-      "--enable-startup-notification"
+      "--with-system-icu"
       "--enable-system-ffi"
       "--enable-system-hunspell"
       "--enable-system-pixman"
       "--enable-system-sqlite"
+      "--enable-system-cairo"
+      "--enable-gstreamer"
+      "--enable-startup-notification"
+      # "--enable-content-sandbox"            # available since 26.0, but not much info available
+      # "--enable-content-sandbox-reporter"   # keeping disabled for now
       "--disable-crashreporter"
       "--disable-tests"
       "--disable-necko-wifi" # maybe we want to enable this at some point
       "--disable-installer"
       "--disable-updater"
-    ] ++ optional useSystemCairo "--enable-system-cairo";
+    ] ++ (if debugBuild then [ "--enable-debug" "--enable-profiling"]
+                        else [ "--disable-debug" "--enable-release"
+                               "--enable-optimize" "--enable-strip" ]);
 
 
   xulrunner = stdenv.mkDerivation rec {
@@ -72,8 +73,9 @@ in rec {
         alsaLib nspr nss libnotify xlibs.pixman yasm mesa
         xlibs.libXScrnSaver xlibs.scrnsaverproto pysqlite
         xlibs.libXext xlibs.xextproto sqlite unzip makeWrapper
-        hunspell libevent libstartup_notification libvpx
-      ] ++ optional useSystemCairo cairo;
+        hunspell libevent libstartup_notification libvpx cairo
+        gstreamer gst_plugins_base icu
+      ];
 
     configureFlags =
       [ "--enable-application=xulrunner"
@@ -81,8 +83,6 @@ in rec {
       ] ++ commonConfigureFlags;
 
     enableParallelBuilding = true;
-
-    patches = optional useSystemCairo ./system-cairo.patch;
 
     preConfigure =
       ''
@@ -139,11 +139,13 @@ in rec {
       [ pkgconfig libpng gtk perl zip libIDL libjpeg zlib bzip2 python
         dbus dbus_glib pango freetype fontconfig alsaLib nspr nss libnotify
         xlibs.pixman yasm mesa sqlite file unzip pysqlite
-        hunspell libevent libstartup_notification libvpx
-      ] ++ optional useSystemCairo cairo;
+        hunspell libevent libstartup_notification libvpx cairo
+        gstreamer gst_plugins_base icu
+      ];
 
     patches = [
       ./disable-reporter.patch # fixes "search box not working when built on xulrunner"
+      ./xpidl.patch
     ];
 
     propagatedBuildInputs = [xulrunner];

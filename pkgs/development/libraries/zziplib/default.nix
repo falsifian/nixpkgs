@@ -28,11 +28,11 @@ stdenv.mkDerivation rec {
       zip/unzip tools.
     '';
 
-    licenses = [ "LGPLv2+" "MPLv1.1" ];
+    license = [ "LGPLv2+" "MPLv1.1" ];
 
     homepage = http://zziplib.sourceforge.net/;
 
-    maintainers = [ stdenv.lib.maintainers.ludo ];
+    maintainers = [ ];
     platforms = python.meta.platforms;
   };
 }

@@ -1,6 +1,6 @@
-{ cabal, binary, blazeHtml, blazeMarkup, citeprocHs, cmdargs
-, cryptohash, dataDefault, deepseq, filepath, fsnotify, httpConduit
-, httpTypes, HUnit, lrucache, mtl, network, pandoc, parsec
+{ cabal, binary, blazeHtml, blazeMarkup, cmdargs, cryptohash
+, dataDefault, deepseq, filepath, fsnotify, httpConduit, httpTypes
+, HUnit, lrucache, mtl, network, pandoc, pandocCiteproc, parsec
 , QuickCheck, random, regexBase, regexTdfa, snapCore, snapServer
 , systemFilepath, tagsoup, testFramework, testFrameworkHunit
 , testFrameworkQuickcheck2, text, time
@@ -8,24 +8,28 @@
 
 cabal.mkDerivation (self: {
   pname = "hakyll";
-  version = "4.3.1.0";
-  sha256 = "1cx5pf0wf49cylbcgy1di218qk0fw8rgzqri9lx1v8jfl31zvsg5";
+  version = "4.4.3.2";
+  sha256 = "1n597q4pbdka7g06524j0zvjcjpv7fgf6mga1a0kfr012sf9cqz9";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
-    binary blazeHtml blazeMarkup citeprocHs cmdargs cryptohash
-    dataDefault deepseq filepath fsnotify httpConduit httpTypes
-    lrucache mtl network pandoc parsec random regexBase regexTdfa
-    snapCore snapServer systemFilepath tagsoup text time
+    binary blazeHtml blazeMarkup cmdargs cryptohash dataDefault deepseq
+    filepath fsnotify httpConduit httpTypes lrucache mtl network pandoc
+    pandocCiteproc parsec random regexBase regexTdfa snapCore
+    snapServer systemFilepath tagsoup text time
   ];
   testDepends = [
-    binary blazeHtml blazeMarkup citeprocHs cmdargs cryptohash
-    dataDefault deepseq filepath fsnotify httpConduit httpTypes HUnit
-    lrucache mtl network pandoc parsec QuickCheck random regexBase
-    regexTdfa snapCore snapServer systemFilepath tagsoup testFramework
+    binary blazeHtml blazeMarkup cmdargs cryptohash dataDefault deepseq
+    filepath fsnotify httpConduit httpTypes HUnit lrucache mtl network
+    pandoc pandocCiteproc parsec QuickCheck random regexBase regexTdfa
+    snapCore snapServer systemFilepath tagsoup testFramework
     testFrameworkHunit testFrameworkQuickcheck2 text time
   ];
   doCheck = false;
+  patchPhase = ''
+    sed -i -e 's|blaze-markup.*,|blaze-markup,|' -e 's|blaze-html.*,|blaze-html,|' \
+      -e 's|pandoc-citeproc.*,|pandoc-citeproc,|' hakyll.cabal
+  '';
   meta = {
     homepage = "http://jaspervdj.be/hakyll";
     description = "A static website compiler library";

@@ -1,9 +1,9 @@
-{ stdenv, fetchurl, upx, freetype, fontconfig }:
+{ stdenv, fetchurl, freetype, fontconfig, openssl }:
 
 assert stdenv.lib.elem stdenv.system [ "i686-linux" "x86_64-linux" ];
 
 stdenv.mkDerivation rec {
-  name = "phantomjs-1.7.0";
+  name = "phantomjs-1.9.7";
 
   # I chose to use the binary build for now.
   # The source version is quite nasty to compile
@@ -12,27 +12,24 @@ stdenv.mkDerivation rec {
 
   src = if stdenv.system == "i686-linux" then
           fetchurl {
-            url = "http://phantomjs.googlecode.com/files/${name}-linux-i686.tar.bz2";
-            sha256 = "045d80lymjxnsssa0sgp5pgkahm651jk69ibk3mjczk3ykc1k91f";
+            url = "https://bitbucket.org/ariya/phantomjs/downloads/${name}-linux-i686.tar.bz2";
+            sha256 = "1ffd5544wnkww5cgwsims4bk4bymvm6pm19p32nbhwabxqhbnj9a";
           }
         else # x86_64-linux
           fetchurl {
-            url = "http://phantomjs.googlecode.com/files/${name}-linux-x86_64.tar.bz2";
-            sha256 = "1m14czhi3b388didn0a881glsx8bnsg9gnxgj5lghr4l5mgqyrd7";
+            url = "https://bitbucket.org/ariya/phantomjs/downloads/${name}-linux-x86_64.tar.bz2";
+            sha256 = "06mhvj8rx298j0mrijw48zfm28hqgy81vdr1vv0jp4ncxbvijfs7";
           };
 
-  nativeBuildInputs = stdenv.lib.optional (stdenv.system == "x86_64-linux") upx;
-
-  buildPhase = stdenv.lib.optionalString (stdenv.system == "x86_64-linux") ''
-    upx -d bin/phantomjs
-  '' + ''
+  buildPhase = ''
     patchelf \
       --set-interpreter "$(cat $NIX_GCC/nix-support/dynamic-linker)" \
-      --set-rpath ${freetype}/lib:${fontconfig}/lib:${stdenv.gcc.gcc}/lib64:${stdenv.gcc.gcc}/lib \
+      --set-rpath "${freetype}/lib:${fontconfig}/lib:${stdenv.gcc.gcc}/lib64:${stdenv.gcc.gcc}/lib:${openssl}/lib" \
       bin/phantomjs
   '';
 
-  dontStrip = true;
+  dontPatchELF = true;
+  dontStrip    = true;
 
   installPhase = ''
     mkdir -p $out/share/doc/phantomjs

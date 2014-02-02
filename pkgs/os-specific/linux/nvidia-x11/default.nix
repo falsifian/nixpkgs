@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, kernelDev ? null, xlibs, zlib, perl
+{ stdenv, fetchurl, kernel ? null, xlibs, zlib, perl
 , gtk, atk, pango, glib, gdk_pixbuf
 , # Whether to build the libraries only (i.e. not the kernel module or
   # nvidia-settings).  Used to support 32-bit binaries on 64-bit
@@ -8,31 +8,33 @@
 
 with stdenv.lib;
 
-let versionNumber = "319.17"; in
+let
+
+  versionNumber = "331.20";
+
+in
 
 stdenv.mkDerivation {
-  name = "nvidia-x11-${versionNumber}${optionalString (!libsOnly) "-${kernelDev.version}"}";
+  name = "nvidia-x11-${versionNumber}${optionalString (!libsOnly) "-${kernel.version}"}";
 
   builder = ./builder.sh;
-
-  patches = [ ./version-test.patch ];
 
   src =
     if stdenv.system == "i686-linux" then
       fetchurl {
         url = "http://us.download.nvidia.com/XFree86/Linux-x86/${versionNumber}/NVIDIA-Linux-x86-${versionNumber}.run";
-        sha256 = "1ja5hc74dff8nhsccqhd5km732a8mafdv7xvzj39asw2r3ma37bp";
+        sha256 = "0icpmfsppnsvk7vj0fshi3ry4s1wix435s2c8wwak47765fv1mks";
       }
     else if stdenv.system == "x86_64-linux" then
       fetchurl {
         url = "http://us.download.nvidia.com/XFree86/Linux-x86_64/${versionNumber}/NVIDIA-Linux-x86_64-${versionNumber}-no-compat32.run";
-        sha256 = "0a6yir07x38b0z51pi7kqgsaidhsib781rd53bpkkkk33yzviaqj";
+        sha256 = "02503dis3ngraqv7174a4pay2x08hp697n9q74rpjjclf5k74ax1";
       }
     else throw "nvidia-x11 does not support platform ${stdenv.system}";
 
   inherit versionNumber libsOnly;
 
-  kernel = if libsOnly then null else kernelDev;
+  kernel = if libsOnly then null else kernel.dev;
 
   dontStrip = true;
 
@@ -51,5 +53,7 @@ stdenv.mkDerivation {
     homepage = http://www.nvidia.com/object/unix.html;
     description = "X.org driver and kernel module for NVIDIA graphics cards";
     license = stdenv.lib.licenses.unfreeRedistributable;
+    platforms = stdenv.lib.platforms.linux;
+    hydraPlatforms = [];
   };
 }

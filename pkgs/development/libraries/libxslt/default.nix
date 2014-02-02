@@ -5,7 +5,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "ftp://xmlsoft.org/libxml2/${name}.tar.gz";
-    sha256 = "5fc7151a57b89c03d7b825df5a0fae0a8d5f05674c0e7cf2937ecec4d54a028c";
+    sha256 = "13029baw9kkyjgr7q3jccw2mz38amq7mmpr5p3bh775qawd1bisz";
   };
 
   buildInputs = [ libxml2 ];
@@ -30,7 +30,7 @@ stdenv.mkDerivation rec {
     homepage = http://xmlsoft.org/XSLT/;
     description = "A C library and tools to do XSL transformations";
     license = "bsd";
-    platforms = stdenv.lib.platforms.linux;
+    platforms = stdenv.lib.platforms.unix;
     maintainers = [ stdenv.lib.maintainers.eelco ];
   };
 }

@@ -1,23 +1,22 @@
-{ stdenv, fetchurl, pkgconfig, dbus, glib, libusb, alsaLib, python, makeWrapper
-, pythonDBus, pygobject, readline, libsndfile, udev, libical, systemd }:
+{ stdenv, fetchurl, pkgconfig, dbus, glib, libusb, alsaLib, python,
+  pythonPackages, pythonDBus, readline, libsndfile, udev, libical,
+  systemd }:
 
 assert stdenv.isLinux;
 
-let
-  pythonpath = "${pythonDBus}/lib/${python.libPrefix}/site-packages:"
-    + "${pygobject}/lib/${python.libPrefix}/site-packages";
-in
-   
 stdenv.mkDerivation rec {
-  name = "bluez-5.3";
+  name = "bluez-5.12";
    
   src = fetchurl {
     url = "mirror://kernel/linux/bluetooth/${name}.tar.xz";
-    sha256 = "41b0559e3a8436a739eb7cc79156ca91daf8c115f57971b6bcb422ee0213db42";
+    sha256 = "0zk183gjsxissq9gma962cyvyqxydai8n6jgslxx0mpk2m7mgvvm";
   };
 
+  pythonPath = with pythonPackages;
+    [ pythonDBus pygobject pygobject3 recursivePthLoader ];
+
   buildInputs =
-    [ pkgconfig dbus.libs glib libusb alsaLib python makeWrapper
+    [ pkgconfig dbus.libs glib libusb alsaLib python pythonPackages.wrapPython
       readline libsndfile udev libical
       # Disables GStreamer; not clear what it gains us other than a
       # zillion extra dependencies.
@@ -49,7 +48,9 @@ stdenv.mkDerivation rec {
   # FIXME: Move these into a separate package to prevent Bluez from
   # depending on Python etc.
   postInstall = ''
-    pushd test
+    mkdir $out/test
+    cp -a test $out
+    pushd $out/test
     for a in \
             simple-agent \
             test-adapter \
@@ -58,14 +59,19 @@ stdenv.mkDerivation rec {
             list-devices \
             monitor-bluetooth \
             ; do
-      cp $a $out/bin/bluez-$a
-      wrapProgram $out/bin/bluez-$a --prefix PYTHONPATH : ${pythonpath}
+      ln -s ../test/$a $out/bin/bluez-$a
     done
     popd
+    wrapPythonProgramsIn $out/test "$out/test $pythonPath"
+
+    # for bluez4 compatibility for NixOS
+    mkdir $out/sbin
+    ln -s ../libexec/bluetooth/bluetoothd $out/sbin/bluetoothd
   '';
 
-  meta = {
+  meta = with stdenv.lib; {
     homepage = http://www.bluez.org/;
     description = "Bluetooth support for Linux";
+    platforms = platforms.linux;
   };
 }

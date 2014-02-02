@@ -1,14 +1,15 @@
 { stdenv, fetchurl, intltool, wirelesstools, pkgconfig, dbus_glib, xz
 , udev, libnl, libuuid, polkit, gnutls, ppp, dhcp, dhcpcd, iptables
-, libgcrypt, dnsmasq, avahi, bind, perl, substituteAll }:
+, libgcrypt, dnsmasq, avahi, bind, perl, bluez5, substituteAll
+, gobjectIntrospection }:
 
 stdenv.mkDerivation rec {
   name = "network-manager-${version}";
-  version = "0.9.8.0";
+  version = "0.9.8.8";
 
   src = fetchurl {
     url = "mirror://gnome/sources/NetworkManager/0.9/NetworkManager-${version}.tar.xz";
-    sha256 = "0sq9yvln0yjff1sgk483m98ca2x2sqk5vh4kmn382k9msvgbqrn3";
+    sha256 = "0mbsl6x3aavdnam8i87p0zz8fvvgi96g199s35wgg5r8rplks2la";
   };
 
   preConfigure = ''
@@ -34,7 +35,7 @@ stdenv.mkDerivation rec {
     "--with-kernel-firmware-dir=/run/current-system/firmware"
     "--with-session-tracking=systemd" ];
 
-  buildInputs = [ wirelesstools udev libnl libuuid polkit ppp xz ];
+  buildInputs = [ wirelesstools udev libnl libuuid polkit ppp xz bluez5 gobjectIntrospection ];
 
   propagatedBuildInputs = [ dbus_glib gnutls libgcrypt ];
 
@@ -59,13 +60,16 @@ stdenv.mkDerivation rec {
       
       # FIXME: Workaround until NixOS' dbus+systemd supports at_console policy
       substituteInPlace $out/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf --replace 'at_console="true"' 'group="networkmanager"'
+
+      # As NixOS doesn't seem to handle systemd Aliases, we just rename the dispatcher service file
+      mv $out/etc/systemd/system/NetworkManager-dispatcher.service $out/etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service
     '';
 
   meta = with stdenv.lib; {
     homepage = http://projects.gnome.org/NetworkManager/;
     description = "Network configuration and management tool";
     license = licenses.gpl2Plus;
-    maintainers = with maintainers; [ phreedom urkud rickynils ];
+    maintainers = with maintainers; [ phreedom urkud rickynils iElectric ];
     platforms = platforms.linux;
   };
 }

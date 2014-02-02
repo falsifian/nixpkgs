@@ -1,15 +1,17 @@
-{ cabal, blazeSvg, cmdargs, colour, diagramsCore, diagramsLib
-, filepath, monoidExtras, mtl, split, time, vectorSpace
+{ cabal, blazeMarkup, blazeSvg, colour, diagramsCore, diagramsLib
+, filepath, hashable, lens, monoidExtras, mtl, split, time
+, vectorSpace
 }:
 
 cabal.mkDerivation (self: {
   pname = "diagrams-svg";
-  version = "0.6.0.1";
-  sha256 = "0x4yjm1wdhicknls1y3fhdg89m8wcvfk2svabww9075w6ras79qk";
+  version = "1.0.1";
+  sha256 = "15adic3dl4qqrd63jx1rc1w4wx270vm7zc3hr69mnh0wn0cr0ga5";
   buildDepends = [
-    blazeSvg cmdargs colour diagramsCore diagramsLib filepath
-    monoidExtras mtl split time vectorSpace
+    blazeMarkup blazeSvg colour diagramsCore diagramsLib filepath
+    hashable lens monoidExtras mtl split time vectorSpace
   ];
+  jailbreak = true;
   meta = {
     homepage = "http://projects.haskell.org/diagrams/";
     description = "SVG backend for diagrams drawing EDSL";

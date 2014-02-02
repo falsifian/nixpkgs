@@ -4,14 +4,14 @@
 }:
 
 let
-  version = "0.22.4"; # even major numbers are stable
-  sha256 = "0fz1vk0rbxvnv7ssj8l910k1rx0gjhzl5wr7hkdf4r9jwqs8yhsg";
+  version = "0.24.5"; # even major numbers are stable
+  sha256 = "114zfm4771iq25wa4bsg4nc2gnr6waaj8936wd23r4hc2084jrd2";
 
   qtcairo_patches =
-    let qtcairo = fetchgit { # the version for poppler-0.22
+    let qtcairo = fetchgit { # the version for poppler-0.24
       url = "git://github.com/giddie/poppler-qt4-cairo-backend.git";
-      rev = "7a12c58e5cefc2b7a5179c53b387fca8963195c0";
-      sha256 = "1jg2d5y62d0bv206nijb63x426zfb2awy70505nx22d0fx1v1p9k";
+      rev = "c4578cde09834e0d70873f63b1c2a410f66bb4f9";
+      sha256 = "07bs2phmp7f4mqrwqz2bgyw2gw7s00mwsm548bsikyz1cbj7fl93";
     }; in
       [ "${qtcairo}/0001-Cairo-backend-added-to-Qt4-wrapper.patch"
         "${qtcairo}/0002-Setting-default-Qt4-backend-to-Cairo.patch"
@@ -22,7 +22,7 @@ let
     name = "poppler-${nameSuff}-${version}";
 
     src = fetchurl {
-      url = "${meta.homepage}/poppler-${version}.tar.gz";
+      url = "${meta.homepage}/poppler-${version}.tar.xz";
       inherit sha256;
     };
 
@@ -32,7 +32,7 @@ let
 
     cmakeFlags = "-DENABLE_XPDF_HEADERS=ON -DENABLE_LIBCURL=ON -DENABLE_ZLIB=ON";
 
-    patches = [ ./datadir_env.patch ];
+    patches = [ ./datadir_env.patch ./poppler-glib.patch ];
 
     # XXX: The Poppler/Qt4 test suite refers to non-existent PDF files
     # such as `../../../test/unittestcases/UseNone.pdf'.
@@ -54,7 +54,6 @@ let
     };
   } merge ]); # poppler_drv
 
-in rec {
   /* We always use cairo in poppler, so we always depend on glib,
      so we always build the glib wrapper (~350kB).
      We also always build the cpp wrapper (<100kB).
@@ -69,4 +68,5 @@ in rec {
     NIX_LDFLAGS = "-lpoppler";
     postConfigure = "cd qt4";
   };
-}
+
+in { inherit poppler_glib poppler_qt4; } // poppler_glib

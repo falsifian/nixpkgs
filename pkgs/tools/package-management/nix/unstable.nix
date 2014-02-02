@@ -5,11 +5,11 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "nix-1.5.3pre3141_1b6ee8f";
+  name = "nix-1.7pre3327_0e2ca26";
 
   src = fetchurl {
-    url = "http://hydra.nixos.org/build/5305802/download/5/${name}.tar.xz";
-    sha256 = "834a0d23456331ac06b6117078f0b9bbeecbc8620d5f844b61455e3daac6ceb0";
+    url = "http://hydra.nixos.org/build/8316406/download/5/${name}.tar.xz";
+    sha256 = "52cc082f4ce8ec3c316f032c0201cc76980df2845b15714e71acb2ef7715f1de";
   };
 
   nativeBuildInputs = [ perl pkgconfig ];
@@ -69,5 +69,7 @@ stdenv.mkDerivation rec {
     description = "The Nix Deployment System";
     homepage = http://nixos.org/;
     license = "LGPLv2+";
+    maintainers = [ stdenv.lib.maintainers.eelco ];
+    platforms = stdenv.lib.platforms.all;
   };
 }

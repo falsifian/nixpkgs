@@ -2,13 +2,13 @@
 
 cabal.mkDerivation (self: {
   pname = "HsOpenSSL";
-  version = "0.10.3.3";
-  sha256 = "04d2nd2hcbglw8blwhi3d32vazdxnvs9s52788qyllgm7gmay6a5";
+  version = "0.10.4";
+  sha256 = "1vpidm3jfwlyf61r0g9fks445w4w0kxk3g37fw4slfb1q3xknq2r";
   buildDepends = [ network time ];
   extraLibraries = [ openssl ];
   meta = {
     homepage = "https://github.com/phonohawk/HsOpenSSL";
-    description = "(Incomplete) OpenSSL binding for Haskell";
+    description = "Partial OpenSSL binding for Haskell";
     license = self.stdenv.lib.licenses.publicDomain;
     platforms = self.ghc.meta.platforms;
     maintainers = [ self.stdenv.lib.maintainers.andres ];

@@ -1,5 +1,5 @@
 { pkgs
-, kernel ? pkgs.linux_3_9
+, kernel ? pkgs.linux_3_10
 , img ? "bzImage"
 , rootModules ?
     [ "virtio_pci" "virtio_blk" "virtio_balloon" "ext4" "unix" "9p" "9pnet_virtio" ]
@@ -9,9 +9,9 @@ with pkgs;
 
 rec {
 
-  kvm = pkgs.qemu;
+  qemu = pkgs.qemu_kvm;
 
-  qemuProg = "${kvm}/bin/qemu-system-" + (if stdenv.system == "x86_64-linux" then "x86_64" else "i386");
+  qemuProg = "${qemu}/bin/qemu-kvm";
 
 
   modulesClosure = makeModulesClosure {
@@ -91,8 +91,8 @@ rec {
       esac
     done
 
+    echo "loading kernel modules..."
     for i in $(cat ${modulesClosure}/insmod-list); do
-      echo "loading module $(basename $i .ko)"
       insmod $i
     done
 
@@ -114,14 +114,14 @@ rec {
 
     echo "mounting Nix store..."
     mkdir -p /fs/nix/store
-    mount -t 9p store /fs/nix/store -o trans=virtio,version=9p2000.L,msize=262144,cache=fscache
+    mount -t 9p store /fs/nix/store -o trans=virtio,version=9p2000.L,msize=262144,cache=loose
 
     mkdir -p /fs/tmp
     mount -t tmpfs -o "mode=755" none /fs/tmp
 
     echo "mounting host's temporary directory..."
     mkdir -p /fs/tmp/xchg
-    mount -t 9p xchg /fs/tmp/xchg -o trans=virtio,version=9p2000.L,msize=262144,cache=fscache
+    mount -t 9p xchg /fs/tmp/xchg -o trans=virtio,version=9p2000.L,msize=262144,cache=loose
 
     mkdir -p /fs/proc
     mount -t proc none /fs/proc
@@ -133,7 +133,7 @@ rec {
     ln -sf /proc/mounts /fs/etc/mtab
     echo "127.0.0.1 localhost" > /fs/etc/hosts
 
-    echo "Now running: $command"
+    echo "starting stage 2 ($command)"
     test -n "$command"
 
     set +e
@@ -188,7 +188,6 @@ rec {
 
   qemuCommandLinux = ''
     ${qemuProg} \
-      -enable-kvm \
       ${lib.optionalString (pkgs.stdenv.system == "x86_64-linux") "-cpu kvm64"} \
       -nographic -no-reboot \
       -virtfs local,path=/nix/store,security_model=none,mount_tag=store \
@@ -196,7 +195,7 @@ rec {
       -drive file=$diskImage,if=virtio,cache=writeback,werror=report \
       -kernel ${kernel}/${img} \
       -initrd ${initrd}/initrd \
-      -append "console=ttyS0 panic=1 command=${stage2Init} out=$out mountDisk=$mountDisk" \
+      -append "console=ttyS0 panic=1 command=${stage2Init} out=$out mountDisk=$mountDisk loglevel=4" \
       $QEMU_OPTS
   '';
 
@@ -242,7 +241,7 @@ rec {
   createEmptyImage = {size, fullName}: ''
     mkdir $out
     diskImage=$out/disk-image.qcow2
-    ${kvm}/bin/qemu-img create -f qcow2 $diskImage "${toString size}M"
+    ${qemu}/bin/qemu-img create -f qcow2 $diskImage "${toString size}M"
 
     mkdir $out/nix-support
     echo "${fullName}" > $out/nix-support/full-name
@@ -291,7 +290,7 @@ rec {
     args = ["-e" (vmRunCommand qemuCommandLinux)];
     origArgs = attrs.args;
     origBuilder = attrs.builder;
-    QEMU_OPTS = "-m ${toString (if attrs ? memSize then attrs.memSize else 512)}";
+    QEMU_OPTS = "${attrs.QEMU_OPTS or ""} -m ${toString (attrs.memSize or 512)}";
   });
 
 
@@ -362,7 +361,7 @@ rec {
       diskImage=$(pwd)/disk-image.qcow2
       origImage=${attrs.diskImage}
       if test -d "$origImage"; then origImage="$origImage/disk-image.qcow2"; fi
-      ${kvm}/bin/qemu-img create -b "$origImage" -f qcow2 $diskImage
+      ${qemu}/bin/qemu-img create -b "$origImage" -f qcow2 $diskImage
     '';
 
     /* Inside the VM, run the stdenv setup script normally, but at the
@@ -459,7 +458,7 @@ rec {
     fi
     diskImage="$1"
     if ! test -e "$diskImage"; then
-      ${kvm}/bin/qemu-img create -b ${image}/disk-image.qcow2 -f qcow2 "$diskImage"
+      ${qemu}/bin/qemu-img create -b ${image}/disk-image.qcow2 -f qcow2 "$diskImage"
     fi
     export TMPDIR=$(mktemp -d)
     export out=/dummy
@@ -515,7 +514,8 @@ rec {
 
       echo "%_topdir $rpmout" >> $HOME/.rpmmacros
 
-      rpmbuild -vv -ta "$srcName"
+      if [ `uname -m` = i686 ]; then extra="--target i686-linux"; fi
+      rpmbuild -vv $extra -ta "$srcName"
 
       eval "$postBuild"
     '';
@@ -599,8 +599,17 @@ rec {
             debs="$debs /inst/$i";
           done
           chroot=$(type -tP chroot)
+
+          # Create a fake start-stop-daemon script, as done in debootstrap.
+          mv "/mnt/sbin/start-stop-daemon" "/mnt/sbin/start-stop-daemon.REAL"
+          echo "#!/bin/true" > "/mnt/sbin/start-stop-daemon"
+          chmod 755 "/mnt/sbin/start-stop-daemon"
+
           PATH=/usr/bin:/bin:/usr/sbin:/sbin $chroot /mnt \
             /usr/bin/dpkg --install --force-all $debs < /dev/null || true
+
+          # Move the real start-stop-daemon back into its place.
+          mv "/mnt/sbin/start-stop-daemon.REAL" "/mnt/sbin/start-stop-daemon"
         done
 
         echo "running post-install script..."
@@ -757,8 +766,20 @@ rec {
         url = mirror://fedora/linux/releases/8/Everything/i386/os/repodata/primary.xml.gz;
         sha256 = "0kwf0jcp63pygpvgvwl4w58pph24xbcy6db6fnq2f3ly5myhz53n";
       };
-      urlPrefix = mirror://fedora/linux/releases/8/Everything/i386/os;
+      urlPrefix = http://archives.fedoraproject.org/pub/archive/fedora/linux/releases/8/Everything/i386/os;
       packages = commonFedoraPackages;
+    };
+
+    fedora8x86_64 = {
+      name = "fedora-8-x86_64";
+      fullName = "Fedora 8 (x86_64)";
+      packagesList = fetchurl {
+        url = mirror://fedora/linux/releases/8/Everything/x86_64/os/repodata/primary.xml.gz;
+        sha256 = "11bfmpy3nz82zzmj5lfravvzlw514v4718adi4b06ps9zv3zpy8r";
+      };
+      urlPrefix = http://archives.fedoraproject.org/pub/archive/fedora/linux/releases/8/Everything/x86_64/os;
+      packages = commonFedoraPackages;
+      archs = ["noarch" "x86_64"];
     };
 
     fedora9i386 = {
@@ -929,6 +950,58 @@ rec {
       unifiedSystemDir = true;
     };
 
+    fedora19i386 = {
+      name = "fedora-19-i386";
+      fullName = "Fedora 19 (i386)";
+      packagesList = fetchurl {
+        url = mirror://fedora/linux/releases/19/Everything/i386/os/repodata/b72220bcdefff8b38de1c9029a630db4813e073f88c4b080ca274d133e0460d1-primary.xml.gz;
+        sha256 = "b72220bcdefff8b38de1c9029a630db4813e073f88c4b080ca274d133e0460d1";
+      };
+      urlPrefix = mirror://fedora/linux/releases/19/Everything/i386/os;
+      archs = ["noarch" "i386" "i586" "i686"];
+      packages = commonFedoraPackages ++ [ "cronie" "util-linux" ];
+      unifiedSystemDir = true;
+    };
+
+    fedora19x86_64 = {
+      name = "fedora-19-x86_64";
+      fullName = "Fedora 19 (x86_64)";
+      packagesList = fetchurl {
+        url = mirror://fedora/linux/releases/19/Everything/x86_64/os/repodata/d3f67da6461748f57a06459e6877fd07858828e256f58f032704186a65430fd3-primary.xml.gz;
+        sha256 = "d3f67da6461748f57a06459e6877fd07858828e256f58f032704186a65430fd3";
+      };
+      urlPrefix = mirror://fedora/linux/releases/19/Everything/x86_64/os;
+      archs = ["noarch" "x86_64"];
+      packages = commonFedoraPackages ++ [ "cronie" "util-linux" ];
+      unifiedSystemDir = true;
+    };
+
+    fedora20i386 = {
+      name = "fedora-20-i386";
+      fullName = "Fedora 20 (i386)";
+      packagesList = fetchurl {
+        url = mirror://fedora/linux/releases/20/Everything/i386/os/repodata/ae9c6ae73a12a64227e6b8e7b2d7e1c2a9515bd9c82f2af006c838e7a445dcb9-primary.xml.gz;
+        sha256 = "1ffw8njfff680vq2lby8v5dm3af2w7bv5rxqwqkl59hj7bknm75f";
+      };
+      urlPrefix = mirror://fedora/linux/releases/20/Everything/i386/os;
+      archs = ["noarch" "i386" "i586" "i686"];
+      packages = commonFedoraPackages ++ [ "cronie" "util-linux" ];
+      unifiedSystemDir = true;
+    };
+
+    fedora20x86_64 = {
+      name = "fedora-20-x86_64";
+      fullName = "Fedora 20 (x86_64)";
+      packagesList = fetchurl {
+        url = mirror://fedora/linux/releases/20/Everything/x86_64/os/repodata/d7777ea6ec66e1c86c3fe1900adf5bf8d877fb77dd06e439bd76bbbec4e82094-primary.xml.gz;
+        sha256 = "1510x32bxfvnplwy81nxfzxpgn7qbgghm4717xnciqb6xjk7wxyp";
+      };
+      urlPrefix = mirror://fedora/linux/releases/20/Everything/x86_64/os;
+      archs = ["noarch" "x86_64"];
+      packages = commonFedoraPackages ++ [ "cronie" "util-linux" ];
+      unifiedSystemDir = true;
+    };
+
     opensuse103i386 = {
       name = "opensuse-10.3-i586";
       fullName = "openSUSE 10.3 (i586)";
@@ -989,26 +1062,26 @@ rec {
       packages = commonOpenSUSEPackages;
     };
 
-    centos64i386 = {
-      name = "centos-6.4-i386";
-      fullName = "CentOS 6.4 (i386)";
+    centos65i386 = {
+      name = "centos-6.5-i386";
+      fullName = "CentOS 6.5 (i386)";
       packagesList = fetchurl {
-        url = http://mirror.centos.org/centos/6.4/os/i386/repodata/87aa4c4e19f9a3ec93e3d820f1ea6b6ece8810cb45f117a16354465e57a1b50d-primary.xml.gz;
-        sha256 = "03dml5bmwijlcfhigwa5rc88ikkfdgmg286qwf9yr8zr3574ral7";
+        url = http://mirror.centos.org/centos/6.5/os/i386/repodata/a89f27cc7d3cea431f3bd605a1e9309c32d5d409abc1b51a7b5c71c05f18a0c2-primary.xml.gz;
+        sha256 = "1hm031gw0wawgcdbbhdb17adaclw63ls21fn7cgl7siwgp62g7x8";
       };
-      urlPrefix = http://mirror.centos.org/centos/6.4/os/i386/ ;
+      urlPrefix = http://mirror.centos.org/centos/6.5/os/i386/ ;
       archs = ["noarch" "i386"];
       packages = commonCentOSPackages;
     };
 
-    centos64x86_64 = {
-      name = "centos-6.4-x86_64";
-      fullName = "CentOS 6.4 (x86_64)";
+    centos65x86_64 = {
+      name = "centos-6.5-x86_64";
+      fullName = "CentOS 6.5 (x86_64)";
       packagesList = fetchurl {
-        url = http://mirror.centos.org/centos/6.4/os/x86_64/repodata/4d4030b92f010f466eb4f004312b9f532b9e85e60c5e6421e8b429c180ac1efe-primary.xml.gz;
-        sha256 = "1zhymj0c2adlx0hn8phcws2rwaskkwmk217hnip4c3q15ywk0h2d";
+        url = http://mirror.centos.org/centos/6.5/os/x86_64/repodata/3353e378f5cb4bb6c3b3dd2ca266c6d68a1e29c36cf99f76aea3d8e158626024-primary.xml.gz;
+        sha256 = "0930c9cf3n53mrv9zybcqclix2nnqrka4b6xng1vcjybymwf6lrk";
       };
-      urlPrefix = http://mirror.centos.org/centos/6.4/os/x86_64/ ;
+      urlPrefix = http://mirror.centos.org/centos/6.5/os/x86_64/ ;
       archs = ["noarch" "x86_64"];
       packages = commonCentOSPackages;
     };
@@ -1018,7 +1091,7 @@ rec {
 
   /* The set of supported Dpkg-based distributions. */
 
-  debDistros = {
+  debDistros = rec {
 
     # Interestingly, the SHA-256 hashes provided by Ubuntu in
     # http://nl.archive.ubuntu.com/ubuntu/dists/{gutsy,hardy}/Release are
@@ -1327,6 +1400,40 @@ rec {
       packages = commonDebPackages ++ [ "diffutils" "libc-bin" ];
     };
 
+    ubuntu1310i386 = {
+      name = "ubuntu-13.10-saucy-i386";
+      fullName = "Ubuntu 13.10 Saucy (i386)";
+      packagesLists =
+        [ (fetchurl {
+            url = mirror://ubuntu/dists/saucy/main/binary-i386/Packages.bz2;
+            sha256 = "9b35d44a737e6aa7e1cb5e2b52ba0ed8717c8820b3950c2e7ade07024db9c138";
+          })
+          (fetchurl {
+            url = mirror://ubuntu/dists/saucy/universe/binary-i386/Packages.bz2;
+            sha256 = "84ff81ef23bcece68bfc3dd4b0b1fd38e5b81ac90ad48b4e4210396b425da500";
+          })
+        ];
+      urlPrefix = mirror://ubuntu;
+      packages = commonDebPackages ++ [ "diffutils" "libc-bin" ];
+    };
+
+    ubuntu1310x86_64 = {
+      name = "ubuntu-13.10-saucy-amd64";
+      fullName = "Ubuntu 13.10 Saucy (amd64)";
+      packagesList =
+        [ (fetchurl {
+            url = mirror://ubuntu/dists/saucy/main/binary-amd64/Packages.bz2;
+            sha256 = "d000968f9653d7c25928002b0850fe2da97607682f63a351eb2c89896a219a12";
+          })
+          (fetchurl {
+            url = mirror://ubuntu/dists/saucy/universe/binary-amd64/Packages.bz2;
+            sha256 = "06ec77f2f5d6ee70ffb805affe3a6b3e8d5b6463fbfe42ba6588295c7e1f65bc";
+          })
+        ];
+      urlPrefix = mirror://ubuntu;
+      packages = commonDebPackages ++ [ "diffutils" "libc-bin" ];
+    };
+
     debian40i386 = {
       name = "debian-4.0r9-etch-i386";
       fullName = "Debian 4.0r9 Etch (i386)";
@@ -1372,44 +1479,48 @@ rec {
     };
 
     debian60i386 = {
-      name = "debian-6.0.7-squeeze-i386";
-      fullName = "Debian 6.0.7 Squeeze (i386)";
+      name = "debian-6.0.8-squeeze-i386";
+      fullName = "Debian 6.0.8 Squeeze (i386)";
       packagesList = fetchurl {
         url = mirror://debian/dists/squeeze/main/binary-i386/Packages.bz2;
-        sha256 = "a770f26b5fce1a16460b68f135dfe97f4f4a9894b538ece0104a508c83ec65d5";
+        sha256 = "c850339aaf46a4ed4abc7c1789c29ea58c3a152aa173ee004578fda86b28391f";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;
     };
 
     debian60x86_64 = {
-      name = "debian-6.0.7-squeeze-amd64";
-      fullName = "Debian 6.0.7 Squeeze (amd64)";
+      name = "debian-6.0.8-squeeze-amd64";
+      fullName = "Debian 6.0.8 Squeeze (amd64)";
       packagesList = fetchurl {
         url = mirror://debian/dists/squeeze/main/binary-amd64/Packages.bz2;
-        sha256 = "b2bb561bde59ac67e07c70aa7c86a33f237436e6891796a93c6ed6ffb032080e";
+        sha256 = "1506ab7de3ad5a2c706183536d2ee88589d7cb922d9e0de36ac062d464082dda";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;
     };
 
-    debian70i386 = {
-      name = "debian-7.0.0-wheezy-i386";
-      fullName = "Debian 7.0.0 Wheezy (i386)";
+    # Backward compatibility.
+    debian70i386 = debian7i386;
+    debian70x86_64 = debian7x86_64;
+
+    debian7i386 = {
+      name = "debian-7.3-wheezy-i386";
+      fullName = "Debian 7.3 Wheezy (i386)";
       packagesList = fetchurl {
         url = mirror://debian/dists/wheezy/main/binary-i386/Packages.bz2;
-        sha256 = "712939639e2cc82615c85bdf81edf31edef0fda003ac2b32998e438aee403ab8";
+        sha256 = "037637520ce371a50beb5446fd27a731f30b51bc362c2f4a5dcfce9c7e30ffb6";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;
     };
 
-    debian70x86_64 = {
-      name = "debian-7.0.0-wheezy-amd64";
-      fullName = "Debian 7.0.0 Wheezy (amd64)";
+    debian7x86_64 = {
+      name = "debian-7.3-wheezy-amd64";
+      fullName = "Debian 7.3 Wheezy (amd64)";
       packagesList = fetchurl {
         url = mirror://debian/dists/wheezy/main/binary-amd64/Packages.bz2;
-        sha256 = "e79132f7db6655013be1f75feb9812b071386525246d8639679b322487d2732a";
+        sha256 = "c2ed55a2a263d482826c934b97ad910984fa5695ab1c480841741b828d0590a5";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;
@@ -1507,6 +1618,7 @@ rec {
     "curl"
     "patch"
     "locales"
+    "coreutils"
     # Needed by checkinstall:
     "util-linux"
     "file"

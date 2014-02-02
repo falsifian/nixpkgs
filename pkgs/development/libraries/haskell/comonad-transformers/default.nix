@@ -1,19 +1,16 @@
-{ cabal, comonad, contravariant, distributive, semigroupoids
-, semigroups, transformers
-}:
+{ cabal, comonad }:
 
 cabal.mkDerivation (self: {
   pname = "comonad-transformers";
-  version = "3.0.3";
-  sha256 = "1q11xasl90z8sv9f7h77dxjsi2cwnjxqpaf0n5pvzn88nz9h6g66";
-  buildDepends = [
-    comonad contravariant distributive semigroupoids semigroups
-    transformers
-  ];
+  version = "4.0";
+  sha256 = "13zzp6r6s6c80skniphwvzxhpazbyal5854m53139kgcw560rv6z";
+  buildDepends = [ comonad ];
+  noHaddock = true;
   meta = {
     homepage = "http://github.com/ekmett/comonad-transformers/";
-    description = "Comonad transformers";
+    description = "This package has been merged into comonad 4.0";
     license = self.stdenv.lib.licenses.bsd3;
     platforms = self.ghc.meta.platforms;
+    maintainers = [ self.stdenv.lib.maintainers.ocharles ];
   };
 })

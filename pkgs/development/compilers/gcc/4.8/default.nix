@@ -52,13 +52,19 @@ assert langGo -> langCC;
 with stdenv.lib;
 with builtins;
 
-let version = "4.8.1";
+let version = "4.8.2";
 
     # Whether building a cross-compiler for GNU/Hurd.
     crossGNU = cross != null && cross.config == "i586-pc-gnu";
 
+  /* gccinstall.info says that "parallel make is currently not supported since
+     collisions in profile collecting may occur".
+  */
+    enableParallelBuilding = !profiledCompiler;
+
     patches = []
-      ++ optional stdenv.isArm [ ./arm-eabi.patch ]
+      ++ optional stdenv.isArm ./arm-eabi.patch
+      ++ optional enableParallelBuilding ./parallel-bconfig.patch
       ++ optional (cross != null) ./libstdc++-target.patch
       # ++ optional noSysDirs ./no-sys-dirs.patch
       # The GNAT Makefiles did not pay attention to CFLAGS_FOR_TARGET for its
@@ -91,12 +97,12 @@ let version = "4.8.1";
 
     /* Platform flags */
     platformFlags = let
-        gccArch = stdenv.lib.attrByPath [ "platform" "gcc" "arch" ] null stdenv;
-        gccCpu = stdenv.lib.attrByPath [ "platform" "gcc" "cpu" ] null stdenv;
-        gccAbi = stdenv.lib.attrByPath [ "platform" "gcc" "abi" ] null stdenv;
-        gccFpu = stdenv.lib.attrByPath [ "platform" "gcc" "fpu" ] null stdenv;
-        gccFloat = stdenv.lib.attrByPath [ "platform" "gcc" "float" ] null stdenv;
-        gccMode = stdenv.lib.attrByPath [ "platform" "gcc" "mode" ] null stdenv;
+        gccArch = stdenv.platform.gcc.arch or null;
+        gccCpu = stdenv.platform.gcc.cpu or null;
+        gccAbi = stdenv.platform.gcc.abi or null;
+        gccFpu = stdenv.platform.gcc.fpu or null;
+        gccFloat = stdenv.platform.gcc.float or null;
+        gccMode = stdenv.platform.gcc.mode or null;
         withArch = if gccArch != null then " --with-arch=${gccArch}" else "";
         withCpu = if gccCpu != null then " --with-cpu=${gccCpu}" else "";
         withAbi = if gccAbi != null then " --with-abi=${gccAbi}" else "";
@@ -104,22 +110,22 @@ let version = "4.8.1";
         withFloat = if gccFloat != null then " --with-float=${gccFloat}" else "";
         withMode = if gccMode != null then " --with-mode=${gccMode}" else "";
       in
-        (withArch +
+        withArch +
         withCpu +
         withAbi +
         withFpu +
         withFloat +
-        withMode);
+        withMode;
 
     /* Cross-gcc settings */
     crossMingw = (cross != null && cross.libc == "msvcrt");
     crossConfigureFlags = let
-        gccArch = stdenv.lib.attrByPath [ "gcc" "arch" ] null cross;
-        gccCpu = stdenv.lib.attrByPath [ "gcc" "cpu" ] null cross;
-        gccAbi = stdenv.lib.attrByPath [ "gcc" "abi" ] null cross;
-        gccFpu = stdenv.lib.attrByPath [ "gcc" "fpu" ] null cross;
-        gccFloat = stdenv.lib.attrByPath [ "gcc" "float" ] null cross;
-        gccMode = stdenv.lib.attrByPath [ "gcc" "mode" ] null cross;
+        gccArch = stdenv.cross.gcc.arch or null;
+        gccCpu = stdenv.cross.gcc.cpu or null;
+        gccAbi = stdenv.cross.gcc.abi or null;
+        gccFpu = stdenv.cross.gcc.fpu or null;
+        gccFloat = stdenv.cross.gcc.float or null;
+        gccMode = stdenv.cross.gcc.mode or null;
         withArch = if gccArch != null then " --with-arch=${gccArch}" else "";
         withCpu = if gccCpu != null then " --with-cpu=${gccCpu}" else "";
         withAbi = if gccAbi != null then " --with-abi=${gccAbi}" else "";
@@ -182,8 +188,7 @@ let version = "4.8.1";
             " --enable-nls" +
             " --disable-decimal-float") # No final libdecnumber (it may work only in 386)
           );
-    stageNameAddon = if crossStageStatic then "-stage-static" else
-      "-stage-final";
+    stageNameAddon = if crossStageStatic then "-stage-static" else "-stage-final";
     crossNameAddon = if cross != null then "-${cross.config}" + stageNameAddon else "";
 
   bootstrap = cross == null && !stdenv.isArm && !stdenv.isMips;
@@ -200,7 +205,7 @@ stdenv.mkDerivation ({
 
   src = fetchurl {
     url = "mirror://gnu/gcc/gcc-${version}/gcc-${version}.tar.bz2";
-    sha256 = "04sqn0ds17ys8l6zn7vyyvjz1a7hsk4zb0381vlw9wnr7az48nsl";
+    sha256 = "1j6dwgby4g3p3lz7zkss32ghr45zpdidrg8xvazvn91lqxv25p09";
   };
 
   inherit patches;
@@ -301,9 +306,7 @@ stdenv.mkDerivation ({
       ''}
     '';
 
-  # 'iant' at #go-nuts@freenode, gccgo maintainer, said that
-  # they have a bug in 4.7.1 if adding "--disable-static"
-  dontDisableStatic = langGo || staticCompiler;
+  dontDisableStatic = true;
 
   configureFlags = "
     ${if stdenv.isSunOS then
@@ -312,7 +315,7 @@ stdenv.mkDerivation ({
       " --with-gnu-as --without-gnu-ld "
       else ""}
     --enable-lto
-    ${if enableMultilib then "" else "--disable-multilib"}
+    ${if enableMultilib then "--disable-libquadmath" else "--disable-multilib"}
     ${if enableShared then "" else "--disable-shared"}
     ${if enablePlugin then "--enable-plugin" else "--disable-plugin"}
     ${if ppl != null then "--with-ppl=${ppl} --disable-ppl-version-check" else ""}
@@ -334,6 +337,7 @@ stdenv.mkDerivation ({
     --disable-libstdcxx-pch
     --without-included-gettext
     --with-system-zlib
+    --enable-static
     --enable-languages=${
       concatStrings (intersperse ","
         (  optional langC        "c"
@@ -368,11 +372,11 @@ stdenv.mkDerivation ({
     else "install";
 
   crossAttrs = let
-    xgccArch = stdenv.lib.attrByPath [ "gcc" "arch" ] null stdenv.cross;
-    xgccCpu = stdenv.lib.attrByPath [ "gcc" "cpu" ] null stdenv.cross;
-    xgccAbi = stdenv.lib.attrByPath [ "gcc" "abi" ] null stdenv.cross;
-    xgccFpu = stdenv.lib.attrByPath [ "gcc" "fpu" ] null stdenv.cross;
-    xgccFloat = stdenv.lib.attrByPath [ "gcc" "float" ] null stdenv.cross;
+    xgccArch = stdenv.cross.gcc.arch or null;
+    xgccCpu = stdenv.cross.gcc.cpu or null;
+    xgccAbi = stdenv.cross.gcc.abi or null;
+    xgccFpu = stdenv.cross.gcc.fpu or null;
+    xgccFloat = stdenv.cross.gcc.float or null;
     xwithArch = if xgccArch != null then " --with-arch=${xgccArch}" else "";
     xwithCpu = if xgccCpu != null then " --with-cpu=${xgccCpu}" else "";
     xwithAbi = if xgccAbi != null then " --with-abi=${xgccAbi}" else "";
@@ -432,8 +436,7 @@ stdenv.mkDerivation ({
   AR = "ar";
   LD = "ld";
   # http://gcc.gnu.org/install/specific.html#x86-64-x-solaris210
-  CC = if stdenv.system == "x86_64-solaris" then "gcc -m64"
-       else "gcc";
+  CC = if stdenv.system == "x86_64-solaris" then "gcc -m64" else "gcc";
 
   # Setting $CPATH and $LIBRARY_PATH to make sure both `gcc' and `xgcc' find
   # the library headers and binaries, regarless of the language being
@@ -457,8 +460,7 @@ stdenv.mkDerivation ({
 
                                    # On GNU/Hurd glibc refers to Mach & Hurd
                                    # headers.
-                                   ++ optionals (libcCross != null &&
-                                                 hasAttr "propagatedBuildInputs" libcCross)
+                                   ++ optionals (libcCross != null && libcCross ? "propagatedBuildInputs" )
                                         libcCross.propagatedBuildInputs)));
 
   LIBRARY_PATH = concatStrings
@@ -481,14 +483,10 @@ stdenv.mkDerivation ({
            " -L${libpthreadCross}/lib -Wl,${libpthreadCross.TARGET_LDFLAGS}")
     else null;
 
-  passthru = { inherit langC langCC langAda langFortran langVhdl
-      langGo enableMultilib version; };
+  passthru =
+    { inherit langC langCC langAda langFortran langVhdl langGo enableMultilib version; };
 
-  /* From gccinstall.info:
-     "parallel make is currently not supported since collisions in profile
-     collecting may occur"
-  */
-  enableParallelBuilding = !profiledCompiler;
+  inherit enableParallelBuilding;
 
   meta = {
     homepage = http://gcc.gnu.org/;
@@ -510,7 +508,10 @@ stdenv.mkDerivation ({
     # Volunteers needed for the {Cyg,Dar}win ports of *PPL.
     # gnatboot is not available out of linux platforms, so we disable the darwin build
     # for the gnat (ada compiler).
-    platforms = stdenv.lib.platforms.linux ++ optionals (langAda == false && libelf == null) [ "i686-darwin" ];
+    platforms =
+      stdenv.lib.platforms.linux ++
+      stdenv.lib.platforms.freebsd ++
+      optionals (langAda == false) stdenv.lib.platforms.darwin;
   };
 }
 
@@ -518,7 +519,6 @@ stdenv.mkDerivation ({
   makeFlags = [ "all-gcc" "all-target-libgcc" ];
   installTargets = "install-gcc install-target-libgcc";
 }
-
 
 # Strip kills static libs of other archs (hence cross != null)
 // optionalAttrs (!stripped || cross != null) { dontStrip = true; NIX_STRIP_DEBUG = 0; }

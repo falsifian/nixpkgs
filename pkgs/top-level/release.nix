@@ -12,7 +12,7 @@
 { nixpkgs ? { outPath = (import ./all-packages.nix {}).lib.cleanSource ../..; revCount = 1234; shortRev = "abcdef"; }
 , officialRelease ? false
 , # The platforms for which we build Nixpkgs.
-  supportedSystems ? [ "x86_64-linux" "i686-linux" "x86_64-darwin" "x86_64-freebsd" "i686-freebsd" ]
+  supportedSystems ? [ "x86_64-linux" "i686-linux" "x86_64-darwin" ]
 }:
 
 with import ./release-lib.nix { inherit supportedSystems; };
@@ -25,7 +25,7 @@ let
       unstable = pkgs.releaseTools.aggregate
         { name = "nixpkgs-${jobs.tarball.version}";
           meta.description = "Release-critical builds for the Nixpkgs unstable channel";
-          members =
+          constituents =
             [ jobs.tarball
               jobs.stdenv.x86_64-linux
               jobs.stdenv.i686-linux
@@ -106,7 +106,6 @@ let
       file = all;
       findutils = all;
       flex = all;
-      flex2535 = all;
       fontforge = linux;
       fuse = linux;
       gajim = linux;
@@ -115,9 +114,8 @@ let
       gcc33 = linux;
       gcc34 = linux;
       gcc42 = linux;
-      gcc43_multi = ["x86_64-linux"];
       gcc44 = linux;
-      gcj44 = linux;
+      gcj = linux;
       ghdl = linux;
       ghostscript = linux;
       ghostscriptX = linux;
@@ -128,7 +126,7 @@ let
       glibcLocales = linux;
       glxinfo = linux;
       gnash = linux;
-      gnat44 = linux;
+      gnat = linux;
       gnugrep = all;
       gnum4 = all;
       gnumake = all;
@@ -142,7 +140,6 @@ let
       gphoto2 = linux;
       gpm = linux;
       gprolog = linux;
-      gpsbabel = all;
       gpscorrelate = linux;
       gpsd = linux;
       gqview = gtkSupported;
@@ -214,13 +211,10 @@ let
       mysql = linux;
       mysql51 = linux;
       mysql55 = linux;
-      namazu = all;
       nano = allBut "i686-cygwin";
       ncat = linux;
       netcat = all;
       nfsUtils = linux;
-      nix = all;
-      nixUnstable = all;
       nmap = linux;
       nss_ldap = linux;
       nssmdns = linux;
@@ -274,7 +268,6 @@ let
       sloccount = allBut "i686-cygwin";
       smartmontools = linux;
       spidermonkey = linux;
-      splashutils = linux;
       sqlite = allBut "i686-cygwin";
       squid = linux;
       ssmtp = linux;
@@ -316,7 +309,6 @@ let
       vim = linux;
       vimHugeX = linux;
       VisualBoyAdvance = linux;
-      vlc = linux;
       vncrec = linux;
       vorbisTools = linux;
       vpnc = linux;
@@ -376,6 +368,10 @@ let
       };
 
       haskellPackages_ghc704 = {
+        ghc = ghcSupported;
+      };
+
+      haskellPackages_ghc722 = {
         ghc = ghcSupported;
       };
 

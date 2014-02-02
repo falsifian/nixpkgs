@@ -1,13 +1,13 @@
 {stdenv, fetchurl}:
 stdenv.mkDerivation {
-  name = "pwgen-2.05";
+  name = "pwgen-2.06";
 
   src = fetchurl {
-    url = ftp://ftp.chg.ru/pub/sourceforge/p/pw/pwgen/pwgen-2.05.tar.gz;
-    sha256 = "1afxbkdl9b81760pyb972k18dmidrciy3vzcnspp3jg0aa316yn8";
+    url = mirror://sourceforge/pwgen/pwgen-2.06.tar.gz;
+    sha256 = "0m1lhkcyizisksr1vlqysjkickrca9qwqkkx6vkv4zhg7ag8qnb1";
   };
   meta = {
-	description = "Small, GPL'ed password generator which creates passwords which can be easily memorized by a human.";
-        platforms = stdenv.lib.platforms.all;
+    description = "Password generator which creates passwords which can be easily memorized by a human";
+    platforms = stdenv.lib.platforms.all;
   };
 }

@@ -1,5 +1,5 @@
 rec {
-  pc = {
+  pcBase = {
     name = "pc";
     uboot = null;
     kernelHeadersBaseConfig = "defconfig";
@@ -7,25 +7,17 @@ rec {
     # Build whatever possible as a module, if not stated in the extra config.
     kernelAutoModules = true;
     kernelTarget = "bzImage";
-    # Currently ignored - it should be set according to 'system' once it is
-    # not ignored. This is for stdenv-updates.
-    kernelArch = "i386";
-    kernelExtraConfig =
-      ''
-        # Virtualisation (KVM, Xen...).
-        HYPERVISOR_GUEST? y #3.10 version of the paravirt options
-        PARAVIRT_GUEST? y #Doesn't exist in 3.10
-        KVM_CLOCK? y #Part of KVM_GUEST since linux 3.7
-        KVM_GUEST? y #Doesn't exist in 3.10
-        XEN? y #Doesn't exist in 3.10
-        KSM y
-
-        # We need 64 GB (PAE) support for Xen guest support.
-        HIGHMEM64G? y
-      '';
   };
 
-  pc_simplekernel = pc // {
+  pc64 = pcBase // { kernelArch = "x86_64"; };
+
+  pc32 = pcBase // { kernelArch = "i386"; };
+
+  pc32_simplekernel = pc32 // {
+    kernelAutoModules = false;
+  };
+
+  pc64_simplekernel = pc64 // {
     kernelAutoModules = false;
   };
 
@@ -53,6 +45,11 @@ rec {
 
         # mv cesa requires this sw fallback, for mv-sha1
         CRYPTO_SHA1 y
+        # Fast crypto
+        CRYPTO_TWOFISH y
+        CRYPTO_TWOFISH_COMMON y
+        CRYPTO_BLOWFISH y
+        CRYPTO_BLOWFISH_COMMON y
 
         IP_PNP y
         IP_PNP_DHCP y

@@ -1,7 +1,7 @@
 { stdenv, fetchurl, composableDerivation, autoconf, automake, flex, bison
 , apacheHttpd, mysql, libxml2, readline, zlib, curl, gd, postgresql, gettext
 , openssl, pkgconfig, sqlite, config, libiconv, libjpeg, libpng, freetype
-, libxslt, libmcrypt, bzip2, icu }:
+, libxslt, libmcrypt, bzip2, icu, openldap, cyrus_sasl, libmhash }:
 
 let
   libmcryptOverride = libmcrypt.override { disablePosixThreads = true; };
@@ -9,7 +9,7 @@ in
 
 composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed) version; in {
 
-  version = "5.4.15";
+  version = "5.4.23";
 
   name = "php-${version}";
 
@@ -30,6 +30,16 @@ composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed)
 
       # Extensions
 
+      ldap = {
+        configureFlags = ["--with-ldap=${openldap}"];
+        buildInputs = [openldap cyrus_sasl openssl];
+      };
+
+      mhash = {
+        configureFlags = ["--with-mhash"];
+        buildInputs = [libmhash];
+      };
+
       curl = {
         configureFlags = ["--with-curl=${curl}" "--with-curlwrappers"];
         buildInputs = [curl openssl];
@@ -46,6 +56,10 @@ composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed)
           #"--with-iconv-dir=${libiconv}"
           ];
         buildInputs = [ libxml2 ];
+      };
+
+      pcntl = {
+        configureFlags = [ "--enable-pcntl" ];
       };
 
       readline = {
@@ -167,6 +181,8 @@ composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed)
     };
 
   cfg = {
+    ldapSupport = config.php.ldap or true;
+    mhashSupport = config.php.mhash or true;
     mysqlSupport = config.php.mysql or true;
     mysqliSupport = config.php.mysqli or true;
     pdo_mysqlSupport = config.php.pdo_mysql or true;
@@ -176,6 +192,7 @@ composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed)
     socketsSupport = config.php.sockets or true;
     curlSupport = config.php.curl or true;
     gettextSupport = config.php.gettext or true;
+    pcntlSupport = config.php.pcntl or true;
     postgresqlSupport = config.php.postgresql or true;
     readlineSupport = config.php.readline or true;
     sqliteSupport = config.php.sqlite or true;
@@ -214,8 +231,11 @@ composableDerivation.composableDerivation {} ( fixed : let inherit (fixed.fixed)
   '';
 
   src = fetchurl {
-    url = "http://nl.php.net/get/php-${version}.tar.bz2/from/this/mirror";
-    sha256 = "0dh159svdrakvm9nsyg3yyln7cqqzpxgs2163cqxplnc93d8a8id";
+    urls = [
+      "http://nl1.php.net/get/php-${version}.tar.bz2/from/this/mirror"
+      "http://se1.php.net/get/php-${version}.tar.bz2/from/this/mirror"
+    ];
+    sha256 = "1k4iplqqcaqkmyq10h6a5qcpkfpkd05r2kclxw9n9qdrm47hfz5f";
     name = "php-${version}.tar.bz2";
   };
 

@@ -1,13 +1,13 @@
-{ cabal, dualTree, MemoTrie, monoidExtras, newtype, semigroups
-, vectorSpace, vectorSpacePoints
+{ cabal, dualTree, lens, MemoTrie, monoidExtras, newtype
+, semigroups, vectorSpace, vectorSpacePoints
 }:
 
 cabal.mkDerivation (self: {
   pname = "diagrams-core";
-  version = "0.6.0.2";
-  sha256 = "1g4b1zabgfdpaf7y3804r3w04ll4sqqrf71rm9389dg17ghc1q85";
+  version = "1.0.0.1";
+  sha256 = "19jri4np14lgf4pxyyczqjwh30cdmcpnb8alj60b0z5fca7042xm";
   buildDepends = [
-    dualTree MemoTrie monoidExtras newtype semigroups vectorSpace
+    dualTree lens MemoTrie monoidExtras newtype semigroups vectorSpace
     vectorSpacePoints
   ];
   jailbreak = true;

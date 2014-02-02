@@ -1,10 +1,10 @@
-{ cabal, mtl, RepLib, transformers }:
+{ cabal, binary, mtl, RepLib, transformers }:
 
 cabal.mkDerivation (self: {
   pname = "unbound";
-  version = "0.4.1.1";
-  sha256 = "0niv8mm4zjkndj0g32dgr32177dfp647hi32hqzwiis77vcfvdzb";
-  buildDepends = [ mtl RepLib transformers ];
+  version = "0.4.3";
+  sha256 = "1lv60zpsvjfp9qnckwbphkfv0x9pz2qvaab3p4kj38fnlq2y20i4";
+  buildDepends = [ binary mtl RepLib transformers ];
   meta = {
     homepage = "http://code.google.com/p/replib/";
     description = "Generic support for programming with names and binders";

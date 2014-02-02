@@ -1,10 +1,22 @@
-{ stdenv, fetchurl, glib, flex, bison, pkgconfig, libffi, python, gdk_pixbuf
+{ stdenv, fetchurl, glib, flex, bison, pkgconfig, libffi, python
 , libintlOrEmpty, autoconf, automake, otool }:
+# now that gobjectIntrospection creates large .gir files (eg gtk3 case)
+# it may be worth thinking about using multiple derivation outputs
+# In that case its about 6MB which could be separated
 
+let
+  ver_maj = "1.38";
+  ver_min = "0";
+in
 stdenv.mkDerivation rec {
-  name = "gobject-introspection-1.34.2";
+  name = "gobject-introspection-${ver_maj}.${ver_min}";
 
-  buildInputs = [ flex bison glib pkgconfig python gdk_pixbuf ]
+  src = fetchurl {
+    url = "mirror://gnome/sources/gobject-introspection/${ver_maj}/${name}.tar.xz";
+    sha256 = "0wvxyvgajmms2bb6k3pf1rdpnd79xdxamykzvxzmcyn1ag9yax9m";
+  };
+
+  buildInputs = [ flex bison glib pkgconfig python ]
     ++ libintlOrEmpty
     ++ stdenv.lib.optional stdenv.isDarwin otool;
   propagatedBuildInputs = [ libffi ];
@@ -13,12 +25,9 @@ stdenv.mkDerivation rec {
   # other dependencies).
   configureFlags = [ "--disable-tests" ];
 
-  src = fetchurl {
-    url = "mirror://gnome/sources/gobject-introspection/1.34/${name}.tar.xz";
-    sha256 = "0a9lq0y67sr3g37l1hy0biqn046jr9wnd05hvwi8j8g2bjilhydw";
-  };
-
   postInstall = "rm -rf $out/share/gtk-doc";
+
+  setupHook = ./setup-hook.sh;
 
   meta = with stdenv.lib; {
     description = "A middleware layer between C libraries and language bindings";

@@ -1,14 +1,14 @@
-{ cabal, byteable, cereal, cryptoApi, HUnit, QuickCheck, tagged
-, testFramework, testFrameworkHunit, testFrameworkQuickcheck2
+{ cabal, byteable, HUnit, QuickCheck, testFramework
+, testFrameworkHunit, testFrameworkQuickcheck2
 }:
 
 cabal.mkDerivation (self: {
   pname = "cryptohash";
-  version = "0.9.1";
-  sha256 = "164j43dja91k2cssh0s2dw9riibijl02bap9mn8jn1h6vjb6w9z0";
-  buildDepends = [ byteable cereal cryptoApi tagged ];
+  version = "0.11.2";
+  sha256 = "0az2p7lql1lchl85ca26b5sbvhqsv47daavyfqy84qmr3w3wyr28";
+  buildDepends = [ byteable ];
   testDepends = [
-    HUnit QuickCheck testFramework testFrameworkHunit
+    byteable HUnit QuickCheck testFramework testFrameworkHunit
     testFrameworkQuickcheck2
   ];
   meta = {

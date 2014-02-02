@@ -1,16 +1,18 @@
-{ stdenv, fetchurl, fetchgit, hotplugSupport ? true, libusb ? null, gt68xxFirmware ? null }:
+{ stdenv, fetchurl, fetchgit, hotplugSupport ? true, libusb ? null
+, gt68xxFirmware ? null, snapscanFirmware ? null
+}:
 let
   firmware = gt68xxFirmware { inherit fetchurl; };
 in
 assert hotplugSupport -> (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux");
 
 stdenv.mkDerivation {
-  name = "sane-backends-1.0.22.482-g071f226";
+  name = "sane-backends-1.0.24.73-g6c4f6bc";
 
   src = fetchgit {
-    url = "http://git.debian.org/git/sane/sane-backends.git";
-    rev = "071f2269cd68d3411cbfa05a3d028b74496db970";
-    sha256 = "178xkv30m6irk4k0gqnfcl5kramm1qyj24dar8gp32428z1444xf";
+    url = "git://alioth.debian.org/git/sane/sane-backends.git";
+    rev = "6c4f6bc58615755dc734281703b594cea3ebf848";
+    sha256 = "0f7lbv1rnr53n4rpihcd8dkfm01xvwfnx9i1nqaadrzbpvgkjrfa";
   };
 
   udevSupport = hotplugSupport;
@@ -29,12 +31,17 @@ stdenv.mkDerivation {
     if gt68xxFirmware != null then
       "mkdir -p \${out}/share/sane/gt68xx ; ln -s " + firmware.fw +
       " \${out}/share/sane/gt68xx/" + firmware.name
+    else if snapscanFirmware != null then
+      "mkdir -p \${out}/share/sane/snapscan ; ln -s " + snapscanFirmware +
+      " \${out}/share/sane/snapscan/your-firmwarefile.bin ;" +
+      "mkdir -p \${out}/etc/sane.d ; " +
+      "echo epson2 > \${out}/etc/sane.d/dll.conf"
     else "";
 
   meta = {
     homepage = "http://www.sane-project.org/";
     description = "Scanner Access Now Easy";
-    license = "GPLv2+";
+    license = stdenv.lib.licenses.gpl2Plus;
 
     maintainers = [ stdenv.lib.maintainers.simons ];
     platforms = stdenv.lib.platforms.linux;

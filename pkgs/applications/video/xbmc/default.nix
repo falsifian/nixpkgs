@@ -1,7 +1,7 @@
 { stdenv, lib, fetchurl, makeWrapper
-, pkgconfig, cmake, gnumake, yasm, python
-, boost, avahi, libdvdcss, lame
-, gettext, pcre, yajl, fribidi
+, pkgconfig, cmake, gnumake, yasm, pythonFull
+, boost, avahi, libdvdcss, lame, autoreconfHook
+, gettext, pcre, yajl, fribidi, which
 , openssl, gperf, tinyxml2, taglib, libssh, swig, jre
 , libX11, xproto, inputproto
 , libXt, libXmu, libXext, xextproto
@@ -19,6 +19,7 @@
 , udev, udevSupport ? true
 , libusb ? null, usbSupport ? false
 , samba ? null, sambaSupport ? true
+, libmicrohttpd
 # TODO: would be nice to have nfsSupport (needs libnfs library)
 # TODO: librtmp
 , libvdpau ? null, vdpauSupport ? true
@@ -33,20 +34,20 @@ assert vdpauSupport -> libvdpau != null && ffmpeg.vdpauSupport;
 assert pulseSupport -> pulseaudio != null;
 
 stdenv.mkDerivation rec {
-    name = "xbmc-12.2";
+    name = "xbmc-12.3";
 
     src = fetchurl {
       url = "http://mirrors.xbmc.org/releases/source/${name}.tar.gz";
-      sha256 = "077apkq9sx6wlwkwmiz63w5dcqbbrbjbn6qk9fj2fgaizhs0ccxj";
+      sha256 = "0wyy9rsl11px4mh0fyq75n29905ldiqp8yraz6jxxvrls1hcj59y";
     };
 
     buildInputs = [
       makeWrapper
-      pkgconfig cmake gnumake yasm python
-      boost
+      pkgconfig cmake gnumake yasm pythonFull
+      boost libmicrohttpd autoreconfHook
       gettext pcre yajl fribidi
       openssl gperf tinyxml2 taglib libssh swig jre
-      libX11 xproto inputproto
+      libX11 xproto inputproto which
       libXt libXmu libXext xextproto
       libXinerama libXrandr randrproto
       libXtst libXfixes fixesproto
@@ -71,11 +72,11 @@ stdenv.mkDerivation rec {
     preConfigure = ''
       substituteInPlace xbmc/linux/LinuxTimezone.cpp \
         --replace 'usr/share/zoneinfo' 'etc/zoneinfo'
+      ./bootstrap
     '';
 
     configureFlags = [
       "--enable-external-libraries"
-      "--disable-webserver"
     ]
     ++ lib.optional (! sambaSupport) "--disable-samba"
     ++ lib.optional vdpauSupport "--enable-vdpau"
@@ -84,7 +85,7 @@ stdenv.mkDerivation rec {
     postInstall = ''
       for p in $(ls $out/bin/) ; do
         wrapProgram $out/bin/$p \
-          --prefix PATH ":" "${python}/bin" \
+          --prefix PATH ":" "${pythonFull}/bin" \
           --prefix PATH ":" "${glxinfo}/bin" \
           --prefix PATH ":" "${xdpyinfo}/bin" \
           --prefix LD_LIBRARY_PATH ":" "${curl}/lib" \

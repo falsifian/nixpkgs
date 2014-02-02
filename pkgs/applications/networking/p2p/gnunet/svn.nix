@@ -1,10 +1,11 @@
 { stdenv, fetchsvn, libextractor, libmicrohttpd, libgcrypt
 , zlib, gmp, curl, libtool, adns, sqlite, pkgconfig
 , libxml2, ncurses, gettext, libunistring, libidn
-, makeWrapper, autoconf, automake }:
+, makeWrapper, autoconf, automake
+, withVerbose ? false }:
 
 let
-  rev = "27399";
+  rev = "27840";
 in
 stdenv.mkDerivation rec {
   name = "gnunet-svn-${rev}";
@@ -12,7 +13,7 @@ stdenv.mkDerivation rec {
   src = fetchsvn {
     url =  https://gnunet.org/svn/gnunet;
     inherit rev;
-    sha256 = "0fn7ppfnc4v6lkxwww11s0h8mdvwyv7f40f6wrbfilqpn2ncrf8c";
+    sha256 = "0zhxvvj5rbhca2ykfx3g93dv94xyhqsnj011a6gql7zd5vfhaf6v";
   };
 
   buildInputs = [
@@ -21,6 +22,8 @@ stdenv.mkDerivation rec {
     pkgconfig gettext libunistring makeWrapper
     autoconf automake
   ];
+
+  configureFlags = stdenv.lib.optional withVerbose "--enable-logging=verbose ";
 
   preConfigure = ''
     # Brute force: since nix-worker chroots don't provide

@@ -1,12 +1,34 @@
 # generic builder for Cabal packages
 
-{ stdenv, fetchurl, lib, pkgconfig, ghc, Cabal, jailbreakCabal
+{ stdenv, fetchurl, lib, pkgconfig, ghc, Cabal, jailbreakCabal, glibcLocales
+, gnugrep, coreutils
 , enableLibraryProfiling ? false
-, enableCheckPhase ? true
+, enableSharedLibraries ? false
+, enableSharedExecutables ? false
+, enableStaticLibraries ? true
+, enableCheckPhase ? stdenv.lib.versionOlder "7.4" ghc.version
 }:
 
-# The Cabal library shipped with GHC versions older than 7.x doesn't accept the --enable-tests configure flag.
-assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
+let
+  enableFeature         = stdenv.lib.enableFeature;
+  versionOlder          = stdenv.lib.versionOlder;
+  optional              = stdenv.lib.optional;
+  optionals             = stdenv.lib.optionals;
+  optionalString        = stdenv.lib.optionalString;
+  filter                = stdenv.lib.filter;
+in
+
+# Cabal shipped with GHC 6.12.4 or earlier doesn't know the "--enable-tests configure" flag.
+assert enableCheckPhase -> versionOlder "7" ghc.version;
+
+# GHC prior to 7.4.x doesn't know the "--enable-executable-dynamic" flag.
+assert enableSharedExecutables -> versionOlder "7.4" ghc.version;
+
+# Our GHC 6.10.x builds do not provide sharable versions of their core libraries.
+assert enableSharedLibraries -> versionOlder "6.12" ghc.version;
+
+# Our GHC 6.10.x builds do not provide sharable versions of their core libraries.
+assert !enableStaticLibraries -> versionOlder "7.7" ghc.version;
 
 {
   mkDerivation =
@@ -23,8 +45,9 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
         # in the interest of keeping hashes stable.
         postprocess =
           x : (removeAttrs x internalAttrs) // {
-                buildInputs           = stdenv.lib.filter (y : ! (y == null)) x.buildInputs;
-                propagatedBuildInputs = stdenv.lib.filter (y : ! (y == null)) x.propagatedBuildInputs;
+                buildInputs           = filter (y : ! (y == null)) x.buildInputs;
+                propagatedBuildInputs = filter (y : ! (y == null)) x.propagatedBuildInputs;
+                propagatedUserEnvPkgs = filter (y : ! (y == null)) x.propagatedUserEnvPkgs;
                 doCheck               = enableCheckPhase && x.doCheck;
               };
 
@@ -42,8 +65,12 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
             # if that is not desired (for applications), name can be set to
             # fname.
             name = if self.isLibrary then
-                     if enableLibraryProfiling then
+                     if enableLibraryProfiling && self.enableSharedLibraries then
+                       "haskell-${self.pname}-ghc${ghc.ghc.version}-${self.version}-profiling-shared"
+                     else if enableLibraryProfiling && !self.enableSharedLibraries then
                        "haskell-${self.pname}-ghc${ghc.ghc.version}-${self.version}-profiling"
+                     else if !enableLibraryProfiling && self.enableSharedLibraries then
+                       "haskell-${self.pname}-ghc${ghc.ghc.version}-${self.version}-shared"
                      else
                        "haskell-${self.pname}-ghc${ghc.ghc.version}-${self.version}"
                    else
@@ -63,7 +90,7 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
             # but often propagatedBuildInputs is preferable anyway
             buildInputs = [ghc Cabal] ++ self.extraBuildInputs;
             extraBuildInputs = self.buildTools ++
-                               (stdenv.lib.optionals self.doCheck self.testDepends) ++
+                               (optionals self.doCheck self.testDepends) ++
                                (if self.pkgconfigDepends == [] then [] else [pkgconfig]) ++
                                (if self.isLibrary then [] else self.buildDepends ++ self.extraLibraries ++ self.pkgconfigDepends);
 
@@ -71,14 +98,24 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
             # have to check for its existence
             propagatedBuildInputs = if self.isLibrary then self.buildDepends ++ self.extraLibraries ++ self.pkgconfigDepends else [];
 
+            # By default, also propagate all dependencies to the user environment. This is required, otherwise packages would be broken, because
+            # GHC also needs all dependencies to be available.
+            propagatedUserEnvPkgs = if self.isLibrary then self.buildDepends else [];
+
             # library directories that have to be added to the Cabal files
             extraLibDirs = [];
 
             # build-depends Cabal field
             buildDepends = [];
 
+            # target(s) passed to the cabal build phase as an argument
+            buildTarget = "";
+
             # build-depends Cabal fields stated in test-suite stanzas
             testDepends = [];
+
+            # target(s) passed to the cabal test phase as an argument
+            testTarget = "";
 
             # build-tools Cabal field
             buildTools = [];
@@ -96,24 +133,48 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
             jailbreak = false;
 
             # pass the '--enable-split-objs' flag to cabal in the configure stage
-            enableSplitObjs = !(  stdenv.isDarwin         # http://hackage.haskell.org/trac/ghc/ticket/4013
-                               || stdenv.lib.versionOlder "7.6.99" ghc.ghcVersion  # -fsplit-ojbs is broken in 7.7 snapshot
+            enableSplitObjs = !(  stdenv.isDarwin                       # http://hackage.haskell.org/trac/ghc/ticket/4013
+                               || versionOlder "7.6.99" ghc.version     # -fsplit-ojbs is broken in 7.7 snapshot
                                );
 
             # pass the '--enable-tests' flag to cabal in the configure stage
             # and run any regression test suites the package might have
             doCheck = enableCheckPhase;
 
+            # abort the build if the configure phase detects that the package
+            # depends on multiple versions of the same build input
+            strictConfigurePhase = true;
+
+            # pass the '--enable-library-vanilla' flag to cabal in the
+            # configure stage to enable building shared libraries
+            inherit enableStaticLibraries;
+
+            # pass the '--enable-shared' flag to cabal in the configure
+            # stage to enable building shared libraries
+            inherit enableSharedLibraries;
+
+            # pass the '--enable-executable-dynamic' flag to cabal in
+            # the configure stage to enable linking shared libraries
+            inherit enableSharedExecutables;
+
             extraConfigureFlags = [
-              (stdenv.lib.enableFeature enableLibraryProfiling "library-profiling")
-              (stdenv.lib.enableFeature self.enableSplitObjs "split-objs")
-            ] ++ stdenv.lib.optional (stdenv.lib.versionOlder "7" ghc.ghcVersion) (stdenv.lib.enableFeature self.doCheck "tests");
+              (enableFeature self.enableSplitObjs "split-objs")
+              (enableFeature enableLibraryProfiling "library-profiling")
+              (enableFeature self.enableSharedLibraries "shared")
+              (optional (versionOlder "7" ghc.version) (enableFeature self.enableStaticLibraries "library-vanilla"))
+              (optional (versionOlder "7.4" ghc.version) (enableFeature self.enableSharedExecutables "executable-dynamic"))
+              (optional (versionOlder "7" ghc.version) (enableFeature self.doCheck "tests"))
+            ];
+
+            # GHC needs the locale configured during the Haddock phase.
+            LANG = "en_US.UTF-8";
+            LOCALE_ARCHIVE = optionalString stdenv.isLinux "${glibcLocales}/lib/locale/locale-archive";
 
             # compiles Setup and configures
             configurePhase = ''
               eval "$preConfigure"
 
-              ${lib.optionalString self.jailbreak "${jailbreakCabal}/bin/jailbreak-cabal ${self.pname}.cabal"}
+              ${optionalString self.jailbreak "${jailbreakCabal}/bin/jailbreak-cabal ${self.pname}.cabal"}
 
               for i in Setup.hs Setup.lhs; do
                 test -f $i && ghc --make $i
@@ -134,8 +195,20 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
                 done
               done
 
+              ${optionalString self.enableSharedExecutables ''
+                configureFlags+=" --ghc-option=-optl=-Wl,-rpath=$out/lib/${ghc.ghc.name}/${self.pname}-${self.version}";
+              ''}
+
               echo "configure flags: $extraConfigureFlags $configureFlags"
-              ./Setup configure --verbose --prefix="$out" --libdir='$prefix/lib/$compiler' --libsubdir='$pkgid' $extraConfigureFlags $configureFlags
+              ./Setup configure --verbose --prefix="$out" --libdir='$prefix/lib/$compiler' \
+                --libsubdir='$pkgid' $extraConfigureFlags $configureFlags 2>&1 \
+              ${optionalString self.strictConfigurePhase ''
+                | ${coreutils}/bin/tee "$NIX_BUILD_TOP/cabal-configure.log"
+                if ${gnugrep}/bin/egrep -q '^Warning:.*depends on multiple versions' "$NIX_BUILD_TOP/cabal-configure.log"; then
+                  echo >&2 "*** abort because of serious configure-time warning from Cabal"
+                  exit 1
+                fi
+              ''}
 
               eval "$postConfigure"
             '';
@@ -144,18 +217,18 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
             buildPhase = ''
               eval "$preBuild"
 
-              ./Setup build
+              ./Setup build ${self.buildTarget}
 
               export GHC_PACKAGE_PATH=$(${ghc.GHCPackages})
-              [ -n "$noHaddock" ] || ./Setup haddock
+              test -n "$noHaddock" || ./Setup haddock
 
               eval "$postBuild"
             '';
 
-            checkPhase = stdenv.lib.optional self.doCheck ''
+            checkPhase = optional self.doCheck ''
               eval "$preCheck"
 
-              ./Setup test
+              ./Setup test ${self.testTarget}
 
               eval "$postCheck"
             '';
@@ -180,13 +253,11 @@ assert enableCheckPhase -> stdenv.lib.versionOlder "7" ghc.ghcVersion;
                 GHC_PACKAGE_PATH=$installedPkgConf ghc-pkg --global register $pkgConf --force
               fi
 
-              eval "$postInstall"
-            '';
-
-            postFixup = ''
               if test -f $out/nix-support/propagated-native-build-inputs; then
                 ln -s $out/nix-support/propagated-native-build-inputs $out/nix-support/propagated-user-env-packages
               fi
+
+              eval "$postInstall"
             '';
 
             # We inherit stdenv and ghc so that they can be used

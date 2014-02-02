@@ -24,12 +24,12 @@ xfce_self = rec { # the lines are very long but it seems better than the even-od
   libxfcegui4     = callPackage ./core/libxfcegui4.nix { };
   thunar          = callPackage ./core/thunar.nix { };
   thunar_volman   = callPackage ./core/thunar-volman.nix { }; # ToDo: probably inside Thunar now
+  thunar_archive_plugin  = callPackage ./core/thunar-archive-plugin.nix { };
   tumbler         = callPackage ./core/tumbler.nix { };
   xfce4panel      = callPackage ./core/xfce4-panel.nix { }; # ToDo: impure plugins from /run/current-system/sw/lib/xfce4
   xfce4session    = callPackage ./core/xfce4-session.nix { };
   xfce4settings   = callPackage ./core/xfce4-settings.nix { };
   xfce4_power_manager = callPackage ./core/xfce4-power-manager.nix { };
-  xfceutils       = null; # removed in 4.10
   xfconf          = callPackage ./core/xfconf.nix { };
   xfdesktop       = callPackage ./core/xfdesktop.nix { };
   xfwm4           = callPackage ./core/xfwm4.nix { };
@@ -41,23 +41,25 @@ xfce_self = rec { # the lines are very long but it seems better than the even-od
 
   gigolo          = callPackage ./applications/gigolo.nix { };
   mousepad        = callPackage ./applications/mousepad.nix { };
+  parole          = callPackage ./applications/parole.nix { };
   ristretto       = callPackage ./applications/ristretto.nix { };
   terminal        = xfce4terminal; # it has changed its name
   xfce4mixer      = callPackage ./applications/xfce4-mixer.nix { };
   xfce4notifyd    = callPackage ./applications/xfce4-notifyd.nix { };
   xfce4taskmanager= callPackage ./applications/xfce4-taskmanager.nix { };
   xfce4terminal   = callPackage ./applications/terminal.nix { };
-
+  xfce4screenshooter   = callPackage ./applications/xfce4-screenshooter.nix { };
 
   #### ART                  from "mirror://xfce/src/art/${p_name}/${ver_maj}/${name}.tar.bz2"
 
   xfce4icontheme  = callPackage ./art/xfce4-icon-theme.nix { };
 
-
   #### PANEL PLUGINS        from "mirror://xfce/src/panel-plugins/${p_name}/${ver_maj}/${name}.tar.bz2"
 
   xfce4_systemload_plugin = callPackage ./panel-plugins/xfce4-systemload-plugin.nix { };
-  xfce4_cpufreq_plugin    = callPackage ./panel-plugins/xfce4-cpufreq-plugin.nix { };
+  xfce4_cpufreq_plugin    = callPackage ./panel-plugins/xfce4-cpufreq-plugin.nix    { };
+  xfce4_xkb_plugin        = callPackage ./panel-plugins/xfce4-xkb-plugin.nix        { };
+  xfce4_datetime_plugin   = callPackage ./panel-plugins/xfce4-datetime-plugin.nix   { };
 
 }; # xfce_self
 

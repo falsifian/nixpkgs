@@ -1,13 +1,14 @@
-{ cabal, pipes, transformers }:
+{ cabal, exceptions, pipes, transformers }:
 
 cabal.mkDerivation (self: {
   pname = "pipes-safe";
-  version = "1.2.0";
-  sha256 = "0ki9i9378j8kgw5dd91b38r686pcr9fl2vf9dfgfshia072ppggj";
-  buildDepends = [ pipes transformers ];
+  version = "2.0.1";
+  sha256 = "11516rixqdym5rf5z5f5gwbfk689dl3ka3dj44c7a2qy7xl4sqzr";
+  buildDepends = [ exceptions pipes transformers ];
   meta = {
     description = "Safety for the pipes ecosystem";
     license = self.stdenv.lib.licenses.bsd3;
     platforms = self.ghc.meta.platforms;
+    maintainers = [ self.stdenv.lib.maintainers.ocharles ];
   };
 })
