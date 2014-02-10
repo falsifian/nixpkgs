@@ -429,13 +429,13 @@ in
         '';
         mkhome = n: u:
          let
-            uid = toString u.uid;
-            gid = toString ((getGroup u.group).gid);
+            uname = toString u.name;
+            gname = toString ((getGroup u.group).name);
             h = u.home;
           in ''
             test -a "${h}" || mkdir -p "${h}" || true
-            test "$(stat -c %u "${h}")" = ${uid} || chown ${uid} "${h}" || true
-            test "$(stat -c %g "${h}")" = ${gid} || chgrp ${gid} "${h}" || true
+            test "$(stat -c %U "${h}")" = ${uname} || chown ${uname} "${h}" || true
+            test "$(stat -c %G "${h}")" = ${gname} || chgrp ${gname} "${h}" || true
           '';
       in stringAfter [ "etc" ] ''
         touch /etc/group
