@@ -7521,15 +7521,11 @@ let
 
   bibletime = callPackage ../applications/misc/bibletime { };
 
-  build_bitcoin = callPackage ../applications/misc/bitcoin/build_bitcoin.nix { db4 = db48; };
+  bitcoin = bitcoinWallets.bitcoin;
 
-  bitcoin = callPackage ../applications/misc/bitcoin/bitcoin.nix { };
-
-  litecoin = callPackage ../applications/misc/bitcoin/litecoin.nix { };
-
-  namecoin = callPackage ../applications/misc/bitcoin/namecoin.nix { };
-
-  ppcoin = callPackage ../applications/misc/bitcoin/ppcoin.nix { };
+  bitcoinWallets = callPackage ../applications/misc/bitcoin_etc {
+    buildBitcoin = callPackage ../applications/misc/bitcoin_etc/build-bitcoin.nix { db4 = db48; };
+  };
 
   bitlbee = callPackage ../applications/networking/instant-messengers/bitlbee {
     # For some reason, TLS support is broken when using GnuTLS 3.0 (can't
