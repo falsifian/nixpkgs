@@ -43,16 +43,20 @@ in {
         '';
       };
 
+    environment.variables.GIO_EXTRA_MODULES = "${gnome3.dconf}/lib/gio/modules";
     environment.systemPackages =
       [ gnome3.evince
         gnome3.eog
+        gnome3.dconf
         pkgs.ibus
         gnome3.gnome_shell
         gnome3.gnome_settings_daemon
         gnome3.gnome_terminal
         gnome3.gnome_icon_theme
         gnome3.gnome_themes_standard
+        gnome3.gnome_control_center
       ];
   };
+
 
 }

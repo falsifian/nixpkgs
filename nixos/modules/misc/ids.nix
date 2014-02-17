@@ -111,6 +111,7 @@
       memcached = 100;
       cgminer = 101;
       munin = 102;
+      logcheck = 103;
       tinc = 200;
 
       # When adding a uid, make sure it doesn't match an existing gid.
@@ -202,6 +203,7 @@
       openldap = 93;
       connman = 94;
       munin = 95;
+      keys = 96;
 
       # When adding a gid, make sure it doesn't match an existing uid.
 

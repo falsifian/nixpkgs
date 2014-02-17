@@ -82,7 +82,7 @@ rec {
         "--disable-javaxpcom"
       ] ++ commonConfigureFlags;
 
-    enableParallelBuilding = true;
+    #enableParallelBuilding = true; # cf. https://github.com/NixOS/nixpkgs/pull/1699#issuecomment-35196282
 
     preConfigure =
       ''
@@ -116,6 +116,7 @@ rec {
       for i in $out/lib/$libDir/{plugin-container,xulrunner,xulrunner-stub}; do
           wrapProgram $i --prefix LD_LIBRARY_PATH ':' "$out/lib/$libDir"
       done
+
       rm -f $out/bin/run-mozilla.sh
     ''; # */
 
