@@ -19,8 +19,8 @@
     self : self.haskellPlatformArgs_future self // {
       haskellPlatform = null;
       extensibleExceptions = self.extensibleExceptions_0_1_1_4;
-      cabalInstall_1_18_0_2 = self.cabalInstall_1_18_0_2.override { Cabal = null; };
-      cabalInstall = self.cabalInstall_1_18_0_2.override { Cabal = null; };
+      cabalInstall_1_18_0_3 = self.cabalInstall_1_18_0_3.override { Cabal = null; };
+      cabalInstall = self.cabalInstall_1_18_0_3.override { Cabal = null; };
     };
 
   ghc763Prefs =
@@ -80,7 +80,7 @@
       cabal2nix = self.cabal2nix.override { Cabal = self.Cabal_1_16_0_3; hackageDb = self.hackageDb.override { Cabal = self.Cabal_1_16_0_3; }; };
       prettyShow = self.prettyShow_1_2;
       binary = self.binary_0_6_0_0;
-      Cabal_1_18_1_2 = self.Cabal_1_18_1_2.override { deepseq = self.deepseq_1_3_0_2; };
+      Cabal_1_18_1_3 = self.Cabal_1_18_1_3.override { deepseq = self.deepseq_1_3_0_2; };
       quickcheckIo = self.quickcheckIo.override {
         HUnit = self.HUnit_1_2_5_2;
         QuickCheck = self.QuickCheck2;
@@ -102,7 +102,7 @@
       cabal2nix = self.cabal2nix.override { Cabal = self.Cabal_1_16_0_3; hackageDb = self.hackageDb.override { Cabal = self.Cabal_1_16_0_3; }; };
       prettyShow = self.prettyShow_1_2;
       binary = self.binary_0_6_0_0;
-      Cabal_1_18_1_2 = self.Cabal_1_18_1_2.override { deepseq = self.deepseq_1_3_0_2; };
+      Cabal_1_18_1_3 = self.Cabal_1_18_1_3.override { deepseq = self.deepseq_1_3_0_2; };
       quickcheckIo = self.quickcheckIo.override {
         HUnit = self.HUnit_1_2_5_2;
         QuickCheck = self.QuickCheck2;
@@ -126,7 +126,7 @@
       cabal2nix = self.cabal2nix.override { Cabal = self.Cabal_1_16_0_3; hackageDb = self.hackageDb.override { Cabal = self.Cabal_1_16_0_3; }; };
       prettyShow = self.prettyShow_1_2;
       binary = self.binary_0_6_0_0;
-      Cabal_1_18_1_2 = self.Cabal_1_18_1_2.override { deepseq = self.deepseq_1_3_0_2; };
+      Cabal_1_18_1_3 = self.Cabal_1_18_1_3.override { deepseq = self.deepseq_1_3_0_2; };
       quickcheckIo = self.quickcheckIo.override {
         HUnit = self.HUnit_1_2_5_2;
         QuickCheck = self.QuickCheck2;
