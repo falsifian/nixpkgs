@@ -61,6 +61,7 @@
   ./security/apparmor.nix
   ./security/apparmor-suid.nix
   ./security/ca.nix
+  ./security/duosec.nix
   ./security/pam.nix
   ./security/pam_usb.nix
   ./security/polkit.nix
@@ -81,6 +82,8 @@
   ./services/backup/rsnapshot.nix
   ./services/backup/sitecopy-backup.nix
   ./services/backup/tarsnap.nix
+  ./services/continuous-integration/jenkins/default.nix
+  ./services/continuous-integration/jenkins/slave.nix
   ./services/databases/4store-endpoint.nix
   ./services/databases/4store.nix
   ./services/databases/couchdb.nix
@@ -177,6 +180,7 @@
   ./services/networking/minidlna.nix
   ./services/networking/nat.nix
   ./services/networking/networkmanager.nix
+  ./services/networking/notbit.nix
   ./services/networking/ntopng.nix
   ./services/networking/ntpd.nix
   ./services/networking/oidentd.nix
@@ -207,6 +211,7 @@
   ./services/scheduling/cron.nix
   ./services/scheduling/fcron.nix
   ./services/search/elasticsearch.nix
+  ./services/search/solr.nix
   ./services/security/clamav.nix
   ./services/security/haveged.nix
   ./services/security/fprot.nix
@@ -229,8 +234,10 @@
   ./services/web-servers/lighttpd/cgit.nix
   ./services/web-servers/lighttpd/gitweb.nix
   ./services/web-servers/nginx/default.nix
+  ./services/web-servers/phpfpm.nix
   ./services/web-servers/tomcat.nix
   ./services/web-servers/varnish/default.nix
+  ./services/web-servers/winstone.nix
   ./services/web-servers/zope2.nix
   ./services/x11/desktop-managers/default.nix
   ./services/x11/display-managers/auto.nix

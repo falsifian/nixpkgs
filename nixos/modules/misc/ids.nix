@@ -116,6 +116,10 @@
       dictd = 105;
       couchdb = 106;
       searx = 107;
+      kippo = 108;
+      jenkins = 109;
+      systemd-journal-gateway = 110;
+      notbit = 111;
       tinc = 200;
 
       # When adding a uid, make sure it doesn't match an existing gid.
@@ -211,6 +215,10 @@
       dictd = 105;
       couchdb = 106;
       searx = 107;
+      kippo = 108;
+      jenkins = 109;
+      systemd-journal-gateway = 110;
+      notbit = 111;
 
       # When adding a gid, make sure it doesn't match an existing uid.
 
