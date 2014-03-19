@@ -9,7 +9,7 @@ stdenv.mkDerivation rec {
   name = "librsvg-2.36.4"; # 2.37 needs pango 1.32.6, 2.40 doesn't support gtk2
 
   src = fetchurl {
-    url    = "mirror://gnome/sources/librsvg/2.36/${name}.tar.xz";
+    url    = "mirror://gnome/sources/librsvg/2.36/${name}.tar.xz_VULNERABLE_CVE-2013-1881";
     sha256 = "1hp6325gdkzx8yqn2d2r915ak3k6hfshjjh0sc54z3vr0i99688h";
   };
 
