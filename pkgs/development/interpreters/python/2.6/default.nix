@@ -13,7 +13,7 @@ let
 
   # python 2.6 will receive security fixes until Oct 2013
   src = fetchurl {
-    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.xz";
+    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.xz_VULNERABLE_CVE-2014-1912";
     sha256 = "0hbfs2691b60c7arbysbzr0w9528d5pl8a4x7mq5psh6a2cvprya";
   };
 

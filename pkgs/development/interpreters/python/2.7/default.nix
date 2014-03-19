@@ -11,7 +11,7 @@ let
   version = "${majorVersion}.6";
 
   src = fetchurl {
-    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.xz";
+    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.xz";  # VULNERABLE to CVE-2014-1912
     sha256 = "18gnpyh071dxa0rv3silrz92jw9qpblswzwv4gzqcwxzz20qxmhz";
   };
 
