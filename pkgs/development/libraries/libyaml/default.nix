@@ -6,7 +6,7 @@ stdenv.mkDerivation {
   name = "libyaml-${version}";
 
   src = fetchurl {
-    url = "http://pyyaml.org/download/libyaml/yaml-${version}.tar.gz";
+    url = "http://pyyaml.org/download/libyaml/yaml-${version}.tar.gz_XXX_CVE-2014-2525";
     sha256 = "1vrv5ly58bkmcyc049ad180f2m8iav6l9h3v8l2fqdmrny7yx1zs";
   };
 
