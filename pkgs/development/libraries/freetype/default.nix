@@ -18,7 +18,7 @@ stdenv.mkDerivation rec {
   name = "freetype-${version}";
 
   src = fetchurl {
-    url = "mirror://sourceforge/freetype/${name}.tar.bz2";
+    url = "mirror://sourceforge/freetype/${name}.tar.bz2";  # Vulnerable: CVE-2014-2240
     sha256 = "10akr2c37iv9y7fkgwp2szgwjyl2g6qmk9z1m596iaw9cr41g2m7";
   };
 
