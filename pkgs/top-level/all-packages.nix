@@ -3425,9 +3425,7 @@ let
   };
 
   ruby18 = callPackage ../development/interpreters/ruby/ruby-18.nix { };
-  ruby19 = callPackage ../development/interpreters/ruby/ruby-19.nix {
-      yamlSupport = false;
-  };
+  ruby19 = callPackage ../development/interpreters/ruby/ruby-19.nix { };
   ruby2 = lowPrio (callPackage ../development/interpreters/ruby/ruby-2.0.nix { });
 
   ruby = ruby19;
