@@ -44,12 +44,6 @@ rec {
     features.apparmor = true;
   };
 
-  sec_perm_2_6_24 =
-    { name = "sec_perm-2.6.24";
-      patch = ./sec_perm-2.6.24.patch;
-      features.secPermPatch = true;
-    };
-
   no_xsave =
     { name = "no-xsave";
       patch = ./no-xsave.patch;
@@ -78,25 +72,25 @@ rec {
   };
 
 
-  grsecurity_3_0_3_2_55 =
-    { name = "grsecurity-3.0-3.2.55";
+  grsecurity_3_0_3_2_56 =
+    { name = "grsecurity-3.0-3.2.56";
       patch = fetchurl {
-        url = http://grsecurity.net/stable/grsecurity-3.0-3.2.55-201403142107.patch;
-        sha256 = "0v858lizqbvp0czpx5vg0h1sd5mb5kik1qhv4hh7y01cx6dywam2";
+        url = http://grsecurity.net/stable/grsecurity-3.0-3.2.56-201404062126.patch;
+        sha256 = "0pm8a6h5dky1frg7bi6ldq849w8xz8isnlw5jpbzix46m3myy3x0";
       };
       features.grsecurity = true;
-      # The grsec kernel patch seems to include the apparmor patches as of 3.0-3.2.55
+      # The grsec kernel patch seems to include the apparmor patches as of 3.0-3.2.56
       features.apparmor = true;
     };
 
-  grsecurity_3_0_3_13_6 =
-    { name = "grsecurity-3.0-3.13.6";
+  grsecurity_3_0_3_13_9 =
+    { name = "grsecurity-3.0-3.13.9";
       patch = fetchurl {
-        url = http://grsecurity.net/test/grsecurity-3.0-3.13.6-201403142112.patch;
-        sha256 = "12wdibf7xfqjwr1cnar3nskgrlm04w68impaq4a3xg1blb9nxxhr";
+        url = http://grsecurity.net/test/grsecurity-3.0-3.13.9-201404062127.patch;
+        sha256 = "0kwqgw2a44wqhwjwws63ww15apb8jki372iccq7h1w5vi551sl0m";
       };
       features.grsecurity = true;
-      # The grsec kernel patch seems to include the apparmor patches as of 3.0-3.13.6
+      # The grsec kernel patch seems to include the apparmor patches as of 3.0-3.13.9
       features.apparmor = true;
     };
 

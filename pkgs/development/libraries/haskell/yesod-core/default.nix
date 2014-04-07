@@ -1,30 +1,32 @@
 { cabal, aeson, async, attoparsecConduit, blazeBuilder, blazeHtml
 , blazeMarkup, caseInsensitive, cereal, clientsession, conduit
-, cookie, dataDefault, failure, fastLogger, hamlet, hspec
-, httpTypes, HUnit, liftedBase, monadControl, monadLogger, network
-, networkConduit, parsec, pathPieces, QuickCheck, random, resourcet
-, safe, shakespeare, shakespeareCss, shakespeareI18n, shakespeareJs
-, text, time, transformers, transformersBase, unixCompat, vector
-, wai, waiExtra, waiLogger, waiTest, warp, yesodRoutes
+, conduitExtra, cookie, dataDefault, fastLogger, hamlet, hspec
+, httpTypes, HUnit, liftedBase, monadControl, monadLogger, mtl
+, network, networkConduit, parsec, pathPieces, QuickCheck, random
+, resourcet, safe, shakespeare, shakespeareCss, shakespeareI18n
+, shakespeareJs, streamingCommons, text, time, transformers
+, transformersBase, unixCompat, vector, wai, waiExtra, waiLogger
+, waiTest, warp, yesodRoutes
 }:
 
 cabal.mkDerivation (self: {
   pname = "yesod-core";
-  version = "1.2.7";
-  sha256 = "1gkpx0d7hyvn45254aj40iy4k0bf3kkrvmxnw3q1mvqc3k1kdxqn";
+  version = "1.2.11";
+  sha256 = "0vg07g5735qsr01wpgxpjzjc7w9nrqvkhfnd90jzdvg3kg33dgih";
   buildDepends = [
     aeson attoparsecConduit blazeBuilder blazeHtml blazeMarkup
-    caseInsensitive cereal clientsession conduit cookie dataDefault
-    failure fastLogger hamlet httpTypes liftedBase monadControl
-    monadLogger parsec pathPieces random resourcet safe shakespeare
+    caseInsensitive cereal clientsession conduit conduitExtra cookie
+    dataDefault fastLogger hamlet httpTypes liftedBase monadControl
+    monadLogger mtl parsec pathPieces random resourcet safe shakespeare
     shakespeareCss shakespeareI18n shakespeareJs text time transformers
     transformersBase unixCompat vector wai waiExtra waiLogger warp
     yesodRoutes
   ];
   testDepends = [
-    async blazeBuilder conduit hamlet hspec httpTypes HUnit liftedBase
-    network networkConduit QuickCheck random resourcet shakespeareCss
-    shakespeareJs text transformers wai waiTest
+    async blazeBuilder conduit conduitExtra hamlet hspec httpTypes
+    HUnit liftedBase network networkConduit QuickCheck random resourcet
+    shakespeare shakespeareCss shakespeareJs streamingCommons text
+    transformers wai waiTest
   ];
   jailbreak = true;
   meta = {
