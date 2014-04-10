@@ -164,6 +164,7 @@
   ./services/networking/bind.nix
   ./services/networking/bitlbee.nix
   ./services/networking/btsync.nix
+  ./services/networking/cjdns.nix
   ./services/networking/connman.nix
   ./services/networking/cntlm.nix
   ./services/networking/chrony.nix
@@ -307,6 +308,7 @@
   ./tasks/scsi-link-power-management.nix
   ./tasks/swraid.nix
   ./testing/service-runner.nix
+  ./virtualisation/container-config.nix
   ./virtualisation/containers.nix
   ./virtualisation/libvirtd.nix
   #./virtualisation/nova.nix

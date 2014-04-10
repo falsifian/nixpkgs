@@ -1122,7 +1122,7 @@ let
     buggyBiosCDSupport = config.grub.buggyBiosCDSupport or true;
   };
 
-  grub2 = callPackage ../tools/misc/grub/2.0x.nix { libusb = libusb1; };
+  grub2 = callPackage ../tools/misc/grub/2.0x.nix { libusb = libusb1; flex = flex_2_5_35; };
 
   grub2_efi = grub2.override { EFIsupport = true; };
 
@@ -1281,6 +1281,8 @@ let
   lockfileProgs = callPackage ../tools/misc/lockfile-progs { };
 
   logstash = callPackage ../tools/misc/logstash { };
+
+  logstash-forwarder = callPackage ../tools/misc/logstash-forwarder { };
 
   kippo = callPackage ../servers/kippo { };
 
@@ -2422,7 +2424,7 @@ let
   clangUnwrapped = llvm: pkg: callPackage pkg {
       stdenv = if stdenv.isDarwin
          then stdenvAdapters.overrideGCC stdenv gccApple
-         else stdenvAdapters.overrideGCC stdenv gcc48;
+         else stdenv;
       llvm = llvm;
   };
 
@@ -2924,10 +2926,9 @@ let
 
   lessc = callPackage ../development/compilers/lessc { };
 
-  llvm = if stdenv.isDarwin then llvm_33 # until someone solves build problems with _34
-    else llvmPackages.llvm;
+  llvm = llvmPackages.llvm;
 
-  llvm_34 = llvmPackages.llvm;
+  llvm_34 = llvmPackages_34.llvm;
   llvm_33 = llvm_v ../development/compilers/llvm/3.3/llvm.nix;
   llvm_32 = llvm_v ../development/compilers/llvm/3.2;
   llvm_31 = llvm_v ../development/compilers/llvm/3.1;
@@ -2938,12 +2939,14 @@ let
       else stdenv;
   };
 
-  llvmPackages = recurseIntoAttrs (import ../development/compilers/llvm/3.4 {
-    inherit newScope fetchurl;
+  llvmPackages = if !stdenv.isDarwin then llvmPackages_34 else {
+    # until someone solves build problems with _34
+    llvm = llvm_33;
+    clang = clang_33;
+  };
+  llvmPackages_34 = recurseIntoAttrs (import ../development/compilers/llvm/3.4 {
+    inherit stdenv newScope fetchurl;
     isl = isl_0_12;
-    stdenv = if stdenv.isDarwin
-      then stdenvAdapters.overrideGCC stdenv gcc48
-      else stdenv;
   });
   llvmPackagesSelf = import ../development/compilers/llvm/3.4 { inherit newScope fetchurl; isl = isl_0_12; stdenv = libcxxStdenv; };
 
@@ -3733,6 +3736,7 @@ let
   checkstyle = callPackage ../development/tools/analysis/checkstyle { };
 
   flex = callPackage ../development/tools/parsing/flex { };
+  flex_2_5_35 = callPackage ../development/tools/parsing/flex/2.5.35.nix { };
 
   m4 = gnum4;
 
@@ -4561,7 +4565,9 @@ let
   };
   cairomm = callPackage ../development/libraries/cairomm { };
 
-  pango = callPackage ../development/libraries/pango { };
+  pango = callPackage ../development/libraries/pango (
+    lib.optionalAttrs stdenv.isDarwin { flex = flex_2_5_35; } # flex fails to build
+  );
   pangomm = callPackage ../development/libraries/pangomm { };
 
   pangox_compat = callPackage ../development/libraries/pangox-compat { };
@@ -5199,6 +5205,8 @@ let
   libtunepimp = callPackage ../development/libraries/libtunepimp { };
 
   libtxc_dxtn = callPackage ../development/libraries/libtxc_dxtn { };
+
+  libtxc_dxtn_s2tc = callPackage ../development/libraries/libtxc_dxtn_s2tc { };
 
   libgeotiff = callPackage ../development/libraries/libgeotiff { };
 
@@ -6912,7 +6920,7 @@ let
   linux_3_2_grsecurity = lowPrio (lib.addMetaAttrs {
     maintainers = with lib.maintainers; [ wizeman thoughtpolice ];
   } (lib.overrideDerivation (linux_3_2.override (args: {
-    kernelPatches = args.kernelPatches ++ [ kernelPatches.grsecurity_3_0_3_2_56 kernelPatches.grsec_path ];
+    kernelPatches = args.kernelPatches ++ [ kernelPatches.grsecurity_3_0_3_2_57 kernelPatches.grsec_path ];
     argsOverride = {
       modDirVersion = "${linux_3_2.modDirVersion}-grsec";
     };
