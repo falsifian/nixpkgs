@@ -3153,9 +3153,7 @@ let
   scala_2_10 = callPackage ../development/compilers/scala { };
   scala = scala_2_10;
 
-  sdcc = callPackage ../development/compilers/sdcc {
-    boost = boost149; # sdcc 3.2.0 fails to build with boost 1.53
-  };
+  sdcc = callPackage ../development/compilers/sdcc { };
 
   smlnj = callPackage_i686 ../development/compilers/smlnj { };
 
@@ -6445,6 +6443,8 @@ let
 
   joseki = callPackage ../servers/http/joseki {};
 
+  leafnode = callPackage ../servers/news/leafnode { };
+
   lighttpd = callPackage ../servers/http/lighttpd { };
 
   mailman = callPackage ../servers/mail/mailman { };
@@ -7055,6 +7055,8 @@ let
 
     spl = callPackage ../os-specific/linux/spl/default.nix { };
 
+    sysdig = callPackage ../os-specific/linux/sysdig {};
+
     tp_smapi = callPackage ../os-specific/linux/tp_smapi { };
 
     v86d = callPackage ../os-specific/linux/v86d { };
@@ -7220,6 +7222,8 @@ let
   procps-old = lowPrio (callPackage ../os-specific/linux/procps { });
 
   procps-ng = callPackage ../os-specific/linux/procps-ng { };
+
+  watch = callPackage ../os-specific/linux/procps/watch.nix { };
 
   qemu_kvm = lowPrio (qemu.override { x86Only = true; });
 
@@ -7933,6 +7937,8 @@ let
     coffee = callPackage ../applications/editors/emacs-modes/coffee { };
 
     colorTheme = callPackage ../applications/editors/emacs-modes/color-theme { };
+
+    cryptol = callPackage ../applications/editors/emacs-modes/cryptol { };
 
     cua = callPackage ../applications/editors/emacs-modes/cua { };
 
@@ -9885,7 +9891,9 @@ let
 
   cinnamon = recurseIntoAttrs rec {
     callPackage = newScope pkgs.cinnamon;
-    inherit (gnome3) gnome_common;
+    inherit (gnome3) gnome_common libgnomekbd;
+
+    cinnamon-settings-daemon = callPackage ../desktops/cinnamon/cinnamon-settings-daemon.nix{ };
 
     cinnamon-session = callPackage ../desktops/cinnamon/cinnamon-session.nix{ } ;
 
@@ -9924,17 +9932,7 @@ let
 
   kde4_next = recurseIntoAttrs( lib.lowPrioSet pkgs.kde412 );
 
-  kde4_prev = recurseIntoAttrs pkgs.kde410;
-
-  kde410 = kdePackagesFor (pkgs.kde410 // {
-      boost = boost149;
-      eigen = eigen2;
-      libotr = libotr_3_2;
-      libusb = libusb1;
-      libcanberra = libcanberra_kde;
-    }) ../desktops/kde-4.10;
-
- kde411 = kdePackagesFor (pkgs.kde411 // {
+  kde411 = kdePackagesFor (pkgs.kde411 // {
       boost = boost149;
       eigen = eigen2;
       libotr = libotr_3_2;
@@ -9942,7 +9940,7 @@ let
       libcanberra = libcanberra_kde;
     }) ../desktops/kde-4.11;
 
- kde412 = kdePackagesFor (pkgs.kde412 // {
+  kde412 = kdePackagesFor (pkgs.kde412 // {
       eigen = eigen2;
       libusb = libusb1;
       libcanberra = libcanberra_kde;

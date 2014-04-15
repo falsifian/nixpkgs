@@ -129,7 +129,8 @@
       foundationdb = 118;
       newrelic = 119;
       starbound = 120;
-      hydra     = 121;
+      hydra     = 122;
+      spiped    = 123;
 
       tinc = 200;
 
@@ -235,6 +236,8 @@
       newrelic = 119;
       starbound = 120;
       grsecurity = 121;
+      hydra = 122;
+      spiped = 123;
 
       # When adding a gid, make sure it doesn't match an existing uid.
 

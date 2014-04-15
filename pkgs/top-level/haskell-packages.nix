@@ -705,6 +705,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   bytestringProgress = callPackage ../development/libraries/haskell/bytestring-progress {};
 
+  bzlib = callPackage ../development/libraries/haskell/bzlib {};
+
   c2hs = callPackage ../development/libraries/haskell/c2hs {};
 
   c2hsc = callPackage ../development/libraries/haskell/c2hsc {};
@@ -1086,6 +1088,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   explicitException = callPackage ../development/libraries/haskell/explicit-exception {};
 
   executablePath = callPackage ../development/libraries/haskell/executable-path {};
+
+  Extra = callPackage ../development/libraries/haskell/Extra {};
 
   fay = callPackage ../development/libraries/haskell/fay {};
 
@@ -1566,6 +1570,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   ioStreams = callPackage ../development/libraries/haskell/io-streams {};
 
+  ipprint = callPackage ../development/libraries/haskell/ipprint {};
+
   iproute = callPackage ../development/libraries/haskell/iproute {};
 
   irc = callPackage ../development/libraries/haskell/irc {};
@@ -1750,6 +1756,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   monadControl = callPackage ../development/libraries/haskell/monad-control {};
 
   monadcryptorandom = callPackage ../development/libraries/haskell/monadcryptorandom {};
+
+  monadExtras = callPackage ../development/libraries/haskell/monad-extras {};
 
   monadloc = callPackage ../development/libraries/haskell/monadloc {};
 
@@ -2599,6 +2607,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   unixTime = callPackage ../development/libraries/haskell/unix-time {};
 
+  Unixutils = callPackage ../development/libraries/haskell/Unixutils {};
+
   unlambda = callPackage ../development/libraries/haskell/unlambda {};
 
   unorderedContainers_0_2_3_0 = callPackage ../development/libraries/haskell/unordered-containers/0.2.3.0.nix {};
@@ -2994,6 +3004,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   cabalDev = callPackage ../development/tools/haskell/cabal-dev {};
 
+  cabalMeta = callPackage ../development/tools/haskell/cabal-meta {};
+
   cabal2Ghci = callPackage ../development/tools/haskell/cabal2ghci {};
 
   cabalGhci = callPackage ../development/tools/haskell/cabal-ghci {};
@@ -3023,9 +3035,15 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   packunused = callPackage ../development/tools/haskell/packunused {};
 
+  rehoo = callPackage ../development/tools/haskell/rehoo {};
+
+  sizes = callPackage ../tools/system/sizes {};
+
   splot = callPackage ../development/tools/haskell/splot {};
 
   timeplot = callPackage ../development/tools/haskell/timeplot {};
+
+  una = callPackage ../development/tools/haskell/una {};
 
   # Games.
 
