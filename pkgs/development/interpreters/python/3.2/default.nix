@@ -28,7 +28,7 @@ stdenv.mkDerivation {
   inherit majorVersion version;
 
   src = fetchurl {
-    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.bz2_VULNERABLE_CVE-2014-1912";
+    url = "http://www.python.org/ftp/python/${version}/Python-${version}.tar.bz2";
     sha256 = "0pxs234g08v3lar09lvzxw4vqdpwkbqmvkv894j2w7aklskcjd6v";
   };
 
