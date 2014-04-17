@@ -18,14 +18,14 @@
 }:
 
 let
-  version = "6.8.8-7";
+  version = "6.8.9-0";
 in
 stdenv.mkDerivation rec {
   name = "ImageMagick-${version}";
 
   src = fetchurl {
-    url = "mirror://imagemagick/${name}.tar.xz_VULNERABLE";  # CVE-2014-{1947,1958,2030}.  See https://bugzilla.redhat.com/show_bug.cgi?id=1064098 .  Based on that and on http://www.imagemagick.org/script/changelog.php and on https://bugzilla.redhat.com/show_bug.cgi?id=1067276 , it looks like they are fixed in ImageMagick 6.8.9-0.
-    sha256 = "1x5jkbrlc10rx7vm344j7xrs74c80xk3n1akqx8w5c194fj56mza";
+    url = "mirror://imagemagick/${name}.tar.xz";
+    sha256 = "1lapn2798fkc2wn81slpms5p21kq4dsyg45khsk7n8p69cvrmw2b";
   };
 
   enableParallelBuilding = true;
