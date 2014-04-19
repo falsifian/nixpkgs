@@ -1,6 +1,6 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-with pkgs.lib;
+with lib;
 
 let
 
@@ -64,9 +64,6 @@ in
   ###### implementation
 
   config = mkIf cfg.enable {
-
-    # Enable the ACPI daemon.  Not sure whether this is essential.
-    services.acpid.enable = true;
 
     boot.kernelModules =
       [ "acpi_cpufreq" "powernow-k8" "cpufreq_performance" "cpufreq_powersave" "cpufreq_ondemand"

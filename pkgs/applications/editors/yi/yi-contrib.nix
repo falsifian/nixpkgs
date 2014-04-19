@@ -1,10 +1,12 @@
-{ cabal, dataAccessor, filepath, mtl, split, yi }:
+{ cabal, filepath, lens, mtl, split, time, transformersBase, yi }:
 
 cabal.mkDerivation (self: {
   pname = "yi-contrib";
-  version = "0.7.1";
-  sha256 = "0915ikck01kc5npbvywd9r7azylqrhfymzc72rf4iaghz4w939li";
-  buildDepends = [ dataAccessor filepath mtl split yi ];
+  version = "0.8.1";
+  sha256 = "0jsbga30x302mr708vj5y7cpc961vh85dshpq2zlrf44dh0kmpvf";
+  buildDepends = [
+    filepath lens mtl split time transformersBase yi
+  ];
   meta = {
     homepage = "http://haskell.org/haskellwiki/Yi";
     description = "Add-ons to Yi, the Haskell-Scriptable Editor";

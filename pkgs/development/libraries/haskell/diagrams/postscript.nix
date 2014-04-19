@@ -1,14 +1,15 @@
-{ cabal, diagramsCore, diagramsLib, dlist, filepath, hashable, lens
-, monoidExtras, mtl, semigroups, split, vectorSpace
+{ cabal, dataDefaultClass, diagramsCore, diagramsLib, dlist
+, filepath, hashable, lens, monoidExtras, mtl, semigroups, split
+, vectorSpace
 }:
 
 cabal.mkDerivation (self: {
   pname = "diagrams-postscript";
-  version = "1.0.1.2";
-  sha256 = "0im1w70qi8qs2z8x41v7pwvk1alfaw1h8k0683njzd5sfz2m1gny";
+  version = "1.0.2.4";
+  sha256 = "0vjzvjyrbmnjgl8ln58a44nhh4abq5q2c6fvlpxpfhxh2ligsmas";
   buildDepends = [
-    diagramsCore diagramsLib dlist filepath hashable lens monoidExtras
-    mtl semigroups split vectorSpace
+    dataDefaultClass diagramsCore diagramsLib dlist filepath hashable
+    lens monoidExtras mtl semigroups split vectorSpace
   ];
   meta = {
     homepage = "http://projects.haskell.org/diagrams/";

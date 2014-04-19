@@ -20,9 +20,9 @@
 
 
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-with pkgs.lib;
+with lib;
 
 let
 
@@ -32,9 +32,9 @@ let
     ''
       # Helper command to manipulate both the IPv4 and IPv6 tables.
       ip46tables() {
-        iptables "$@"
+        iptables -w "$@"
         ${optionalString config.networking.enableIPv6 ''
-          ip6tables "$@"
+          ip6tables -w "$@"
         ''}
       }
     '';
@@ -54,7 +54,7 @@ in
 
     networking.firewall.enable = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description =
         ''
           Whether to enable the firewall.  This is a simple stateful
@@ -168,6 +168,17 @@ in
           ("pings").  ICMPv6 pings are always allowed because the
           larger address space of IPv6 makes network scanning much
           less effective.
+        '';
+    };
+
+    networking.firewall.pingLimit = mkOption {
+      default = null;
+      type = types.nullOr (types.separatedString " ");
+      description =
+        ''
+          If pings are allowed, this allows setting rate limits
+          on them. If non-null, this option should be in the form
+          of flags like "-limit 1/minute -limit-burst 5"
         '';
     };
 
@@ -375,7 +386,9 @@ in
 
             # Optionally respond to ICMPv4 pings.
             ${optionalString cfg.allowPing ''
-              iptables -A nixos-fw -p icmp --icmp-type echo-request -j nixos-fw-accept
+              iptables -w -A nixos-fw -p icmp --icmp-type echo-request ${optionalString (cfg.pingLimit != null)
+                "-m limit ${cfg.pingLimit} "
+              }-j nixos-fw-accept
             ''}
 
             # Accept all ICMPv6 messages except redirects and node

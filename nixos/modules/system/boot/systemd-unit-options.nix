@@ -1,6 +1,6 @@
-{ config, pkgs }:
+{ config, lib }:
 
-with pkgs.lib;
+with lib;
 
 let
 
@@ -39,6 +39,12 @@ in rec {
         template instances (e.g. <literal>serial-getty@ttyS0</literal>)
         from being started.
       '';
+    };
+
+    baseUnit = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to an upstream unit file on which the NixOS unit configuration will be based.";
     };
 
     description = mkOption {
@@ -135,6 +141,7 @@ in rec {
 
     restartTriggers = mkOption {
       default = [];
+      type = types.listOf types.unspecified;
       description = ''
         An arbitrary list of items such as derivations.  If any item
         in the list changes between reconfigurations, the service will
@@ -236,6 +243,17 @@ in rec {
       '';
     };
 
+    reloadIfChanged = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Whether the service should be reloaded during a NixOS
+        configuration switch if its definition has changed.  If
+        enabled, the value of <option>restartIfChanged</option> is
+        ignored.
+      '';
+    };
+
     stopIfChanged = mkOption {
       type = types.bool;
       default = true;
@@ -307,6 +325,23 @@ in rec {
         <citerefentry><refentrytitle>systemd.timer</refentrytitle>
         <manvolnum>5</manvolnum></citerefentry> and
         <citerefentry><refentrytitle>systemd.time</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
+
+  };
+
+
+  pathOptions = unitOptions // {
+
+    pathConfig = mkOption {
+      default = {};
+      example = { PathChanged = "/some/path"; Unit = "changedpath.service"; };
+      type = types.attrsOf unitOption;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[Path]</literal> section of the unit.  See
+        <citerefentry><refentrytitle>systemd.path</refentrytitle>
         <manvolnum>5</manvolnum></citerefentry> for details.
       '';
     };

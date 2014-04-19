@@ -1,8 +1,8 @@
 # Module for VirtualBox guests.
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-with pkgs.lib;
+with lib;
 
 let
 
@@ -37,6 +37,8 @@ optionalAttrs (pkgs.stdenv.isi686 || pkgs.stdenv.isx86_64) # ugly...
     environment.systemPackages = [ kernel.virtualboxGuestAdditions ];
 
     boot.extraModulePackages = [ kernel.virtualboxGuestAdditions ];
+
+    boot.kernelModules = [ "vboxsf" ];
 
     users.extraGroups.vboxsf.gid = config.ids.gids.vboxsf;
 

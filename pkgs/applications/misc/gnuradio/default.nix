@@ -23,11 +23,11 @@
 
 stdenv.mkDerivation rec {
   name = "gnuradio-${version}";
-  version = "3.7.2.1";
+  version = "3.7.3";
 
   src = fetchurl {
     url = "http://gnuradio.org/releases/gnuradio/${name}.tar.gz";
-    sha256 = "101wr19nxfc5x7i4s10vgrypaa0vj2pkg8b2vn5j5s9iv8gpwswc";
+    sha256 = "0caj7dqppav53nhn0ima106hpsn0sakw57v1ihac9fk7ka0x2w8w";
   };
 
   buildInputs = [
@@ -53,7 +53,7 @@ stdenv.mkDerivation rec {
 
     for file in "$out"/bin/* "$out"/share/gnuradio/examples/*/*.py; do
         wrapProgram "$file" \
-            --set PYTHONPATH $PYTHONPATH:$(toPythonPath "$out") \
+            --prefix PYTHONPATH : $PYTHONPATH:$(toPythonPath "$out") \
             --set MATPLOTLIBRC "$out/share/gnuradio"
     done
   '';

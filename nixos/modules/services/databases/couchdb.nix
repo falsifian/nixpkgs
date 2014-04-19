@@ -1,9 +1,8 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-with pkgs.lib;
+with lib;
 
 let
-
   cfg = config.services.couchdb;
   configFile = pkgs.writeText "couchdb.ini"
     ''
@@ -19,10 +18,8 @@ let
       [log]
       file = ${cfg.logFile}
     '';
-  configExtraFile = pkgs.writeText "couchdb-extra.ini" cfg.extraConfig;
 
-in
-{
+in {
 
   ###### interface
 
@@ -61,14 +58,6 @@ in
         default = "couchdb";
         description = ''
           Group account under which couchdb runs.
-        '';
-      };
-
-      pidFile = mkOption {
-        type = types.path;
-        default = "/var/run/couchdb/couchdb.pid";
-        description = ''
-          pid file.
         '';
       };
 
@@ -153,26 +142,23 @@ in
 
       preStart =
         ''
-        mkdir -p `dirname ${cfg.pidFile}`;
         mkdir -p `dirname ${cfg.uriFile}`;
         mkdir -p `dirname ${cfg.logFile}`;
-        touch ${cfg.logFile};
         mkdir -p ${cfg.databaseDir};
         mkdir -p ${cfg.viewIndexDir};
-        chown ${cfg.user}:${cfg.group} `dirname ${cfg.pidFile}`
-        chown ${cfg.user}:${cfg.group} `dirname ${cfg.uriFile}`
-        chown ${cfg.user}:${cfg.group} ${cfg.logFile}
-        chown ${cfg.user}:${cfg.group} ${cfg.databaseDir}
-        chown ${cfg.user}:${cfg.group} ${cfg.viewIndexDir}
+
+        if [ "$(id -u)" = 0 ]; then
+          chown ${cfg.user}:${cfg.group} `dirname ${cfg.uriFile}`
+          chown ${cfg.user}:${cfg.group} ${cfg.databaseDir}
+          chown ${cfg.user}:${cfg.group} ${cfg.viewIndexDir}
+        fi
         '';
 
       serviceConfig = {
         PermissionsStartOnly = true;
         User = cfg.user;
         Group = cfg.group;
-        Type = "forking";
-        ExecStart = "${cfg.package}/bin/couchdb -b -o /dev/null -e /dev/null -p ${cfg.pidFile} -a ${configFile} -a ${configExtraFile}";
-        ExecStop = "${cfg.package}/bin/couchdb -d";
+        ExecStart = "${cfg.package}/bin/couchdb -a ${configFile} -a ${pkgs.writeText "couchdb-extra.ini" cfg.extraConfig}";
       };
     };
 

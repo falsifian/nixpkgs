@@ -3,9 +3,9 @@
 # of the virtual consoles.  The latter is useful for the installation
 # CD.
 
-{ config, pkgs, baseModules, ... } @ extraArgs:
+{ config, lib, pkgs, baseModules, ... } @ extraArgs:
 
-with pkgs.lib;
+with lib;
 
 let
 
@@ -63,7 +63,7 @@ in
 
     services.nixosManual.showManual = mkOption {
       type = types.bool;
-      default = true;
+      default = false;
       description = ''
         Whether to show the NixOS manual on one of the virtual
         consoles.
