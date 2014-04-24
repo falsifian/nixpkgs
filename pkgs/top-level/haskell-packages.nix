@@ -835,7 +835,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   controlMonadLoop = callPackage ../development/libraries/haskell/control-monad-loop {};
 
-  convertible = callPackage ../development/libraries/haskell/convertible {};
+  convertible_1_0_11_1 = callPackage ../development/libraries/haskell/convertible/1.0.11.1.nix {};
+  convertible_1_1_0_0 = callPackage ../development/libraries/haskell/convertible/1.1.0.0.nix {};
+  convertible = self.convertible_1_1_0_0;
 
   continuedFractions = callPackage ../development/libraries/haskell/continued-fractions {};
 
@@ -1397,6 +1399,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   heist = callPackage ../development/libraries/haskell/heist {};
 
   hflags = callPackage ../development/libraries/haskell/hflags {};
+
+  hfsevents = callPackage ../development/libraries/haskell/hfsevents {};
 
   HFuse = callPackage ../development/libraries/haskell/HFuse {};
 
@@ -2540,7 +2544,9 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   # pass it explicitly in rare circumstances.
   time = null;
 
-  timeparsers = callPackage ../development/libraries/haskell/timeparsers {};
+  timeparsers = callPackage ../development/libraries/haskell/timeparsers {
+    convertible = self.convertible_1_0_11_1;
+  };
 
   timeRecurrence = callPackage ../development/libraries/haskell/time-recurrence {};
 
@@ -2786,6 +2792,8 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
 
   xmlhtml = callPackage ../development/libraries/haskell/xmlhtml {};
 
+  xmlLens = callPackage ../development/libraries/haskell/xml-lens {};
+
   xmlTypes = callPackage ../development/libraries/haskell/xml-types {};
 
   xournalParser = callPackage ../development/libraries/haskell/xournal-parser {};
@@ -2984,7 +2992,7 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
   cabal2nix = callPackage ../development/tools/haskell/cabal2nix {};
 
   # Build a cabal package given a local .cabal file
-  buildLocalCabal = src: name: let
+  buildLocalCabalWithArgs = { src, name, args ? {} }: let
     cabalExpr = pkgs.stdenv.mkDerivation ({
       name = "${name}.nix";
 
@@ -3000,7 +3008,11 @@ let result = let callPackage = x : y : modifyPrio (newScope result.finalReturn x
       LANG = "en_US.UTF-8";
       LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
     });
-  in callPackage cabalExpr { inherit src; };
+  in callPackage cabalExpr ({ inherit src; } // args);
+
+  buildLocalCabal = src: name: self.buildLocalCabalWithArgs { inherit src name; };
+
+  cabalDelete = callPackage ../development/tools/haskell/cabal-delete {};
 
   cabalDev = callPackage ../development/tools/haskell/cabal-dev {};
 
