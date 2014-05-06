@@ -84,7 +84,7 @@
       postgres = 71;
       smbguest = 74;
       varnish = 75;
-      dd-agent = 76;
+      datadog = 76;
       lighttpd = 77;
       lightdm = 78;
       freenet = 79;
@@ -203,7 +203,7 @@
       vboxsf = 73;
       smbguest = 74;
       varnish = 75;
-      dd-agent = 76;
+      datadog = 76;
       lighttpd = 77;
       lightdm = 78;
       freenet = 79;

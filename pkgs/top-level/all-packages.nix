@@ -1112,7 +1112,9 @@ let
    */
   graphviz_2_0 = callPackage ../tools/graphics/graphviz/2.0.nix { };
 
-  grive = callPackage ../tools/filesystems/grive { };
+  grive = callPackage ../tools/filesystems/grive {
+    json_c = json-c-0-11; # won't configure with 0.12; others are vulnerable
+  };
 
   groff = callPackage ../tools/text/groff {
     ghostscript = null;
@@ -1394,7 +1396,7 @@ let
 
   mdbtools = callPackage ../tools/misc/mdbtools { };
 
-  mdbtools_git = callPackage ../tools/misc/mdbtools/git.nix { 
+  mdbtools_git = callPackage ../tools/misc/mdbtools/git.nix {
     inherit (gnome) scrollkeeper;
   };
 
@@ -2470,6 +2472,8 @@ let
 
   cmucl_binary = callPackage ../development/compilers/cmucl/binary.nix { };
 
+  compcert = callPackage_i686 ../development/compilers/compcert {};
+
   cryptol1 = lowPrio (callPackage ../development/compilers/cryptol/1.8.x.nix {});
   cryptol2 = haskellPackages.cryptol;
 
@@ -3313,7 +3317,9 @@ let
 
   erlangR14B04 = callPackage ../development/interpreters/erlang/R14B04.nix { };
   erlangR15B03 = callPackage ../development/interpreters/erlang/R15B03.nix { };
-  erlang = callPackage ../development/interpreters/erlang/default.nix { };
+  erlangR16B02 = callPackage ../development/interpreters/erlang/R16B02.nix { };
+  erlangR17 = callPackage ../development/interpreters/erlang/R17.nix { };
+  erlang = erlangR17;
 
   rebar = callPackage ../development/tools/build-managers/rebar { };
 
@@ -3727,7 +3733,7 @@ let
 
   coccinelle = callPackage ../development/tools/misc/coccinelle { };
 
-  framac = callPackage ../development/tools/misc/frama-c { };
+  framac = callPackage ../development/tools/analysis/frama-c { };
 
   cppi = callPackage ../development/tools/misc/cppi { };
 
@@ -4273,7 +4279,7 @@ let
   dclib = callPackage ../development/libraries/dclib { };
 
   dillo = callPackage ../applications/networking/browsers/dillo {
-    fltk = fltk13;  
+    fltk = fltk13;
   };
 
   directfb = callPackage ../development/libraries/directfb { };
@@ -4784,9 +4790,8 @@ let
 
   json_glib = callPackage ../development/libraries/json-glib { };
 
-  json-c-0-9 = callPackage ../development/libraries/json-c { };
-  json-c-0-11 = callPackage ../development/libraries/json-c/0.11.nix { };
-  json_c = json-c-0-9;
+  json-c-0-11 = callPackage ../development/libraries/json-c/0.11.nix { }; # vulnerable
+  json_c = callPackage ../development/libraries/json-c { };
 
   jsoncpp = callPackage ../development/libraries/jsoncpp { };
 
@@ -5773,6 +5778,8 @@ let
 
   qwt = callPackage ../development/libraries/qwt {};
 
+  qwt6 = callPackage ../development/libraries/qwt/6.nix { };
+
   rabbitmq-c = callPackage ../development/libraries/rabbitmq-c {};
 
   raul = callPackage ../development/libraries/audio/raul { };
@@ -6423,7 +6430,14 @@ let
 
   ### DEVELOPMENT / R MODULES
 
-  buildRPackage = import ../development/r-modules/generic R;
+  R = callPackage ../applications/science/math/R {
+    inherit (xlibs) libX11 libXt;
+    texLive = texLiveAggregationFun { paths = [ texLive texLiveExtra ]; };
+  };
+
+  rWrapper = callPackage ../development/r-modules/generic/wrapper.nix {
+    packages = [];
+  };
 
   rPackages = recurseIntoAttrs (import ./r-packages.nix {
     inherit pkgs;
@@ -6486,7 +6500,9 @@ let
 
   dovecot_pigeonhole = callPackage ../servers/mail/dovecot-pigeonhole { };
 
-  ejabberd = callPackage ../servers/xmpp/ejabberd { };
+  ejabberd = callPackage ../servers/xmpp/ejabberd {
+    erlang = erlangR16B02;
+  };
 
   elasticmq = callPackage ../servers/elasticmq { };
 
@@ -6552,7 +6568,12 @@ let
 
   myserver = callPackage ../servers/http/myserver { };
 
-  nginx = callPackage ../servers/http/nginx { };
+  nginx = callPackage ../servers/http/nginx {
+    rtmp        = true;
+    fullWebDAV  = true;
+    syslog      = true;
+    moreheaders = true;
+  };
 
   ngircd = callPackage ../servers/irc/ngircd { };
 
@@ -10005,11 +10026,11 @@ let
   cinnamon = recurseIntoAttrs rec {
     callPackage = newScope pkgs.cinnamon;
     inherit (gnome3) gnome_common libgnomekbd gnome-menus zenity;
-    
+
     muffin = callPackage ../desktops/cinnamon/muffin.nix { } ;
-    
+
     cinnamon-control-center = callPackage ../desktops/cinnamon/cinnamon-control-center.nix{ };
-    
+
     cinnamon-settings-daemon = callPackage ../desktops/cinnamon/cinnamon-settings-daemon.nix{ };
 
     cinnamon-session = callPackage ../desktops/cinnamon/cinnamon-session.nix{ } ;
@@ -10432,11 +10453,6 @@ let
 
   pspp = callPackage ../applications/science/math/pssp {
     inherit (gnome) libglade gtksourceview;
-  };
-
-  R = callPackage ../applications/science/math/R {
-    inherit (xlibs) libX11 libXt;
-    texLive = texLiveAggregationFun { paths = [ texLive texLiveExtra ]; };
   };
 
   singular = callPackage ../applications/science/math/singular {};
