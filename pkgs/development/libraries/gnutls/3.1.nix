@@ -7,7 +7,7 @@ stdenv.mkDerivation rec {
   name = "gnutls-3.1.22";
 
   src = fetchurl {
-    url = "ftp://ftp.gnutls.org/gcrypt/gnutls/v3.1/${name}.tar.lz";
+    url = "ftp://ftp.gnutls.org/gcrypt/gnutls/v3.1/${name}.tar.lz_XXX_vulnerable_CVE-2014-3466";
     sha256 = "177kmq4jn67s7mmb249722nwxmbjwjpphmib7bhzfk43z02j3pvh";
   };
 
