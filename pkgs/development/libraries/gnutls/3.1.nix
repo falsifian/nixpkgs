@@ -65,7 +65,3 @@ stdenv.mkDerivation rec {
     maintainers = [ stdenv.lib.maintainers.eelco ];
   };
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> channel
