@@ -130,4 +130,6 @@
 , "phantomjs"
 , "sinon"
 , "shelljs"
+, "typescript"
+, "vtop"
 ]
