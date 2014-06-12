@@ -1,24 +1,22 @@
 { cabal, ansiTerminal, async, deepseq, doctest, filepath, ghcPaths
-, hspecExpectations, hspecMeta, HUnit, ioMemoize, QuickCheck
-, quickcheckIo, random, setenv, silently, tfRandom, time
-, transformers
+, hspecExpectations, hspecMeta, HUnit, QuickCheck, quickcheckIo
+, random, setenv, silently, tfRandom, time, transformers
 }:
 
 cabal.mkDerivation (self: {
   pname = "hspec2";
-  version = "0.3.0";
-  sha256 = "0ia19jraz2di31c48lh0kswkb2573jxm7msf33i8d5a5yq8y9wwp";
+  version = "0.3.3";
+  sha256 = "0rza34smm30h6jfdb4f4is45j5bp59nq8bn34l1bmv3aiw9kjbmz";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
     ansiTerminal async deepseq filepath hspecExpectations HUnit
-    ioMemoize QuickCheck quickcheckIo random setenv tfRandom time
-    transformers
+    QuickCheck quickcheckIo random setenv tfRandom time transformers
   ];
   testDepends = [
     ansiTerminal async deepseq doctest filepath ghcPaths
-    hspecExpectations hspecMeta HUnit ioMemoize QuickCheck quickcheckIo
-    random setenv silently tfRandom time transformers
+    hspecExpectations hspecMeta HUnit QuickCheck quickcheckIo random
+    setenv silently tfRandom time transformers
   ];
   meta = {
     homepage = "http://hspec.github.io/";

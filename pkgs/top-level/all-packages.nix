@@ -278,6 +278,8 @@ let
     dotnetfx = dotnetfx40;
   };
 
+  scatterOutputHook = makeSetupHook {} ../build-support/setup-hooks/scatter_output.sh;
+
   vsenv = callPackage ../build-support/vsenv {
     vs = vs90wrapper;
   };
@@ -2114,6 +2116,8 @@ let
 
   privoxy = callPackage ../tools/networking/privoxy { };
 
+  t1utils = callPackage ../tools/misc/t1utils { };
+
   tarsnap = callPackage ../tools/backup/tarsnap { };
 
   tcpcrypt = callPackage ../tools/security/tcpcrypt { };
@@ -3671,6 +3675,8 @@ let
 
 
   ### DEVELOPMENT / TOOLS
+
+  ansible = callPackage ../tools/system/ansible { };
 
   antlr = callPackage ../development/tools/parsing/antlr/2.7.7.nix { };
 
@@ -6675,6 +6681,8 @@ let
 
   ngircd = callPackage ../servers/irc/ngircd { };
 
+  nsd = callPackage ../servers/dns/nsd { };
+
   opensmtpd = callPackage ../servers/mail/opensmtpd { };
 
   petidomo = callPackage ../servers/mail/petidomo { };
@@ -7052,7 +7060,12 @@ let
 
   hostapd = callPackage ../os-specific/linux/hostapd { };
 
-  htop = callPackage ../os-specific/linux/htop { };
+  htop =
+    if stdenv.isLinux then
+      callPackage ../os-specific/linux/htop { }
+    else if stdenv.isDarwin then
+      callPackage ../os-specific/darwin/htop { }
+    else null;
 
   # GNU/Hurd core packages.
   gnu = recurseIntoAttrs (callPackage ../os-specific/gnu {
