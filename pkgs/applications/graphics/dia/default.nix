@@ -36,7 +36,8 @@ stdenv.mkDerivation rec {
     mv dia .dia-wrapped
     echo '#! ${stdenv.shell}' >> dia
     echo 'test -f "$HOME/.dia/persistence" || cp ${correctPersistence} "$HOME/.dia/persistence" ' >> dia
-    echo '.dia-wrapped "$@"' >> dia
+    echo 'chmod u+rw "$HOME/.dia/persistence" ' >> dia
+    echo "\"$out/bin/"'.dia-wrapped" "$@"' >> dia
     chmod a+x dia
   '';
 

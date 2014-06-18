@@ -1611,6 +1611,8 @@ let
 
   nilfs_utils = callPackage ../tools/filesystems/nilfs-utils {};
 
+  nitrogen = callPackage ../tools/X11/nitrogen {};
+
   nlopt = callPackage ../development/libraries/nlopt {};
 
   npapi_sdk = callPackage ../development/libraries/npapi-sdk {};
@@ -5142,6 +5144,8 @@ let
 
   libmhash = callPackage ../development/libraries/libmhash {};
 
+  libmodbus = callPackage ../development/libraries/libmodbus {};
+
   libmtp = callPackage ../development/libraries/libmtp { };
 
   libmsgpack = callPackage ../development/libraries/libmsgpack { };
@@ -5151,6 +5155,8 @@ let
   libnfsidmap = callPackage ../development/libraries/libnfsidmap { };
 
   libnice = callPackage ../development/libraries/libnice { };
+
+  liboping = callPackage ../development/libraries/liboping { };
 
   libplist = callPackage ../development/libraries/libplist { };
 
@@ -5491,6 +5497,8 @@ let
 
   libxmlxx = callPackage ../development/libraries/libxmlxx { };
 
+  libxmp = callPackage ../development/libraries/libxmp { };
+
   libxslt = callPackage ../development/libraries/libxslt { };
 
   libixp_for_wmii = lowPrio (import ../development/libraries/libixp_for_wmii {
@@ -5551,11 +5559,18 @@ let
 
   mesaSupported = lib.elem system lib.platforms.mesaPlatforms;
 
-  mesa_original = callPackage ../development/libraries/mesa { };
+  mesa_original = callPackage ../development/libraries/mesa {
+    # makes it slower, but during runtime we link against just mesa_drivers
+    # through /run/opengl-driver*, which is overriden according to config.grsecurity
+    grsecEnabled = true;
+  };
+
   mesa_noglu = if stdenv.isDarwin
     then darwinX11AndOpenGL // { driverLink = mesa_noglu; }
     else mesa_original;
-  mesa_drivers = mesa_original.drivers;
+  mesa_drivers = let
+      mo = mesa_original.override { grsecEnabled = config.grsecurity or false; };
+    in mo.drivers;
   mesa_glu = callPackage ../development/libraries/mesa-glu { };
   mesa = if stdenv.isDarwin then darwinX11AndOpenGL
     else buildEnv {
@@ -9405,6 +9420,12 @@ let
     conf = config.st.conf or null;
   };
 
+  sweethome3d = recurseIntoAttrs (  (callPackage ../applications/misc/sweethome3d { })
+                                 // (callPackage ../applications/misc/sweethome3d/editors.nix {
+                                      sweethome3dApp = sweethome3d.application;
+                                    })
+                                 );
+
   sxiv = callPackage ../applications/graphics/sxiv { };
 
   bittorrentSync = callPackage ../applications/networking/bittorrentsync { };
@@ -9890,6 +9911,8 @@ let
   xmacro = callPackage ../tools/X11/xmacro { };
 
   xmove = callPackage ../applications/misc/xmove { };
+
+  xmp = callPackage ../applications/audio/xmp { };
 
   xnee = callPackage ../tools/X11/xnee {
     # Work around "missing separator" error.
@@ -10894,13 +10917,10 @@ let
     stateDir = config.nix.stateDir or "/nix/var";
   };
 
-  nixUnstable = nixStable;
-  /*
   nixUnstable = callPackage ../tools/package-management/nix/unstable.nix {
     storeDir = config.nix.storeDir or "/nix/store";
     stateDir = config.nix.stateDir or "/nix/var";
   };
-  */
 
   nixops = callPackage ../tools/package-management/nixops { };
 
