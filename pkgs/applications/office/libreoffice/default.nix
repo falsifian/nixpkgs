@@ -120,7 +120,7 @@ stdenv.mkDerivation rec {
   name = "libreoffice-${version}";
 
   src = fetchurl {
-    url = "http://download.documentfoundation.org/libreoffice/src/${subdir}/libreoffice-${version}.tar.xz";
+    url = "http://download.documentfoundation.org/libreoffice/src/${subdir}/libreoffice-${version}.tar.xz_VULNERABLE_CVE-2014-0247";
     sha256 = "195g1iab7j2x7sl326xbq7vya412ns57xrwpv9hqdrb7iiz2n8la";
   };
 
