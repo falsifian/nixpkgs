@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     urls =
-      [ "ftp://ftp.remotesensing.org/pub/libtiff/tiff-${version}.tar.gz"
+      [ "ftp://ftp.remotesensing.org/pub/libtiff/tiff-${version}.tar.gz" # Vulnerable to CVE-2013-4243
         "http://download.osgeo.org/libtiff/tiff-${version}.tar.gz"
       ];
     sha256 = "0wj8d1iwk9vnpax2h29xqc2hwknxg3s0ay2d5pxkg59ihbifn6pa";
