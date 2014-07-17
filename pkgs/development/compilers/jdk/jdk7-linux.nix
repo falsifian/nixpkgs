@@ -43,7 +43,7 @@ let
       requireFile {
         name = "UnlimitedJCEPolicyJDK7.zip";
         url = http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html;
-        sha256 = "7a8d790e7bd9c2f82a83baddfae765797a4a56ea603c9150c87b7cdb7800194d";
+        sha256 = "MAYBE_VULNERABLE";  # See ../openjdk/default.nix
       }
     else
       "";

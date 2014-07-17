@@ -30,7 +30,7 @@ let
       requireFile {
         name = "jce_policy-6.zip";
         url = http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html;
-        sha256 = "0qljzfxbikm8br5k7rkamibp1vkyjrf6blbxpx6hn4k46f62bhnh";
+        sha256 = "MAYBE_VULNERABLE";  # See ../openjdk/default.nix
       }
     else
       null;
