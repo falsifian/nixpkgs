@@ -14,7 +14,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://download.transmissionbt.com/files/transmission-${version}.tar.xz";
-    sha256 = "0cqlgl6jmjw1caybz6nzh3l8z0jak1dxba01isv72zvy2r8b1qdh";
+    sha256 = "VULNERABLE_CVE-2014-4909";  # I'm not sure which versions are vulnerable.
   };
 
   buildInputs = [ pkgconfig intltool file openssl curl libevent inotifyTools ]
