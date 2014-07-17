@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = http://www.java.net/download/openjdk/jdk7u40/promoted/b43/openjdk-7u40-fcs-src-b43-26_aug_2013.zip;
-    sha256 = "15h5nmbw6yn5596ccakqdbs0vd8hmslsfg5sfk8wmjvn31bfmy00";
+    sha256 = "VULNERABLE_various_cves";  # See  DSA-2912-1, USN-2187-1, USN-2191-1, DSA 2923-1, DSA-2980-1.  I'm not sure which versions are vulnerable.
   };
 
   outputs = [ "out" "jre" ];
