@@ -26,10 +26,9 @@ with { inherit (stdenv.lib) optional optionals; };
 
 let
   result = {
-    # CVE-2014-4609 is fixed in Libav 10.2, 9.14 and 0.8.13, according to https://libav.org on 2014-07-17.
-    libav_0_8 = libavFun "0.8.12" "VULNERABLE_CVE_2014-4609";
-    libav_9   = libavFun   "9.13" "VULNERABLE_CVE_2014-4609";
-    libav_10  = libavFun  "10.1"  "VULNERABLE_CVE_2014-4609";
+    libav_0_8 = libavFun "0.8.13" "1fr3rzykrlm1cla0csm9hqa3gcqp19hf5rgn70nyb9w92r67v685";
+    libav_9   = libavFun   "9.14" "07gn4lbqx6wfhb2h2ddj88hcsacwmzb4syalg211m55xmp1g1fp4";
+    libav_10  = libavFun  "10.2"  "06wvk51cnllw6367qagc90sva4jr5d0r6jx8183wcwzwzgv01w29";
   };
 
   libavFun = version : sha256 : stdenv.mkDerivation rec {

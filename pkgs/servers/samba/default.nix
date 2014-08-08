@@ -18,14 +18,11 @@
 assert useKerberos -> kerberos != null;
 
 stdenv.mkDerivation rec {
-  name = "samba-3.6.22";
+  name = "samba-3.6.24";
 
   src = fetchurl {
-    # CVE-2014-0178 (Samba 3.6.6 through 3.6.23, 4.0.x before 4.0.18, and 4.1.x before 4.1.8).
-    # CVE-2014-0244 (Samba 3.6.x before 3.6.24, 4.0.x before 4.0.19, and 4.1.x before 4.1.9).
-    # CVE-2014-3493 (Samba 3.6.x before 3.6.24, 4.0.x before 4.0.19, and 4.1.x before 4.1.9)
-    url = "http://us3.samba.org/samba/ftp/stable/${name}.tar.gz_VULNERABLE";
-    sha256 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    url = "http://samba.org/samba/ftp/stable/${name}.tar.gz";
+    sha256 = "19rln8m1k359bz6dhmlv39kzyjg7p296dz4y4mq1jwrlnw2bvl0i";
   };
 
   buildInputs = [ readline pam openldap popt iniparser libunwind fam acl cups ]
