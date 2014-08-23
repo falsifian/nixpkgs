@@ -163,7 +163,20 @@ rec {
     pythonDBus = dbus;
   };
 
+  pyqt5 = import ../development/python-modules/pyqt/5.x.nix {
+    inherit (pkgs) stdenv fetchurl pkgconfig qt5 makeWrapper;
+    inherit (pkgs.xorg) lndir;
+    inherit python;
+    sip = sip_4_16;
+    pythonDBus = dbus;
+  };
+
   sip = import ../development/python-modules/sip {
+    inherit (pkgs) stdenv fetchurl;
+    inherit python;
+  };
+
+  sip_4_16 = import ../development/python-modules/sip/4.16.nix {
     inherit (pkgs) stdenv fetchurl;
     inherit python;
   };
@@ -650,16 +663,16 @@ rec {
 
 
   bedup = buildPythonPackage rec {
-    name = "bedup-20140206";
+    name = "bedup-20140413";
 
     src = fetchgit {
       url = "https://github.com/g2p/bedup.git";
-      rev = "80cb217d4819a03e159e42850a9a3f14e2b278a3";
-      sha256 = "1rik7a62v708ivfcy0pawhfnrb84b7gm3qr54x6jsxl0iqz078h6";
+      rev = "5189e166145b8954ac41883f81ef3c3b50dc96ab";
+      sha256 = "e61768fa19934bd176799f90bda3ea9f49a5def21fa2523a8e47df8a48e730e9";
     };
 
     buildInputs = [ pkgs.btrfsProgs ];
-    propagatedBuildInputs = with pkgs; [ contextlib2 sqlalchemy pyxdg pycparser cffi alembic ];
+    propagatedBuildInputs = with pkgs; [ contextlib2 sqlalchemy8 pyxdg pycparser cffi alembic ];
 
     meta = {
       description = "Deduplication for Btrfs";
@@ -1420,6 +1433,23 @@ rec {
     };
   };
 
+  detox = pythonPackages.buildPythonPackage rec {
+    name = "detox-0.9.3";
+
+    propagatedBuildInputs = with pythonPackages; [ tox py eventlet ];
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/d/detox/detox-0.9.3.tar.gz";
+      md5 = "b52588ec61cd4c2d33e419677a5eac8c";
+    };
+
+    meta = with stdenv.lib; {
+      description = "What is detox?";
+      homepage = http://bitbucket.org/hpk42/detox;
+    };
+  };
+
+
   pbkdf2 = buildPythonPackage rec {
     name = "pbkdf2-1.3";
 
@@ -1750,6 +1780,42 @@ rec {
       description = "derpconf abstracts loading configuration files for your app";
       homepage = https://github.com/globocom/derpconf;
       license = licenses.mit;
+    };
+  };
+
+  dogpile_cache = buildPythonPackage rec {
+    name = "dogpile.cache-0.5.4";
+
+    propagatedBuildInputs = [ dogpile_core ];
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/d/dogpile.cache/dogpile.cache-0.5.4.tar.gz";
+      md5 = "513b77ba1bd0c31bb15dd9dd0d8471af";
+    };
+
+    doCheck = false;
+
+    meta = {
+      description = "A caching front-end based on the Dogpile lock.";
+      homepage = http://bitbucket.org/zzzeek/dogpile.cache;
+      license = licenses.bsd3;
+    };
+  };
+
+  dogpile_core = buildPythonPackage rec {
+    name = "dogpile.core-0.4.1";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/d/dogpile.core/dogpile.core-0.4.1.tar.gz";
+      md5 = "01cb19f52bba3e95c9b560f39341f045";
+    };
+
+    doCheck = false;
+
+    meta = {
+      description = "A 'dogpile' lock, typically used as a component of a larger caching solution";
+      homepage = http://bitbucket.org/zzzeek/dogpile.core;
+      license = licenses.bsd3;
     };
   };
 
@@ -2810,11 +2876,11 @@ rec {
 
   django_1_6 = buildPythonPackage rec {
     name = "Django-${version}";
-    version = "1.6.3";
+    version = "1.6.6";
 
     src = fetchurl {
       url = "http://www.djangoproject.com/m/releases/1.6/${name}.tar.gz";
-      sha256 = "1wdqb2x0w0c10annbyz7rrrgrv9mpa9f8pz8006lf2csix33r7bd";
+      sha256 = "143yp984n8a2bs1dflxjp1s7skmji0cwkw05s9ikbfikwmabsv2k";
     };
 
     # error: invalid command 'test'
@@ -2828,11 +2894,11 @@ rec {
 
   django_1_5 = buildPythonPackage rec {
     name = "Django-${version}";
-    version = "1.5.6";
+    version = "1.5.9";
 
     src = fetchurl {
       url = "http://www.djangoproject.com/m/releases/1.5/${name}.tar.gz";
-      sha256 = "1bxzz71sfvh0zgdzv4x3wdr4ffzd5cfnvq7iq2g1i282sacwnzwv";
+      sha256 = "1lm0pa6m9f4cd6pv239lqj32z1snf8xjbvlbh8bqihs6a1f51kj7";
     };
 
     # error: invalid command 'test'
@@ -2846,11 +2912,11 @@ rec {
 
   django_1_4 = buildPythonPackage rec {
     name = "Django-${version}";
-    version = "1.4.11";
+    version = "1.4.14";
 
     src = fetchurl {
       url = "http://www.djangoproject.com/m/releases/1.4/${name}.tar.gz";
-      sha256 = "00f2jlls3fhddrg7q4sjkwj6dmclh28n0vqm1m7kzcq5fjrxh6a8";
+      sha256 = "173ci9ml2vs1z2x51wahssfn8mrmhd02varmg9kibm8z460svvc1";
     };
 
     # error: invalid command 'test'
@@ -3186,17 +3252,24 @@ rec {
   };
 
   flexget = buildPythonPackage rec {
-    name = "FlexGet-1.1.121";
+    name = "FlexGet-1.2.161";
 
     src = fetchurl {
       url = "https://pypi.python.org/packages/source/F/FlexGet/${name}.tar.gz";
-      md5 = "44521bcbc2c1e941b656ecfa358adcaa";
+      md5 = "f7533e7b1df49cc8027fc4a2cde0290d";
     };
 
     buildInputs = [ nose ];
-    propagatedBuildInputs = [ beautifulsoup4 pyrss2gen feedparser pynzb html5lib dateutil
-        beautifulsoup flask jinja2 requests sqlalchemy pyyaml cherrypy progressbar deluge
-        python_tvrage jsonschema ];
+    # dateutil dependancy: requirement is dateutil !=2.0 and != 2.2,
+    # dateutil_1_5 is used as it's supported, but a newer version could be used
+    propagatedBuildInputs = [ paver feedparser sqlalchemy pyyaml rpyc
+	    beautifulsoup4 html5lib pyrss2gen pynzb progressbar jinja2 flask
+	    cherrypy requests dateutil_1_5 jsonschema python_tvrage tmdb3 ]
+	# enable deluge and transmission plugin support, if they're installed
+	++ stdenv.lib.optional (pkgs.config.pythonPackages.deluge or false)
+	    pythonpackages.deluge
+	++ stdenv.lib.optional (pkgs.transmission != null)
+	    pythonPackages.transmissionrpc;
 
     meta = {
       homepage = http://flexget.com/;
@@ -3702,6 +3775,24 @@ rec {
       license = stdenv.lib.licenses.mit;
     };
   });
+
+  httpbin = buildPythonPackage rec {
+    name = "httpbin-0.2.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/h/httpbin/${name}.tar.gz";
+      md5 = "9b2bb2fab45f5fa839e9a776a64d6089";
+    };
+
+    propagatedBuildInputs = [ flask markupsafe decorator itsdangerous six ];
+
+    meta = {
+      homepage = https://github.com/kennethreitz/httpbin;
+      description = "HTTP Request & Response Service";
+      license = licenses.mit;
+    };
+
+  };
 
   httplib2 = buildPythonPackage rec {
     name = "httplib2-0.9";
@@ -5482,7 +5573,7 @@ rec {
   protobuf = buildPythonPackage rec {
     inherit (pkgs.protobuf) name src;
 
-    propagatedBuildInputs = [pkgs.protobuf];
+    propagatedBuildInputs = [ pkgs.protobuf setuptools ];
     sourceRoot = "${name}/python";
 
     meta = {
@@ -5511,14 +5602,14 @@ rec {
 
 
   psycopg2 = buildPythonPackage rec {
-    name = "psycopg2-2.5.2";
+    name = "psycopg2-2.5.3";
 
     # error: invalid command 'test'
     doCheck = false;
 
     src = fetchurl {
       url = "https://pypi.python.org/packages/source/p/psycopg2/${name}.tar.gz";
-      sha256 = "0bmxlmi9k995n6pz16awjaap0y02y1v2d31jbxhkqv510f3jsf2h";
+      sha256 = "02h33barxigsczpympnwa0yvw9hgdv8d63bxm5x251ri26xz6b9s";
     };
 
     propagatedBuildInputs = [ pkgs.postgresql ];
@@ -6908,6 +6999,24 @@ rec {
 
   });
 
+  rpyc = buildPythonPackage rec {
+    name = "rpyc-${version}";
+    version = "3.3.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/r/rpyc/${name}.tar.gz";
+      md5 = "6931cb92c41f547591b525142ccaeef1";
+    };
+
+    propagatedBuildInputs = [ nose plumbum ];
+
+    meta = {
+      description = "Remote Python Call (RPyC), a transparent and symmetric RPC library";
+      homepage = http://rpyc.readthedocs.org;
+      license = stdenv.lib.licenses.mit;
+    };
+  };
+
   rsa = buildPythonPackage rec {
     name = "rsa-3.1.2";
 
@@ -7872,22 +7981,40 @@ rec {
     };
   };
 
+  tmdb3 = buildPythonPackage rec {
+    name = "tmdb3-${version}";
+    version = "0.6.17";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/t/tmdb3/${name}.zip";
+      md5 = "cd259427454472164c9a2479504c9cbb";
+    };
+
+    meta = {
+      description = "Python implementation of the v3 API for TheMovieDB.org, allowing access to movie and cast information.";
+      homepage = http://pypi.python.org/pypi/tmdb3;
+      license = stdenv.lib.licenses.bsd3;
+    };
+  };
 
   # TODO
   # Installs correctly but fails tests that involve simple things like:
   # cmd.run("tox", "-h")
   # also, buildPythonPackage needs to supply the tox.ini correctly for projects that use tox for their tests
   #
-  # tox = buildPythonPackage rec {
-  #   name = "tox-1.7.0";
-  #
-  #   propagatedBuildInputs = [ py virtualenv ];
-  #
-  #   src = fetchurl {
-  #     url = "https://pypi.python.org/packages/source/t/tox/${name}.tar.gz";
-  #     md5 = "5314ceca2b179ad4a9c79f4d817b8a99";
-  #   };
-  # };
+
+  tox = buildPythonPackage rec {
+    name = "tox-1.7.2";
+  
+    propagatedBuildInputs = [ py virtualenv ];
+
+    doCheck = false;
+  
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/t/tox/${name}.tar.gz";
+      md5 = "0d9b3acb1a9252659d753b0ae6b9b264";
+    };
+  };
 
   smmap = buildPythonPackage rec {
     name = "smmap-0.8.2";
@@ -7940,6 +8067,23 @@ rec {
     };
   };
 
+  transmissionrpc = buildPythonPackage rec {
+    name = "transmissionrpc-${version}";
+    version = "0.11";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/t/transmissionrpc/${name}.tar.gz";
+      md5 = "b2f918593e509f0e66e2e643291b436d";
+    };
+
+    propagatedBuildInputs = [ six ];
+
+    meta = {
+      description = "Python implementation of the Transmission bittorent client RPC protocol.";
+      homepage = http://pypi.python.org/pypi/transmissionrpc/;
+      license = stdenv.lib.licenses.mit;
+    };
+  };
 
   eggdeps  = buildPythonPackage rec {
      name = "eggdeps-${version}";
@@ -8104,11 +8248,31 @@ rec {
     };
   });
 
+  pyuv = buildPythonPackage rec {
+    name = "pyuv-0.11.5";
+
+    src = fetchurl {
+      url = "https://github.com/saghul/pyuv/archive/${name}.tar.gz";
+      sha256 = "c251952cb4e54c92ab0e871decd13cf73d11ca5dba9f92962de51d12e3a310a9";
+    };
+
+    patches = [ ../development/python-modules/pyuv-external-libuv.patch ];
+
+    buildInputs = [ pkgs.libuvVersions.v0_11_29 ];
+
+    meta = {
+      description = "Python interface for libuv";
+      homepage = https://github.com/saghul/pyuv;
+      repositories.git = git://github.com/saghul/pyuv.git;
+      license = licenses.mit;
+    };
+  };
+
   virtualenv = buildPythonPackage rec {
-    name = "virtualenv-1.11.4";
+    name = "virtualenv-1.11.6";
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/v/virtualenv/${name}.tar.gz";
-      md5 = "9accc2d3f0ec1da479ce2c3d1fdff06e";
+      md5 = "f61cdd983d2c4e6aeabb70b1060d6f49";
     };
 
     inherit recursivePthLoader;
@@ -8168,6 +8332,27 @@ rec {
     patchPhase = ''
       substituteInPlace "virtualenvwrapper.sh" --replace "which" "${pkgs.which}/bin/which"
       substituteInPlace "virtualenvwrapper_lazy.sh" --replace "which" "${pkgs.which}/bin/which"
+    '';
+
+    postInstall = ''
+      # This might look like a dirty hack but we can't use the makeWrapper function because
+      # the wrapped file were then called via "exec". The virtualenvwrapper shell scripts
+      # aren't normal executables. Instead, the user has to evaluate them.
+
+      for file in "virtualenvwrapper.sh" "virtualenvwrapper_lazy.sh"; do
+        local wrapper="$out/bin/$file"
+        local wrapped="$out/bin/.$file-wrapped"
+        mv "$wrapper" "$wrapped"
+
+        cat > "$wrapper" <<- EOF
+	export PATH=$PATH:\$PATH
+	export PYTHONPATH=$PYTHONPATH:$(toPythonPath $out):\$PYTHONPATH
+	source "$wrapped"
+	EOF
+
+        chmod -x "$wrapped"
+        chmod +x "$wrapper"
+      done
     '';
 
     meta = {
@@ -8273,13 +8458,17 @@ rec {
 
 
   webtest = buildPythonPackage rec {
-    version = "2.0.11";
+    version = "2.0.15";
     name = "webtest-${version}";
 
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/W/WebTest/WebTest-${version}.zip";
-      md5 = "e51da21da8815cef07f543d8688effea";
+      md5 = "49314bdba23f4d0bd807facb2a6d3f90";
     };
+    
+    preConfigure = ''
+      substituteInPlace setup.py --replace "nose<1.3.0" "nose"
+    '';
 
     # XXX: skipping two tests fails in python2.6
     doCheck = ! isPy26;
@@ -8898,12 +9087,14 @@ rec {
 
   zope_testing = buildPythonPackage rec {
     name = "zope.testing-${version}";
-    version = "4.1.2";
+    version = "4.1.3";
 
     src = fetchurl {
-      url = "http://pypi.python.org/packages/source/z/zope.testing/${name}.zip";
-      md5 = "01c30c342c6a18002a762bd5d320a6e9";
+      url = "http://pypi.python.org/packages/source/z/zope.testing/${name}.tar.gz";
+      md5 = "6c73c5b668a67fdc116a25b884058ed9";
     };
+    
+    doCheck = !python.isPypy;
 
     propagatedBuildInputs = [ zope_interface zope_exceptions zope_location ];
 
@@ -8994,11 +9185,11 @@ rec {
 
   cliapp = buildPythonPackage rec {
     name = "cliapp-${version}";
-    version = "1.20130808";
+    version = "1.20140719";
 
     src = fetchurl rec {
       url = "http://code.liw.fi/debian/pool/main/p/python-cliapp/python-cliapp_${version}.orig.tar.gz";
-      sha256 = "0i9fqkahrc16mnxjw8fcr4hwrq3ibfrj2lzzbzzb7v5yk5dlr532";
+      sha256 = "0kxl2q85n4ggvbw2m8crl11x8n637mx6y3a3b5ydw8nhlsiqijgp";
     };
 
     buildInputs = [ sphinx ];
@@ -9520,11 +9711,11 @@ rec {
 
   libvirt = pkgs.stdenv.mkDerivation rec {
     name = "libvirt-python-${version}";
-    version = "1.2.5";
+    version = "1.2.7";
 
     src = fetchurl {
       url = "http://libvirt.org/sources/python/${name}.tar.gz";
-      sha256 = "0r0v48nkkxfagckizbcf67xkmyd1bnq36d30b58zmhvl0abryz7p";
+      sha256 = "0wg0pnvrwfjdl8haxr2dyfhdasddq97zy6l27xwrvd1hnh1394f1";
     };
 
     buildInputs = [ python pkgs.pkgconfig pkgs.libvirt lxml ];
