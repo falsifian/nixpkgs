@@ -5814,7 +5814,7 @@ let
 
     src = fetchurl {
       url = "http://effbot.org/downloads/Imaging-${version}.tar.gz";
-      sha256 = "04aj80jhfbmxqzvmq40zfi4z3cw6vi01m3wkk6diz3lc971cfnw9";
+      sha256 = "04aj80jhfbmxqzvmq40zfi4z3cw6vi01m3wkk6diz3lc971cfnw9 XXX vulnerable CVE-2014-3589"; # see http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3589
     };
 
     buildInputs = [ python pkgs.libjpeg pkgs.zlib pkgs.freetype ];
@@ -5853,7 +5853,7 @@ let
 
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/P/Pillow/${name}.zip";
-      md5 = "56b6614499aacb7d6b5983c4914daea7";
+      md5 = "56b6614499aacb7d6b5983c4914daea7 XXX vulnerable CVE-2014-3589"; # see http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3589
     };
 
     buildInputs = [ pkgs.freetype pkgs.libjpeg pkgs.zlib pkgs.libtiff pkgs.libwebp ];
