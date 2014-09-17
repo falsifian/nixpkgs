@@ -22,7 +22,7 @@ rec {
   
   src = fetchurl {
     url = "http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${firefoxVersion}/source/firefox-${firefoxVersion}.source.tar.bz2";
-    sha256 = "1qwvs3rdmrnkjnjvhi3vh4mjdpxr43zcm7llc6z5qws9n9yx15n1";
+    sha256 = "1qwvs3rdmrnkjnjvhi3vh4mjdpxr43zcm7llc6z5qws9n9yx15n1 XXX maybe vulnerable";
   };
   
   commonConfigureFlags =
