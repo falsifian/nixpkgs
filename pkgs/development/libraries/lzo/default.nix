@@ -5,7 +5,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "${meta.homepage}/download/${name}.tar.gz";
-    sha256 = "0536ad3ksk1r8h2a27d0y4p27lwjarzyndw7sagvxzj6xr6kw6xc";
+    sha256 = "0536ad3ksk1r8h2a27d0y4p27lwjarzyndw7sagvxzj6xr6kw6xc XXX maybe vulnerable CVE-2014-4607";
   };
 
   configureFlags = [ "--enable-shared" ];
