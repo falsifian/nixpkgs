@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "mirror://apache/httpd/httpd-${version}.tar.bz2";
-    sha256 = "0iw19y6knijinqwvv4q16fgq5xq8nwxdg14wrrbc0mfasvg76n90";
+    sha256 = "0iw19y6knijinqwvv4q16fgq5xq8nwxdg14wrrbc0mfasvg76n90 XXX maybe vulnerable CVE-2014-0118 CVE-2014-0226 CVE-2014-0231";
   };
 
   buildInputs = [perl apr aprutil pcre] ++
