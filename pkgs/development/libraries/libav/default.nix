@@ -26,8 +26,8 @@ with { inherit (stdenv.lib) optional optionals; };
 
 let
   result = {
-    libav_9   = libavFun  "9.12"  "1wm0nf12c1p138y54jh71mvbpikrpk43zc9m2qhpjm9pgnagizk0";
-    libav_0_8 = libavFun "0.8.11" "0nhm0mzz2aj78sgmw9xf20a1mlgig78cv1nyhx4zrq7nvgqf8d2r";
+    libav_9   = libavFun  "9.12"  "1wm0nf12c1p138y54jh71mvbpikrpk43zc9m2qhpjm9pgnagizk0 XXX vulnerable"; # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1370175
+    libav_0_8 = libavFun "0.8.11" "0nhm0mzz2aj78sgmw9xf20a1mlgig78cv1nyhx4zrq7nvgqf8d2r XXX vulnerable"; # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1370175
   };
 
   libavFun = version : sha256 : stdenv.mkDerivation rec {
