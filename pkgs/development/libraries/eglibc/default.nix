@@ -9,7 +9,7 @@ stdenv.mkDerivation rec {
   src = fetchsvn {
     url = svn://svn.eglibc.org/branches/eglibc-2_10;
     rev = 8690;
-    sha256 = "029hklrx2rlhsb5r2csd0gapjm0rbr8n28ib6jnnhms12x302viq";
+    sha256 = "029hklrx2rlhsb5r2csd0gapjm0rbr8n28ib6jnnhms12x302viq XXX vulnerable CVE-2014-5119 or see DSA-2014-5119";
   };
 
   inherit kernelHeaders installLocales;
