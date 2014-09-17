@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   
   src = fetchurl {
     url = "ftp://ftp.gnupg.org/gcrypt/gpgme/${name}.tar.bz2";
-    sha256 = "15h429h6pd67iiv580bjmwbkadpxsdppw0xrqpcm4dvm24jc271d";
+    sha256 = "15h429h6pd67iiv580bjmwbkadpxsdppw0xrqpcm4dvm24jc271d XXX maybe vulnerable CVE-2014-3564";
   };
   
   propagatedBuildInputs = [ libgpgerror glib libassuan pth ];
