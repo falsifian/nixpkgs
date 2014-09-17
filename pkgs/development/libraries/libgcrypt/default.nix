@@ -5,7 +5,7 @@ stdenv.mkDerivation (rec {
 
   src = fetchurl {
     url = "mirror://gnupg/libgcrypt/${name}.tar.bz2";
-    sha256 = "d5f88d9f41a46953dc250cdb8575129b37ee2208401b7fa338c897f667c7fb33 XXX vulnerable CVE-2014-5270";  # See https://security-tracker.debian.org/tracker/CVE-2014-5270
+    sha256 = "d5f88d9f41a46953dc250cdb8575129b37ee2208401b7fa338c897f667c7fb33";
   };
 
   propagatedBuildInputs = [ libgpgerror ];
