@@ -12,7 +12,7 @@ stdenv.mkDerivation (rec {
 
   src = fetchurl {
     url = "${webpage}/dist/krb5/1.11/${name}-signed.tar";
-    sha256 = "1daiaxgkxcryqs37w28v4x1vajqmay4l144d1zd9c2d7jjxr9gcs";
+    sha256 = "1daiaxgkxcryqs37w28v4x1vajqmay4l144d1zd9c2d7jjxr9gcs XXX vulnerable CVE-2014-4341 CVE-2014-4342 CVE-2014-4343 CVE-2014-4344 CVE-2014-4345 CVE-2013-4317";
   };
 
   buildInputs = [ perl ncurses yacc ];
