@@ -16,8 +16,8 @@ stdenv.mkDerivation rec {
   name = "apache-httpd-${version}";
 
   src = fetchurl {
-    url = "mirror://apache/httpd/httpd-${version}.tar.bz2";
-    sha256 = "0iw19y6knijinqwvv4q16fgq5xq8nwxdg14wrrbc0mfasvg76n90 XXX maybe vulnerable CVE-2014-0118 CVE-2014-0226 CVE-2014-0231";  # Maybe keep an eye on http://httpd.apache.org/security/vulnerabilities_22.html
+    url = "XXX VULNERABLE mirror://apache/httpd/httpd-${version}.tar.bz2";
+    sha256 = "0iw19y6knijinqwvv4q16fgq5xq8nwxdg14wrrbc0mfasvg76n90"; # Maybe vulnerable to CVE-2014-0118 CVE-2014-0226 CVE-2014-0231"; perhaps keep an eye on http://httpd.apache.org/security/vulnerabilities_22.html .
   };
 
   buildInputs = [perl apr aprutil pcre] ++
