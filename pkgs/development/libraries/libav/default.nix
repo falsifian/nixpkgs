@@ -27,6 +27,7 @@ with { inherit (stdenv.lib) optional optionals; };
 let
   result = {
     # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1370175
+    # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1354755
     # See also DSA-3003-1 and USN-2309-1.
     libav_0_8 = libavFun "0.8.13" "1fr3rzykrlm1cla0csm9hqa3gcqp19hf5rgn70nyb9w92r67v685 XXX vulnerable";
     libav_9   = libavFun   "9.16" "18378gdgzqsxaacc9vl7ligwndbdvy95wbn50hs8xvdqn1rn916a XXX vulnerable";
