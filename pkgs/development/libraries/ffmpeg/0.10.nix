@@ -25,7 +25,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://www.ffmpeg.org/releases/${name}.tar.bz2";
-    sha256 = "1frkz3971zc2a60ras5ia26b2h8wbh017x1x80q8cfw0ycrpbxqy XXX vulnerable";  # See https://www.ffmpeg.org/security.html (scroll down to FFmpeg 0.10)
+    # sha256 = "1frkz3971zc2a60ras5ia26b2h8wbh017x1x80q8cfw0ycrpbxqy";
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # Vulnerable; see https://www.ffmpeg.org/security.html (scroll down to FFmpeg 0.10)
   };
 
   # `--enable-gpl' (as well as the `postproc' and `swscale') mean that
