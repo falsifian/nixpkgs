@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     urls =
-      [ "ftp://ftp.remotesensing.org/pub/libtiff/tiff-${version}.tar.gz" # Vulnerable to CVE-2013-4243
+      [ "ftp://ftp.remotesensing.org/pub/libtiff/tiff-${version}.tar.gz"
         "http://download.osgeo.org/libtiff/tiff-${version}.tar.gz"
       ];
     sha256 = "0wj8d1iwk9vnpax2h29xqc2hwknxg3s0ay2d5pxkg59ihbifn6pa";
@@ -45,5 +45,8 @@ stdenv.mkDerivation rec {
     homepage = http://www.remotesensing.org/libtiff/;
     license = licenses.libtiff;
     platforms = platforms.unix;
+
+    # Version 4.0.3 and earlier vulnerable to CVE-2013-4243, but it's just the gif2tiff tool.
+    broken = true;
   };
 }
