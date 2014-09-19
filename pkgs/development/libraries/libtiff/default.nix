@@ -46,7 +46,9 @@ stdenv.mkDerivation rec {
     license = licenses.libtiff;
     platforms = platforms.unix;
 
-    # Version 4.0.3 and earlier vulnerable to CVE-2013-4243, but it's just the gif2tiff tool.
+    # Version 4.0.3 and earlier vulnerable to CVE-2013-4231, CVE-2013-4243, CVE-2013-4244, but it may be just the gif2tiff tool.
+    # Version 4.0.3 and earlier: tiff2pdf tool vulnerable to CVE-2013-4232.
+    
     broken = true;
   };
 }
