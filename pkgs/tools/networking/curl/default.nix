@@ -76,9 +76,5 @@ stdenv.mkDerivation rec {
     homepage    = http://curl.haxx.se/;
     maintainers = with maintainers; [ lovek323 ];
     platforms   = platforms.all;
-
-    # Security vulnerabilities: See http://curl.haxx.se/docs/security.html .
-    # E.g. CVE-2014-3613 affects 7.1-7.37.1.
-    broken = true;
   };
 }
