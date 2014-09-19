@@ -16,11 +16,7 @@ stdenv.mkDerivation rec {
       [ "ftp://ftp.remotesensing.org/pub/libtiff/tiff-${version}.tar.gz"
         "http://download.osgeo.org/libtiff/tiff-${version}.tar.gz"
       ];
-    # sha256 = "0wj8d1iwk9vnpax2h29xqc2hwknxg3s0ay2d5pxkg59ihbifn6pa";
-    # Vulnerabilities:
-    # Version 4.0.3 and earlier vulnerable to CVE-2013-4231, CVE-2013-4243, CVE-2013-4244, but it may be just the gif2tiff tool.
-    # Version 4.0.3 and earlier: tiff2pdf tool vulnerable to CVE-2013-4232.
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    sha256 = "0wj8d1iwk9vnpax2h29xqc2hwknxg3s0ay2d5pxkg59ihbifn6pa";
   };
 
   patchPhase = ''
