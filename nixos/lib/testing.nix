@@ -37,7 +37,7 @@ rec {
   # `driver' is the script that runs the network.
   runTests = driver:
     stdenv.mkDerivation {
-      name = "vm-test-run";
+      name = "vm-test-run-${driver.testName}";
 
       requiredSystemFeatures = [ "kvm" "nixos-test" ];
 
@@ -53,6 +53,8 @@ rec {
           xsltproc --output $out/log.html ${./test-driver/log2html.xsl} $out/log.xml
           ln -s ${./test-driver/logfile.css} $out/logfile.css
           ln -s ${./test-driver/treebits.js} $out/treebits.js
+          ln -s ${jquery}/js/jquery.min.js $out/
+          ln -s ${jquery-ui}/js/jquery-ui.min.js $out/
 
           touch $out/nix-support/hydra-build-products
           echo "report testlog $out log.html" >> $out/nix-support/hydra-build-products
@@ -68,9 +70,10 @@ rec {
 
 
   makeTest =
-    { testScript, makeCoverageReport ? false, ... } @ t:
+    { testScript, makeCoverageReport ? false, name ? "unnamed", ... } @ t:
 
     let
+      testDriverName = "nixos-test-driver-${name}";
 
       nodes = buildVirtualNetwork (
         t.nodes or (if t ? machine then { machine = t.machine; } else { }));
@@ -88,10 +91,11 @@ rec {
       # Generate onvenience wrappers for running the test driver
       # interactively with the specified network, and for starting the
       # VMs from the command line.
-      driver = runCommand "nixos-test-driver"
+      driver = runCommand testDriverName
         { buildInputs = [ makeWrapper];
           testScript = testScript';
           preferLocalBuild = true;
+          testName = name;
         }
         ''
           mkdir -p $out/bin
@@ -115,7 +119,7 @@ rec {
 
       report = releaseTools.gcovReport { coverageRuns = [ test ]; };
 
-    in (if makeCoverageReport then report else test) // { inherit driver test; };
+    in (if makeCoverageReport then report else test) // { inherit nodes driver test; };
 
 
   runInMachine =
@@ -196,6 +200,6 @@ rec {
       } // args);
 
 
-  simpleTest = as: (makeTest ({ ... }: as)).test;
+  simpleTest = as: (makeTest as).test;
 
 }

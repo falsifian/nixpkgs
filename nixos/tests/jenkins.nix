@@ -4,6 +4,7 @@
 #   3. jenkins service not started on slave node
 
 import ./make-test.nix {
+  name = "jenkins";
 
   nodes = {
 
@@ -15,6 +16,8 @@ import ./make-test.nix {
         services.jenkinsSlave.enable = true;
 
         users.extraUsers.jenkins.extraGroups = [ "users" ];
+
+        systemd.services.jenkins.unitConfig.TimeoutSec = 240;
       };
 
     slave =
@@ -36,6 +39,6 @@ import ./make-test.nix {
     print $slave->execute("sudo -u jenkins groups");
     $slave->mustSucceed("sudo -u jenkins groups | grep jenkins | grep users");
 
-    $slave->mustFail("systemctl status jenkins.service");
+    $slave->mustFail("systemctl is-enabled jenkins.service");
   '';
 }

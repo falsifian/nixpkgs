@@ -1,5 +1,5 @@
 { stdenv, stdenv_32bit, fetchurl, unzip, makeWrapper
-, platformTools, buildTools, support, platforms, sysimages, addons
+, platformTools, buildTools, support, supportRepository, platforms, sysimages, addons
 , zlib_32bit
 , libX11_32bit, libxcb_32bit, libXau_32bit, libXdmcp_32bit, libXext_32bit, mesa_32bit, alsaLib_32bit
 , libX11, libXext, libXrender, libxcb, libXau, libXdmcp, libXtst, mesa, alsaLib
@@ -7,37 +7,37 @@
 }:
 {platformVersions, abiVersions, useGoogleAPIs}:
 
-stdenv.mkDerivation {
-  name = "android-sdk-22.3";
+stdenv.mkDerivation rec {
+  name = "android-sdk-${version}";
+  version = "23.0.2";
   
   src = if (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux")
     then fetchurl {
-      url = http://dl.google.com/android/android-sdk_r22.3-linux.tgz;
-      md5 = "6ae581a906d6420ad67176dff25a31cc";
+      url = "http://dl.google.com/android/android-sdk_r${version}-linux.tgz";
+      md5 = "94a8c62086a7398cc0e73e1c8e65f71e";
     }
     else if stdenv.system == "x86_64-darwin" then fetchurl {
-      url = http://dl.google.com/android/android-sdk_r22.3-macosx.zip;
-      md5 = "ecde88ca1f05955826697848fcb4a9e7";
+      url = "http://dl.google.com/android/android-sdk_r${version}-macosx.zip";
+      md5 = "322787b0e6c629d926c28690c79ac0d8";
     }
     else throw "platform not ${stdenv.system} supported!";
   
   buildCommand = ''
     mkdir -p $out/libexec
     cd $out/libexec
-    unpackFile $src;
-    
+    unpackFile $src
     cd android-sdk-*/tools
     
     ${stdenv.lib.optionalString (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux")
     ''
       # There are a number of native binaries. We must patch them to let them find the interpreter and libstdc++
-    
-      for i in dmtracedump emulator emulator-arm emulator-mips emulator-x86 hprof-conv mksdcard sqlite3
+      
+      for i in emulator emulator-arm emulator-mips emulator-x86 mksdcard
       do
           patchelf --set-interpreter ${stdenv_32bit.gcc.libc}/lib/ld-linux.so.2 $i
           patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib $i
       done
-    
+      
       ${stdenv.lib.optionalString (stdenv.system == "x86_64-linux") ''
         # We must also patch the 64-bit emulator instances, if needed
         
@@ -47,17 +47,6 @@ stdenv.mkDerivation {
             patchelf --set-rpath ${stdenv.gcc.gcc}/lib64 $i
         done
       ''}
-      
-      # These tools also need zlib in addition to libstdc++
-    
-      for i in etc1tool zipalign
-      do
-          patchelf --set-interpreter ${stdenv_32bit.gcc.libc}/lib/ld-linux.so.2 $i
-          patchelf --set-rpath ${stdenv_32bit.gcc.gcc}/lib:${zlib_32bit}/lib $i
-      done
-    
-      # The android script has a hardcoded reference to /bin/ls that must be patched
-      sed -i -e "s|/bin/ls|ls|" android
       
       # The android script used SWT and wants to dynamically load some GTK+ stuff.
       # The following wrapper ensures that they can be found:
@@ -138,6 +127,15 @@ stdenv.mkDerivation {
       
     cd ..
 
+    # Symlink required extras
+
+    mkdir -p extras/android
+    cd extras/android
+
+    ln -s ${supportRepository}/m2repository
+
+    cd ../..
+
     # Symlink required platforms
    
     mkdir -p platforms
@@ -177,7 +175,7 @@ stdenv.mkDerivation {
     
     # Create wrappers to the most important tools and platform tools so that we can run them if the SDK is in our PATH
     
-    ensureDir $out/bin
+    mkdir -p $out/bin
 
     for i in $out/libexec/android-sdk-*/tools/*
     do

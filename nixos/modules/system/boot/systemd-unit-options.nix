@@ -28,7 +28,7 @@ let
 
 in rec {
 
-  unitOptions = {
+  sharedOptions = {
 
     enable = mkOption {
       default = true;
@@ -41,11 +41,36 @@ in rec {
       '';
     };
 
-    baseUnit = mkOption {
-      type = types.nullOr types.path;
-      default = null;
-      description = "Path to an upstream unit file on which the NixOS unit configuration will be based.";
+    requiredBy = mkOption {
+      default = [];
+      type = types.listOf types.string;
+      description = "Units that require (i.e. depend on and need to go down with) this unit.";
     };
+
+    wantedBy = mkOption {
+      default = [];
+      type = types.listOf types.string;
+      description = "Units that want (i.e. depend on) this unit.";
+    };
+
+  };
+
+  concreteUnitOptions = sharedOptions // {
+
+    text = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Text of this systemd unit.";
+    };
+
+    unit = mkOption {
+      internal = true;
+      description = "The generated unit.";
+    };
+
+  };
+
+  commonUnitOptions = sharedOptions // {
 
     description = mkOption {
       default = "";
@@ -115,18 +140,6 @@ in rec {
       '';
     };
 
-    requiredBy = mkOption {
-      default = [];
-      type = types.listOf types.str;
-      description = "Units that require (i.e. depend on and need to go down with) this unit.";
-    };
-
-    wantedBy = mkOption {
-      default = [];
-      type = types.listOf types.str;
-      description = "Units that want (i.e. depend on) this unit.";
-    };
-
     unitConfig = mkOption {
       default = {};
       example = { RequiresMountsFor = "/data"; };
@@ -152,7 +165,7 @@ in rec {
   };
 
 
-  serviceOptions = unitOptions // {
+  serviceOptions = commonUnitOptions // {
 
     environment = mkOption {
       default = {};
@@ -214,6 +227,15 @@ in rec {
       description = ''
         Shell commands executed after the service's main process
         is started.
+      '';
+    };
+
+    reload = mkOption {
+      type = types.lines;
+      default = "";
+      description = ''
+        Shell commands executed when the service's main process
+        is reloaded.
       '';
     };
 
@@ -286,7 +308,7 @@ in rec {
   };
 
 
-  socketOptions = unitOptions // {
+  socketOptions = commonUnitOptions // {
 
     listenStreams = mkOption {
       default = [];
@@ -313,7 +335,7 @@ in rec {
   };
 
 
-  timerOptions = unitOptions // {
+  timerOptions = commonUnitOptions // {
 
     timerConfig = mkOption {
       default = {};
@@ -332,7 +354,7 @@ in rec {
   };
 
 
-  pathOptions = unitOptions // {
+  pathOptions = commonUnitOptions // {
 
     pathConfig = mkOption {
       default = {};
@@ -349,7 +371,7 @@ in rec {
   };
 
 
-  mountOptions = unitOptions // {
+  mountOptions = commonUnitOptions // {
 
     what = mkOption {
       example = "/dev/sda1";
@@ -393,7 +415,7 @@ in rec {
     };
   };
 
-  automountOptions = unitOptions // {
+  automountOptions = commonUnitOptions // {
 
     where = mkOption {
       example = "/mnt";
@@ -416,5 +438,7 @@ in rec {
       '';
     };
   };
+
+  targetOptions = commonUnitOptions;
 
 }

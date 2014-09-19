@@ -26,36 +26,11 @@ let
         inherit sha256;
       };
       features.grsecurity = true;
-      # The grsec kernel patchset includes AppArmor patches
-      features.apparmor = true;
-    };
-
-  makeAppArmorPatch = {apparmor, version}:
-    stdenv.mkDerivation {
-      name = "apparmor-${version}.patch";
-      phases = ["installPhase"];
-      installPhase = ''
-        cat ${apparmor}/kernel-patches/${version}/* > $out
-      '';
     };
 
 in
 
 rec {
-
-  apparmor_3_2 = rec {
-    version = "3.2";
-    name = "apparmor-${version}";
-    patch = makeAppArmorPatch { inherit apparmor version; };
-    features.apparmor = true;
-  };
-
-  apparmor_3_4 = rec {
-    version = "3.4";
-    name = "apparmor-${version}";
-    patch = makeAppArmorPatch { inherit apparmor version; };
-    features.apparmor = true;
-  };
 
   no_xsave =
     { name = "no-xsave";
@@ -85,24 +60,17 @@ rec {
   };
 
   grsecurity_stable = grsecPatch
-    { kversion  = "3.2.57";
-      revision  = "201404131252";
+    { kversion  = "3.14.18";
+      revision  = "201409060013";
       branch    = "stable";
-      sha256    = "1yic257h2vy3175c34i54873lc93y0m57rw1d059wz1wxy9waiwl";
-    };
-
-  grsecurity_vserver = grsecPatch
-    { kversion  = "3.2.57";
-      revision  = "vs2.3.2.16-201404131253";
-      branch    = "vserver";
-      sha256    = "0grhd9hbk952dwr91syi5pda1iccmcd8s0l3ki13689z8ns35f7k";
+      sha256    = "0dlri42z8rihhib0ahagia8z2ga4di1mc8y63n3s7ja0f2bvzy19";
     };
 
   grsecurity_unstable = grsecPatch
-    { kversion  = "3.13.10";
-      revision  = "201404141717";
+    { kversion  = "3.16.2";
+      revision  = "201409060014";
       branch    = "test";
-      sha256    = "1vraf9g7za0syx5c1x1ks7kgaxc9mjspy6pvgrs0vi326v12sqnx";
+      sha256    = "1fnvmzfjpx74g5r1nilnynjyp18s5nnyw78znxdn33xxr5kdfzr4";
     };
 
   grsec_fix_path =

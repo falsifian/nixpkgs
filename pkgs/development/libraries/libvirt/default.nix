@@ -4,14 +4,14 @@
 , dnsmasq, libnl
 }:
 
-let version = "1.2.2"; in
+let version = "1.2.7"; in
 
 stdenv.mkDerivation rec {
   name = "libvirt-${version}";
 
   src = fetchurl {
     url = "http://libvirt.org/sources/${name}.tar.gz";
-    sha256 = "1hxvgh2fp2fk3wva7fnbz2pk6g5217wrmf9xwikiphn50zipg0x4";
+    sha256 = "1z6yfzzbf9rvqjq1my7x1br73g8dz8kij3khpb4x520ip8n4dyrx";
   };
 
   buildInputs = [
@@ -39,6 +39,7 @@ stdenv.mkDerivation rec {
   ];
 
   postInstall = ''
+    sed -i 's/ON_SHUTDOWN=suspend/ON_SHUTDOWN=''${ON_SHUTDOWN:-suspend}/' $out/libexec/libvirt-guests.sh
     substituteInPlace $out/libexec/libvirt-guests.sh \
       --replace "$out/bin" "${gettext}/bin"
     wrapProgram $out/sbin/libvirtd \

@@ -85,7 +85,7 @@ in
           Defines how users authenticate themselves to the server. By
           default, "trust" access to local users will always be granted
           along with any other custom options. If you do not want this,
-          set this option using "pkgs.lib.mkForce" to override this
+          set this option using "lib.mkForce" to override this
           behaviour.
         '';
       };
@@ -215,7 +215,7 @@ in
             # Shut down Postgres using SIGINT ("Fast Shutdown mode").  See
             # http://www.postgresql.org/docs/current/static/server-shutdown.html
             KillSignal = "SIGINT";
-            KillMode = "process"; # FIXME: this may cause processes to be left behind in the cgroup even after the final SIGKILL
+            KillMode = "mixed";
 
             # Give Postgres a decent amount of time to clean up after
             # receiving systemd's SIGINT.

@@ -4,24 +4,39 @@ with lib;
 
 let
 
-  runInNetns = pkgs.stdenv.mkDerivation {
-    name = "run-in-netns";
-    unpackPhase = "true";
-    buildPhase = ''
-      mkdir -p $out/bin
-      gcc ${./run-in-netns.c} -o $out/bin/run-in-netns
-    '';
-    installPhase = "true";
-  };
-
   nixos-container = pkgs.substituteAll {
     name = "nixos-container";
     dir = "bin";
     isExecutable = true;
     src = ./nixos-container.pl;
     perl = "${pkgs.perl}/bin/perl -I${pkgs.perlPackages.FileSlurp}/lib/perl5/site_perl";
-    inherit (pkgs) socat;
+    inherit (pkgs) utillinux;
   };
+
+  # The container's init script, a small wrapper around the regular
+  # NixOS stage-2 init script.
+  containerInit = pkgs.writeScript "container-init"
+    ''
+      #! ${pkgs.stdenv.shell} -e
+
+      # Initialise the container side of the veth pair.
+      if [ "$PRIVATE_NETWORK" = 1 ]; then
+        ip link set host0 name eth0
+        ip link set dev eth0 up
+        if [ -n "$HOST_ADDRESS" ]; then
+          ip route add $HOST_ADDRESS dev eth0
+          ip route add default via $HOST_ADDRESS
+        fi
+        if [ -n "$LOCAL_ADDRESS" ]; then
+          ip addr add $LOCAL_ADDRESS dev eth0
+        fi
+      fi
+
+      # Start the regular stage 1 script, passing the bind-mounted
+      # notification socket from the host to allow the container
+      # systemd to signal readiness to the host systemd.
+      NOTIFY_SOCKET=/var/lib/private/host-notify exec "$1"
+    '';
 
   system = config.nixpkgs.system;
 
@@ -70,7 +85,7 @@ in
                 Whether to give the container its own private virtual
                 Ethernet interface.  The interface is called
                 <literal>eth0</literal>, and is hooked up to the interface
-                <literal>c-<replaceable>container-name</replaceable></literal>
+                <literal>ve-<replaceable>container-name</replaceable></literal>
                 on the host.  If this option is not set, then the
                 container shares the network interfaces of the host,
                 and can bind to any port on any interface.
@@ -105,7 +120,6 @@ in
                   modules =
                     let extraConfig =
                       { boot.isContainer = true;
-                        security.initialRootPassword = mkDefault "!";
                         networking.hostName = mkDefault name;
                         networking.useDHCP = false;
                       };
@@ -157,17 +171,23 @@ in
 
         preStart =
           ''
-            mkdir -p -m 0755 $root/var/lib
+            # Clean up existing machined registration and interfaces.
+            machinectl terminate "$INSTANCE" 2> /dev/null || true
 
-            # Create a named pipe to get a signal when the container
-            # has finished booting.
-            rm -f $root/var/lib/startup-done
-            mkfifo -m 0600 $root/var/lib/startup-done
+            if [ "$PRIVATE_NETWORK" = 1 ]; then
+              ip link del dev "ve-$INSTANCE" 2> /dev/null || true
+            fi
+
+
+            if [ "$PRIVATE_NETWORK" = 1 ]; then
+              ip link del dev "ve-$INSTANCE" 2> /dev/null || true
+            fi
          '';
 
         script =
           ''
             mkdir -p -m 0755 "$root/etc" "$root/var/lib"
+            mkdir -p -m 0700 "$root/var/lib/private"
             if ! [ -e "$root/etc/os-release" ]; then
               touch "$root/etc/os-release"
             fi
@@ -176,94 +196,94 @@ in
               "/nix/var/nix/profiles/per-container/$INSTANCE" \
               "/nix/var/nix/gcroots/per-container/$INSTANCE"
 
-            SYSTEM_PATH=/nix/var/nix/profiles/system
-            if [ -f "/etc/containers/$INSTANCE.conf" ]; then
-              . "/etc/containers/$INSTANCE.conf"
-            fi
-
-            # Cleanup from last time.
-            ifaceHost=c-$INSTANCE
-            ifaceCont=ctmp-$INSTANCE
-            ns=net-$INSTANCE
-            ip netns del $ns 2> /dev/null || true
-            ip link del $ifaceHost 2> /dev/null || true
-            ip link del $ifaceCont 2> /dev/null || true
+            cp -f /etc/resolv.conf "$root/etc/resolv.conf"
 
             if [ "$PRIVATE_NETWORK" = 1 ]; then
-              # Create a pair of virtual ethernet devices.  On the host,
-              # we get ‘c-<container-name’, and on the guest, we get
-              # ‘eth0’.
-              ip link add $ifaceHost type veth peer name $ifaceCont
-              ip netns add $ns
-              ip link set $ifaceCont netns $ns
-              ip netns exec $ns ip link set $ifaceCont name eth0
-              ip netns exec $ns ip link set dev eth0 up
-              ip link set dev $ifaceHost up
-              if [ -n "$HOST_ADDRESS" ]; then
-                ip addr add $HOST_ADDRESS dev $ifaceHost
-                ip netns exec $ns ip route add $HOST_ADDRESS dev eth0
-                ip netns exec $ns ip route add default via $HOST_ADDRESS
-              fi
-              if [ -n "$LOCAL_ADDRESS" ]; then
-                ip netns exec $ns ip addr add $LOCAL_ADDRESS dev eth0
-                ip route add $LOCAL_ADDRESS dev $ifaceHost
-              fi
-              runInNetNs="${runInNetns}/bin/run-in-netns $ns"
-              extraFlags="--capability=CAP_NET_ADMIN"
+              extraFlags+=" --network-veth"
             fi
 
-            exec $runInNetNs ${config.systemd.package}/bin/systemd-nspawn \
-              -M "$INSTANCE" -D "/var/lib/containers/$INSTANCE" $extraFlags \
+            for iface in $MACVLANS; do
+              extraFlags+=" --network-macvlan=$iface"
+            done
+
+            # If the host is 64-bit and the container is 32-bit, add a
+            # --personality flag.
+            ${optionalString (config.nixpkgs.system == "x86_64-linux") ''
+              if [ "$(< ''${SYSTEM_PATH:-/nix/var/nix/profiles/per-container/$INSTANCE/system}/system)" = i686-linux ]; then
+                extraFlags+=" --personality=x86"
+              fi
+            ''}
+
+            # Run systemd-nspawn without startup notification (we'll
+            # wait for the container systemd to signal readiness).
+            EXIT_ON_REBOOT=1 NOTIFY_SOCKET= \
+            exec ${config.systemd.package}/bin/systemd-nspawn \
+              --keep-unit \
+              -M "$INSTANCE" -D "$root" $extraFlags \
               --bind-ro=/nix/store \
               --bind-ro=/nix/var/nix/db \
               --bind-ro=/nix/var/nix/daemon-socket \
+              --bind=/run/systemd/notify:/var/lib/private/host-notify \
               --bind="/nix/var/nix/profiles/per-container/$INSTANCE:/nix/var/nix/profiles" \
               --bind="/nix/var/nix/gcroots/per-container/$INSTANCE:/nix/var/nix/gcroots" \
-              "$SYSTEM_PATH/init"
+              --setenv PRIVATE_NETWORK="$PRIVATE_NETWORK" \
+              --setenv HOST_ADDRESS="$HOST_ADDRESS" \
+              --setenv LOCAL_ADDRESS="$LOCAL_ADDRESS" \
+              --setenv PATH="$PATH" \
+              ${containerInit} "''${SYSTEM_PATH:-/nix/var/nix/profiles/system}/init"
           '';
 
         postStart =
           ''
-            # This blocks until the container-startup-done service
-            # writes something to this pipe.  FIXME: it also hangs
-            # until the start timeout expires if systemd-nspawn exits.
-            read x < $root/var/lib/startup-done
-            rm -f $root/var/lib/startup-done
+            if [ "$PRIVATE_NETWORK" = 1 ]; then
+              ifaceHost=ve-$INSTANCE
+              ip link set dev $ifaceHost up
+              if [ -n "$HOST_ADDRESS" ]; then
+                ip addr add $HOST_ADDRESS dev $ifaceHost
+              fi
+              if [ -n "$LOCAL_ADDRESS" ]; then
+                ip route add $LOCAL_ADDRESS dev $ifaceHost
+              fi
+            fi
           '';
 
         preStop =
           ''
-            pid="$(cat /sys/fs/cgroup/systemd/machine/$INSTANCE.nspawn/system/tasks 2> /dev/null)"
-            if [ -n "$pid" ]; then
-              # Send the RTMIN+3 signal, which causes the container
-              # systemd to start halt.target.
-              echo "killing container systemd, PID = $pid"
-              kill -RTMIN+3 $pid
-              # Wait for the container to exit.  We can't let systemd
-              # do this because it will send a signal to the entire
-              # cgroup.
-              for ((n = 0; n < 180; n++)); do
-                if ! kill -0 $pid 2> /dev/null; then break; fi
-                sleep 1
-              done
-            fi
+            machinectl poweroff "$INSTANCE" || true
           '';
 
         restartIfChanged = false;
         #reloadIfChanged = true; # FIXME
 
-        serviceConfig.ExecReload = pkgs.writeScript "reload-container"
-          ''
-            #! ${pkgs.stdenv.shell} -e
-            SYSTEM_PATH=/nix/var/nix/profiles/system
-            if [ -f "/etc/containers/$INSTANCE.conf" ]; then
-              . "/etc/containers/$INSTANCE.conf"
-            fi
-            echo $SYSTEM_PATH/bin/switch-to-configuration test | \
-              ${pkgs.socat}/bin/socat unix:$root/var/lib/run-command.socket -
-          '';
+        serviceConfig = {
+          ExecReload = pkgs.writeScript "reload-container"
+            ''
+              #! ${pkgs.stdenv.shell} -e
+              ${nixos-container}/bin/nixos-container run "$INSTANCE" -- \
+                bash --login -c "/nix/var/nix/profiles/system/bin/switch-to-configuration test"
+            '';
 
-        serviceConfig.SyslogIdentifier = "container %i";
+          SyslogIdentifier = "container %i";
+
+          EnvironmentFile = "-/etc/containers/%i.conf";
+
+          Type = "notify";
+
+          NotifyAccess = "all";
+
+          # Note that on reboot, systemd-nspawn returns 10, so this
+          # unit will be restarted. On poweroff, it returns 0, so the
+          # unit won't be restarted.
+          Restart = "on-failure";
+
+          # Hack: we don't want to kill systemd-nspawn, since we call
+          # "machinectl poweroff" in preStop to shut down the
+          # container cleanly. But systemd requires sending a signal
+          # (at least if we want remaining processes to be killed
+          # after the timeout). So send an ignored signal.
+          KillMode = "mixed";
+          KillSignal = "WINCH";
+        };
       };
 
     # Generate a configuration file in /etc/containers for each
@@ -293,7 +313,34 @@ in
         ${cfg.localAddress} ${name}.containers
       '') config.containers);
 
+    networking.dhcpcd.denyInterfaces = [ "ve-*" ];
+
     environment.systemPackages = [ nixos-container ];
+
+    # Start containers at boot time.
+    systemd.services.all-containers =
+      { description = "All Containers";
+
+        wantedBy = [ "multi-user.target" ];
+
+        unitConfig.ConditionDirectoryNotEmpty = "/etc/containers";
+
+        serviceConfig.Type = "oneshot";
+
+        script =
+          ''
+            res=0
+            shopt -s nullglob
+            for i in /etc/containers/*.conf; do
+              AUTO_START=
+              source "$i"
+              if [ "$AUTO_START" = 1 ]; then
+                systemctl start "container@$(basename "$i" .conf).service" || res=1
+              fi
+            done
+            exit $res
+          ''; # */
+      };
 
   };
 }

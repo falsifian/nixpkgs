@@ -1,29 +1,19 @@
 { stdenv, fetchurl, unzip }:
 
 stdenv.mkDerivation rec {
-  name = "jquery-ui-1.10.3";
+  name = "jquery-ui-1.11.1";
 
   src = fetchurl {
-    url = "http://jqueryui.com/resources/download/${name}.custom.zip";
-    sha256 = "1nqh3fmjgy73cbwb5sj775242i6jhz3f5b9fxgrkq00dfvkls779";
+    url = "http://jqueryui.com/resources/download/${name}.zip";
+    sha256 = "05dlcfwklymx94fb4n88l5syf80l6zrs862zzmla477vd8ndk537";
   };
 
   buildInputs = [ unzip ];
 
   installPhase =
     ''
-      mkdir -p $out
-      cp -prvd css js $out/
-
-      # For convenience, provide symlinks "jquery.min.js" etc. (i.e.,
-      # without the version number).
-      pushd $out/js
-      ln -s jquery-ui-*.custom.js jquery-ui.js
-      ln -s jquery-ui-*.custom.min.js jquery-ui.min.js
-      ln -s jquery-1.*.js jquery.js
-      popd
-      pushd $out/css/smoothness
-      ln -s jquery-ui-*.custom.css jquery-ui.css
+      mkdir -p "$out/js"
+      cp -rv . "$out/js"
     '';
 
   meta = {

@@ -9,10 +9,11 @@ let
   setuidWrapper = pkgs.stdenv.mkDerivation {
     name = "setuid-wrapper";
     buildCommand = ''
-      ensureDir $out/bin
+      mkdir -p $out/bin
+      cp ${./setuid-wrapper.c} setuid-wrapper.c
       gcc -Wall -O2 -DWRAPPER_DIR=\"${wrapperDir}\" \
-          ${./setuid-wrapper.c} -o $out/bin/setuid-wrapper
-      strip -s $out/bin/setuid-wrapper
+          setuid-wrapper.c -o $out/bin/setuid-wrapper
+      strip -S $out/bin/setuid-wrapper
     '';
   };
 
@@ -75,8 +76,7 @@ in
 
   config = {
 
-    security.setuidPrograms =
-      [ "fusermount" "wodim" "cdrdao" "growisofs" ];
+    security.setuidPrograms = [ "fusermount" ];
 
     system.activationScripts.setuid =
       let
@@ -96,8 +96,7 @@ in
           }:
 
           ''
-            source=${if source != "" then source else "$(PATH=$SETUID_PATH type -tP ${program})"}
-            if test -z "$source"; then
+            if ! source=${if source != "" then source else "$(PATH=$SETUID_PATH type -tP ${program})"}; then
                 # If we can't find the program, fall back to the
                 # system profile.
                 source=/nix/var/nix/profiles/default/bin/${program}
@@ -116,8 +115,7 @@ in
           # programs to be wrapped.
           SETUID_PATH=${config.system.path}/bin:${config.system.path}/sbin
 
-          if test -d ${wrapperDir}; then rm -f ${wrapperDir}/*; fi # */
-          mkdir -p ${wrapperDir}
+          rm -f ${wrapperDir}/* # */
 
           ${concatMapStrings makeSetuidWrapper setuidPrograms}
         '';

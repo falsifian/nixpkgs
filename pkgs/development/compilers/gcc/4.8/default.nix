@@ -1,5 +1,7 @@
 { stdenv, fetchurl, noSysDirs
 , langC ? true, langCC ? true, langFortran ? false
+, langObjC ? stdenv.isDarwin
+, langObjCpp ? stdenv.isDarwin
 , langJava ? false
 , langAda ? false
 , langVhdl ? false
@@ -11,7 +13,7 @@
 , perl ? null # optional, for texi2pod (then pod2man); required for Java
 , gmp, mpfr, mpc, gettext, which
 , libelf                      # optional, for link-time optimizations (LTO)
-, ppl ? null, cloog ? null, isl ? null # optional, for the Graphite optimization framework.
+, cloog ? null, isl ? null # optional, for the Graphite optimization framework.
 , zlib ? null, boehmgc ? null
 , zip ? null, unzip ? null, pkgconfig ? null, gtk ? null, libart_lgpl ? null
 , libX11 ? null, libXt ? null, libSM ? null, libICE ? null, libXtst ? null
@@ -52,20 +54,17 @@ assert langGo -> langCC;
 with stdenv.lib;
 with builtins;
 
-let version = "4.8.2";
+let version = "4.8.3";
 
     # Whether building a cross-compiler for GNU/Hurd.
     crossGNU = cross != null && cross.config == "i586-pc-gnu";
 
-  /* gccinstall.info says that "parallel make is currently not supported since
-     collisions in profile collecting may occur".
-  */
-    enableParallelBuilding = !profiledCompiler;
+    enableParallelBuilding = true;
 
     patches = []
       ++ optional enableParallelBuilding ./parallel-bconfig.patch
       ++ optional (cross != null) ./libstdc++-target.patch
-      # ++ optional noSysDirs ./no-sys-dirs.patch
+      ++ optional noSysDirs ./no-sys-dirs.patch
       # The GNAT Makefiles did not pay attention to CFLAGS_FOR_TARGET for its
       # target libraries and tools.
       ++ optional langAda ./gnat-cflags.patch
@@ -83,8 +82,8 @@ let version = "4.8.2";
     # Antlr (optional) allows the Java `gjdoc' tool to be built.  We want a
     # binary distribution here to allow the whole chain to be bootstrapped.
     javaAntlr = fetchurl {
-      url = http://www.antlr.org/download/antlr-3.1.3.jar;
-      sha256 = "1f41j0y4kjydl71lqlvr73yagrs2jsg1fjymzjz66mjy7al5lh09";
+      url = http://www.antlr.org/download/antlr-4.4-complete.jar;
+      sha256 = "02lda2imivsvsis8rnzmbrbp8rh1kb8vmq4i67pqhkwz7lf8y6dz";
     };
 
     xlibs = [
@@ -117,7 +116,8 @@ let version = "4.8.2";
         withMode;
 
     /* Cross-gcc settings */
-    crossMingw = (cross != null && cross.libc == "msvcrt");
+    crossMingw = cross != null && cross.libc == "msvcrt";
+    crossDarwin = cross != null && cross.libc == "libSystem";
     crossConfigureFlags = let
         gccArch = stdenv.cross.gcc.arch or null;
         gccCpu = stdenv.cross.gcc.cpu or null;
@@ -159,9 +159,16 @@ let version = "4.8.2";
           " --disable-libgomp " +
           " --disable-libquadmath" +
           " --disable-shared" +
+          " --disable-libatomic " +  # libatomic requires libc
           " --disable-decimal-float" # libdecnumber requires libc
           else
-          " --with-headers=${libcCross}/include" +
+          (if crossDarwin then " --with-sysroot=${libcCross}/share/sysroot"
+           else                " --with-headers=${libcCross}/include") +
+          # Ensure that -print-prog-name is able to find the correct programs.
+          (stdenv.lib.optionalString (crossMingw || crossDarwin) (
+            " --with-as=${binutilsCross}/bin/${cross.config}-as" +
+            " --with-ld=${binutilsCross}/bin/${cross.config}-ld"
+          )) +
           " --enable-__cxa_atexit" +
           " --enable-long-long" +
           (if crossMingw then
@@ -175,10 +182,8 @@ let version = "4.8.2";
             # In any case, mingw32 g++ linking is broken by default with shared libs,
             # unless adding "-lsupc++" to any linking command. I don't know why.
             " --disable-shared" +
-            (if cross.config == "x86_64-w64-mingw32" then
-              # To keep ABI compatibility with upstream mingw-w64
-              " --enable-fully-dynamic-string"
-              else "")
+            # To keep ABI compatibility with upstream mingw-w64
+            " --enable-fully-dynamic-string"
             else (if cross.libc == "uclibc" then
               # In uclibc cases, libgomp needs an additional '-ldl'
               # and as I don't know how to pass it, I disable libgomp.
@@ -204,7 +209,7 @@ stdenv.mkDerivation ({
 
   src = fetchurl {
     url = "mirror://gnu/gcc/gcc-${version}/gcc-${version}.tar.bz2";
-    sha256 = "1j6dwgby4g3p3lz7zkss32ghr45zpdidrg8xvazvn91lqxv25p09";
+    sha256 = "07hg10zs7gnqz58my10ch0zygizqh0z0bz6pv4pgxx45n48lz3ka";
   };
 
   inherit patches;
@@ -271,7 +276,6 @@ stdenv.mkDerivation ({
     ++ (optional javaAwtGtk pkgconfig);
 
   buildInputs = [ gmp mpfr mpc libelf ]
-    ++ (optional (ppl != null) ppl)
     ++ (optional (cloog != null) cloog)
     ++ (optional (isl != null) isl)
     ++ (optional (zlib != null) zlib)
@@ -288,22 +292,21 @@ stdenv.mkDerivation ({
 
   NIX_LDFLAGS = stdenv.lib.optionalString  stdenv.isSunOS "-lm -ldl";
 
-  preConfigure = ''
-    configureFlagsArray=(
-      ${stdenv.lib.optionalString (ppl != null && ppl ? dontDisableStatic && ppl.dontDisableStatic)
-        "'--with-host-libstdcxx=-lstdc++ -lgcc_s'"}
-      ${stdenv.lib.optionalString (ppl != null && stdenv.isSunOS)
-        "\"--with-host-libstdcxx=-Wl,-rpath,\$prefix/lib/amd64 -lstdc++\"
-         \"--with-boot-ldflags=-L../prev-x86_64-pc-solaris2.11/libstdc++-v3/src/.libs\""}
-    );
-    ${stdenv.lib.optionalString (stdenv.isSunOS && stdenv.is64bit)
-      ''
-        export NIX_LDFLAGS=`echo $NIX_LDFLAGS | sed -e s~$prefix/lib~$prefix/lib/amd64~g`
-        export LDFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $LDFLAGS_FOR_TARGET"
-        export CXXFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $CXXFLAGS_FOR_TARGET"
-        export CFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $CFLAGS_FOR_TARGET"
-      ''}
-    '';
+  preConfigure = stdenv.lib.optionalString (stdenv.isSunOS && stdenv.is64bit) ''
+    export NIX_LDFLAGS=`echo $NIX_LDFLAGS | sed -e s~$prefix/lib~$prefix/lib/amd64~g`
+    export LDFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $LDFLAGS_FOR_TARGET"
+    export CXXFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $CXXFLAGS_FOR_TARGET"
+    export CFLAGS_FOR_TARGET="-Wl,-rpath,$prefix/lib/amd64 $CFLAGS_FOR_TARGET"
+  '' + stdenv.lib.optionalString stdenv.isDarwin ''
+    if SDKROOT=$(/usr/bin/xcrun --show-sdk-path); then
+      configureFlagsArray+=(--with-native-system-header-dir=$SDKROOT/usr/include)
+      makeFlagsArray+=( \
+       CFLAGS_FOR_BUILD=-F$SDKROOT/System/Library/Frameworks \
+       CFLAGS_FOR_TARGET=-F$SDKROOT/System/Library/Frameworks \
+       FLAGS_FOR_TARGET=-F$SDKROOT/System/Library/Frameworks \
+      )
+    fi
+  '';
 
   dontDisableStatic = true;
 
@@ -317,7 +320,6 @@ stdenv.mkDerivation ({
     ${if enableMultilib then "--disable-libquadmath" else "--disable-multilib"}
     ${if enableShared then "" else "--disable-shared"}
     ${if enablePlugin then "--enable-plugin" else "--disable-plugin"}
-    ${if ppl != null then "--with-ppl=${ppl} --disable-ppl-version-check" else ""}
     ${optionalString (isl != null) "--with-isl=${isl}"}
     ${optionalString (cloog != null) "--with-cloog=${cloog} --disable-cloog-version-check --enable-cloog-backend=isl"}
     ${if langJava then
@@ -346,6 +348,9 @@ stdenv.mkDerivation ({
         ++ optional langAda      "ada"
         ++ optional langVhdl     "vhdl"
         ++ optional langGo       "go"
+        ++ optional langObjC     "objc"
+        ++ optional langObjCpp   "obj-c++"
+        ++ optionals crossDarwin [ "objc" "obj-c++" ]
         )
       )
     }
@@ -397,7 +402,6 @@ stdenv.mkDerivation ({
     configureFlags = ''
       ${if enableMultilib then "" else "--disable-multilib"}
       ${if enableShared then "" else "--disable-shared"}
-      ${if ppl != null then "--with-ppl=${ppl.crossDrv}" else ""}
       ${if cloog != null then "--with-cloog=${cloog.crossDrv} --enable-cloog-backend=isl" else ""}
       ${if langJava then "--with-ecj-jar=${javaEcj.crossDrv}" else ""}
       ${if javaAwtGtk then "--enable-java-awt=gtk" else ""}
@@ -483,13 +487,15 @@ stdenv.mkDerivation ({
     else null;
 
   passthru =
-    { inherit langC langCC langAda langFortran langVhdl langGo enableMultilib version; };
+    { inherit langC langCC langObjC langObjCpp langAda langFortran langVhdl langGo version; };
 
-  inherit enableParallelBuilding;
+  inherit enableParallelBuilding enableMultilib;
+
+  inherit (stdenv) is64bit;
 
   meta = {
     homepage = http://gcc.gnu.org/;
-    license = "GPLv3+";  # runtime support libraries are typically LGPLv3+
+    license = stdenv.lib.licenses.gpl3Plus;  # runtime support libraries are typically LGPLv3+
     description = "GNU Compiler Collection, version ${version}"
       + (if stripped then "" else " (with debugging info)");
 
@@ -504,7 +510,6 @@ stdenv.mkDerivation ({
 
     maintainers = with stdenv.lib.maintainers; [ ludo viric shlevy simons ];
 
-    # Volunteers needed for the {Cyg,Dar}win ports of *PPL.
     # gnatboot is not available out of linux platforms, so we disable the darwin build
     # for the gnat (ada compiler).
     platforms =

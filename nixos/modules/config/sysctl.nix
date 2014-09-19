@@ -6,8 +6,12 @@ let
 
   sysctlOption = mkOptionType {
     name = "sysctl option value";
-    check = x: isBool x || isString x || isInt x || isNull x;
-    merge = args: defs: (last defs).value; # FIXME: hacky way to allow overriding in configuration.nix.
+    check = val:
+      let
+        checkType = x: isBool x || isString x || isInt x || isNull x;
+      in
+        checkType val || (val._type or "" == "override" && checkType val.content);
+    merge = loc: defs: mergeOneOption loc (filterOverrides defs);
   };
 
 in
@@ -45,19 +49,8 @@ in
       ) config.boot.kernel.sysctl);
 
     systemd.services.systemd-sysctl =
-      { description = "Apply Kernel Variables";
-        before = [ "sysinit.target" "shutdown.target" ];
-        wantedBy = [ "sysinit.target" "multi-user.target" ];
+      { wantedBy = [ "multi-user.target" ];
         restartTriggers = [ config.environment.etc."sysctl.d/nixos.conf".source ];
-        unitConfig = {
-          DefaultDependencies = false; # needed to prevent a cycle
-          ConditionPathIsReadWrite = "/proc/sys/"; # prevent systemd-sysctl in containers
-        };
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${config.systemd.package}/lib/systemd/systemd-sysctl";
-        };
       };
 
     # Enable hardlink and symlink restrictions.  See

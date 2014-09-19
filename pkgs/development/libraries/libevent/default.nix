@@ -1,4 +1,4 @@
-{stdenv, fetchurl}:
+{ stdenv, fetchurl, python }:
 
 let version = "2.0.21"; in
 stdenv.mkDerivation {
@@ -9,8 +9,13 @@ stdenv.mkDerivation {
     sha256 = "1xblymln9vihdmf1aqkp8chwvnhpdch3786bh30bj75slnl31992";
   };
 
+  patchPhase = ''
+    substituteInPlace event_rpcgen.py \
+      --replace "/usr/bin/env python2" "${python}/bin/python"
+  '';
+
   meta = {
-    description = "libevent, an event notification library";
+    description = "Event notification library";
 
     longDescription =
       '' The libevent API provides a mechanism to execute a callback function

@@ -1,18 +1,15 @@
-{ nixpkgs ? { outPath = ./..; revCount = 5678; shortRev = "gfedcba"; }
-, officialRelease ? false
+{ nixpkgs ? { outPath = ./..; revCount = 56789; shortRev = "gfedcba"; }
 , stableBranch ? false
+, supportedSystems ? [ "x86_64-linux" "i686-linux" ]
 }:
 
 let
 
   version = builtins.readFile ../.version;
   versionSuffix =
-    if officialRelease then ""
-    else (if stableBranch then "." else "pre") + "${toString nixpkgs.revCount}.${nixpkgs.shortRev}";
+    (if stableBranch then "." else "pre") + "${toString nixpkgs.revCount}.${nixpkgs.shortRev}";
 
-  systems = [ "x86_64-linux" "i686-linux" ];
-
-  forAllSystems = pkgs.lib.genAttrs systems;
+  forAllSystems = pkgs.lib.genAttrs supportedSystems;
 
   callTest = fn: args: forAllSystems (system: import fn ({ inherit system; } // args));
 
@@ -81,6 +78,16 @@ let
         };
 
 
+  makeClosure = module: forAllSystems (system: (import ./lib/eval-config.nix {
+    inherit system;
+    modules = [ module ] ++ lib.singleton
+      ({ config, lib, ... }:
+      { fileSystems."/".device  = lib.mkDefault "/dev/sda1";
+        boot.loader.grub.device = lib.mkDefault "/dev/sda";
+      });
+  }).config.system.build.toplevel);
+
+
 in rec {
 
   channel =
@@ -116,6 +123,7 @@ in rec {
 
 
   manual = forAllSystems (system: (builtins.getAttr system iso_minimal).config.system.build.manual.manual);
+  manualPDF = iso_minimal.x86_64-linux.config.system.build.manual.manualPDF;
   manpages = forAllSystems (system: (builtins.getAttr system iso_minimal).config.system.build.manual.manpages);
 
 
@@ -125,14 +133,6 @@ in rec {
     inherit system;
   });
 
-  /*
-  iso_minimal_new_kernel = forAllSystems (system: makeIso {
-    module = ./modules/installer/cd-dvd/installation-cd-minimal-new-kernel.nix;
-    type = "minimal-new-kernel";
-    inherit system;
-  });
-  */
-
   iso_graphical = forAllSystems (system: makeIso {
     module = ./modules/installer/cd-dvd/installation-cd-graphical.nix;
     type = "graphical";
@@ -141,13 +141,17 @@ in rec {
 
   # A variant with a more recent (but possibly less stable) kernel
   # that might support more hardware.
-  /*
-  iso_new_kernel = forAllSystems (system: makeIso {
-    module = ./modules/installer/cd-dvd/installation-cd-new-kernel.nix;
-    type = "new-kernel";
+  iso_minimal_new_kernel = forAllSystems (system: makeIso {
+    module = ./modules/installer/cd-dvd/installation-cd-minimal-new-kernel.nix;
+    type = "minimal-new-kernel";
     inherit system;
   });
-  */
+
+  iso_graphical_new_kernel = forAllSystems (system: makeIso {
+    module = ./modules/installer/cd-dvd/installation-cd-graphical-new-kernel.nix;
+    type = "graphical-new-kernel";
+    inherit system;
+  });
 
 
   # A bootable VirtualBox virtual appliance as an OVA file (i.e. packaged OVF).
@@ -218,17 +222,24 @@ in rec {
   tests.firefox = callTest tests/firefox.nix {};
   tests.firewall = callTest tests/firewall.nix {};
   tests.gnome3 = callTest tests/gnome3.nix {};
+  tests.installer.efi = forAllSystems (system: (import tests/installer.nix { inherit system; }).efi.test);
   tests.installer.grub1 = forAllSystems (system: (import tests/installer.nix { inherit system; }).grub1.test);
   tests.installer.lvm = forAllSystems (system: (import tests/installer.nix { inherit system; }).lvm.test);
   tests.installer.rebuildCD = forAllSystems (system: (import tests/installer.nix { inherit system; }).rebuildCD.test);
   tests.installer.separateBoot = forAllSystems (system: (import tests/installer.nix { inherit system; }).separateBoot.test);
   tests.installer.simple = forAllSystems (system: (import tests/installer.nix { inherit system; }).simple.test);
+  tests.installer.simpleLabels = forAllSystems (system: (import tests/installer.nix { inherit system; }).simpleLabels.test);
+  tests.installer.simpleProvided = forAllSystems (system: (import tests/installer.nix { inherit system; }).simpleProvided.test);
+  tests.installer.btrfsSimple = forAllSystems (system: (import tests/installer.nix { inherit system; }).btrfsSimple.test);
+  tests.installer.btrfsSubvols = forAllSystems (system: (import tests/installer.nix { inherit system; }).btrfsSubvols.test);
+  tests.installer.btrfsSubvolDefault = forAllSystems (system: (import tests/installer.nix { inherit system; }).btrfsSubvolDefault.test);
+  tests.influxdb = callTest tests/influxdb.nix {};
   tests.ipv6 = callTest tests/ipv6.nix {};
   tests.jenkins = callTest tests/jenkins.nix {};
   tests.kde4 = callTest tests/kde4.nix {};
   tests.latestKernel.login = callTest tests/login.nix { latestKernel = true; };
   tests.login = callTest tests/login.nix {};
-  tests.logstash = callTest tests/logstash.nix {};
+  #tests.logstash = callTest tests/logstash.nix {};
   tests.misc = callTest tests/misc.nix {};
   tests.mumble = callTest tests/mumble.nix {};
   tests.munin = callTest tests/munin.nix {};
@@ -236,15 +247,57 @@ in rec {
   tests.mysqlReplication = callTest tests/mysql-replication.nix {};
   tests.nat = callTest tests/nat.nix {};
   tests.nfs3 = callTest tests/nfs.nix { version = 3; };
+  tests.nsd = callTest tests/nsd.nix {};
   tests.openssh = callTest tests/openssh.nix {};
   tests.printing = callTest tests/printing.nix {};
   tests.proxy = callTest tests/proxy.nix {};
   tests.quake3 = callTest tests/quake3.nix {};
-  tests.rabbitmq = callTest tests/rabbitmq.nix {};
   tests.runInMachine = callTest tests/run-in-machine.nix {};
   tests.simple = callTest tests/simple.nix {};
   tests.tomcat = callTest tests/tomcat.nix {};
-  tests.udisks = callTest tests/udisks.nix {};
+  tests.udisks2 = callTest tests/udisks2.nix {};
   tests.xfce = callTest tests/xfce.nix {};
+
+
+  /* Build a bunch of typical closures so that Hydra can keep track of
+     the evolution of closure sizes. */
+
+  closures = {
+
+    smallContainer = makeClosure ({ pkgs, ... }:
+      { boot.isContainer = true;
+        services.openssh.enable = true;
+      });
+
+    tinyContainer = makeClosure ({ pkgs, ... }:
+      { boot.isContainer = true;
+        imports = [ modules/profiles/minimal.nix ];
+      });
+
+    ec2 = makeClosure ({ pkgs, ... }:
+      { imports = [ modules/virtualisation/amazon-image.nix ];
+      });
+
+    kde = makeClosure ({ pkgs, ... }:
+      { services.xserver.enable = true;
+        services.xserver.displayManager.kdm.enable = true;
+        services.xserver.desktopManager.kde4.enable = true;
+      });
+
+    xfce = makeClosure ({ pkgs, ... }:
+      { services.xserver.enable = true;
+        services.xserver.desktopManager.xfce.enable = true;
+      });
+
+    # Linux/Apache/PostgreSQL/PHP stack.
+    lapp = makeClosure ({ pkgs, ... }:
+      { services.httpd.enable = true;
+        services.httpd.adminAddr = "foo@example.org";
+        services.postgresql.enable = true;
+        services.postgresql.package = pkgs.postgresql93;
+        environment.systemPackages = [ pkgs.php ];
+      });
+
+  };
 
 }

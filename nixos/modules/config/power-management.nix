@@ -35,7 +35,9 @@ in
       powerUpCommands = mkOption {
         type = types.lines;
         default = "";
-        example = "${pkgs.hdparm}/sbin/hdparm -B 255 /dev/sda";
+        example = literalExample ''
+          "''${pkgs.hdparm}/sbin/hdparm -B 255 /dev/sda"
+        '';
         description =
           ''
             Commands executed when the machine powers up.  That is,
@@ -47,7 +49,9 @@ in
       powerDownCommands = mkOption {
         type = types.lines;
         default = "";
-        example = "${pkgs.hdparm}/sbin/hdparm -B 255 /dev/sda";
+        example = literalExample ''
+          "''${pkgs.hdparm}/sbin/hdparm -B 255 /dev/sda"
+        '';
         description =
           ''
             Commands executed when the machine powers down.  That is,
@@ -65,11 +69,7 @@ in
 
   config = mkIf cfg.enable {
 
-    boot.kernelModules =
-      [ "acpi_cpufreq" "powernow-k8" "cpufreq_performance" "cpufreq_powersave" "cpufreq_ondemand"
-        "cpufreq_conservative"
-      ];
-
+    # FIXME: Implement powersave governor for sandy bridge or later Intel CPUs
     powerManagement.cpuFreqGovernor = mkDefault "ondemand";
     powerManagement.scsiLinkPolicy = mkDefault "min_power";
 

@@ -35,7 +35,7 @@ let
   bindir = pkgs.buildEnv {
     name = "cups-progs";
     paths = cfg.drivers;
-    pathsToLink = [ "/lib/cups" "/share/cups" "/bin" ];
+    pathsToLink = [ "/lib/cups" "/share/cups" "/bin" "/etc/cups" ];
     postBuild = cfg.bindirCmds;
   };
 
@@ -53,6 +53,15 @@ in
         default = false;
         description = ''
           Whether to enable printing support through the CUPS daemon.
+        '';
+      };
+
+      listenAddresses = mkOption {
+        type = types.listOf types.str;
+        default = [ "127.0.0.1:631" ];
+        example = [ "*:631" ];
+        description = ''
+          A list of addresses and ports on which to listen.
         '';
       };
 
@@ -77,6 +86,20 @@ in
         description = ''
           The contents of the configuration file of the CUPS daemon
           (<filename>cupsd.conf</filename>).
+        '';
+      };
+
+      clientConf = mkOption {
+        type = types.lines;
+        default = "";
+        example =
+          ''
+            ServerName server.example.com
+            Encryption Never
+          '';
+        description = ''
+          The contents of the client configuration.
+          (<filename>client.conf</filename>)
         '';
       };
 
@@ -115,6 +138,14 @@ in
 
     environment.systemPackages = [ cups ];
 
+    environment.variables.CUPS_SERVERROOT = "/etc/cups";
+
+    environment.etc = [
+      { source = pkgs.writeText "client.conf" cfg.clientConf;
+        target = "cups/client.conf";
+      }
+    ];
+
     services.dbus.packages = [ cups ];
 
     # Cups uses libusb to talk to printers, and does not use the
@@ -126,7 +157,8 @@ in
       { description = "CUPS Printing Daemon";
 
         wantedBy = [ "multi-user.target" ];
-        after = [ "network-interfaces.target" ];
+        wants = [ "network.target" ];
+        after = [ "network.target" ];
 
         path = [ cups ];
 
@@ -145,7 +177,7 @@ in
     services.printing.drivers =
       [ pkgs.cups pkgs.cups_pdf_filter pkgs.ghostscript additionalBackends
         pkgs.perl pkgs.coreutils pkgs.gnused pkgs.bc pkgs.gawk pkgs.gnugrep
-	];
+      ];
 
     services.printing.cupsdConf =
       ''
@@ -153,7 +185,9 @@ in
 
         SystemGroup root wheel
 
-        Listen localhost:631
+        ${concatMapStrings (addr: ''
+          Listen ${addr}
+        '') cfg.listenAddresses}
         Listen /var/run/cups/cups.sock
 
         # Note: we can't use ${cups}/etc/cups as the ServerRoot, since

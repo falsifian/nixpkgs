@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, unzip, erlangR15B03 }:
+{ stdenv, fetchurl, unzip, erlangR15}:
 
 let
   srcs = {
@@ -15,7 +15,7 @@ in
 stdenv.mkDerivation rec {
   name = "riak-1.3.1";
 
-  buildInputs = [unzip erlangR15B03];
+  buildInputs = [unzip erlangR15];
 
   src = srcs.riak;
 
@@ -50,7 +50,7 @@ stdenv.mkDerivation rec {
   '';
 
   meta = {
-    maintainers = stdenv.lib.maintainers.orbitz;
+    maintainers = [ stdenv.lib.maintainers.orbitz ];
     description = "Dynamo inspired NoSQL DB by Basho";
     longDescription = ''
       This patches the riak and riak-admin scripts to work better in Nix.

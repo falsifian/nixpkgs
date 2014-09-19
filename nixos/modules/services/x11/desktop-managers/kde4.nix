@@ -43,7 +43,6 @@ let
   phononBackendPackages = flip concatMap cfg.phononBackends
     (name: attrByPath [name] (throw "unknown phonon backend `${name}'") phononBackends);
 
-  wantsUdisks2 = pkgs.kde4.kdelibs.wantsUdisks2 or false;
 in
 
 {
@@ -66,7 +65,7 @@ in
 
     environment.kdePackages = mkOption {
       default = [];
-      example = "[ pkgs.kde4.kdesdk ]";
+      example = literalExample "[ pkgs.kde4.kdesdk ]";
       type = types.listOf types.package;
       description = "This option is obsolete.  Please use <option>environment.systemPackages</option> instead.";
     };
@@ -158,8 +157,7 @@ in
       };
 
     # Enable helpful DBus services.
-    services.udisks.enable = ! wantsUdisks2;
-    services.udisks2.enable = wantsUdisks2;
+    services.udisks2.enable = true;
     services.upower.enable = config.powerManagement.enable;
 
     security.pam.services.kde = { allowNullPassword = true; };

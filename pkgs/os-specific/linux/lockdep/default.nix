@@ -2,11 +2,11 @@
 
 stdenv.mkDerivation rec {
   name    = "lockdep-${version}";
-  version = "3.14";
+  version = "3.16.1";
 
   src = fetchurl {
     url = "mirror://kernel/linux/kernel/v3.x/linux-${version}.tar.xz";
-    sha256 = "61558aa490855f42b6340d1a1596be47454909629327c49a5e4e10268065dffa";
+    sha256 = "0wbxqlmk7w9047ir51dsz6vi7ww0hpycgrb43mk2a189xaldsdxy";
   };
 
   preConfigure = "cd tools/lib/lockdep";
@@ -16,7 +16,7 @@ stdenv.mkDerivation rec {
     cp -R include/liblockdep $out/include
     make install DESTDIR=$out prefix=""
 
-    substituteInPlace $out/bin/lockdep --replace "./liblockdep.so" "$out/lib/liblockdep.so"
+    substituteInPlace $out/bin/lockdep --replace "./liblockdep.so" "$out/lib/liblockdep.so.$version"
   '';
 
   meta = {

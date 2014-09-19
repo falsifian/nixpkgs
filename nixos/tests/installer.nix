@@ -27,6 +27,7 @@ let
                 pkgs.grub
                 pkgs.perlPackages.XMLLibXML
                 pkgs.unionfs-fuse
+                pkgs.gummiboot
               ];
           }
         ];
@@ -34,8 +35,9 @@ let
 
 
   # The configuration to install.
-  config = { fileSystems, testChannel, grubVersion, grubDevice }: pkgs.writeText "configuration.nix"
-    ''
+  makeConfig = { testChannel, useEFI, grubVersion, grubDevice, grubIdentifier
+    , readOnly ? true, forceGrubReinstallCount ? 0 }:
+    pkgs.writeText "configuration.nix" ''
       { config, pkgs, modulesPath, ... }:
 
       { imports =
@@ -43,25 +45,25 @@ let
             <nixpkgs/nixos/modules/testing/test-instrumentation.nix>
           ];
 
-        boot.loader.grub.version = ${toString grubVersion};
-        ${optionalString (grubVersion == 1) ''
-          boot.loader.grub.splashImage = null;
+        ${if useEFI then ''
+          boot.loader.efi.canTouchEfiVariables = true;
+          boot.loader.gummiboot.enable = true;
+        '' else ''
+          boot.loader.grub.version = ${toString grubVersion};
+          ${optionalString (grubVersion == 1) ''
+            boot.loader.grub.splashImage = null;
+          ''}
+          boot.loader.grub.device = "${grubDevice}";
+          boot.loader.grub.extraConfig = "serial; terminal_output.serial";
+          boot.loader.grub.fsIdentifier = "${grubIdentifier}";
         ''}
-        boot.loader.grub.device = "${grubDevice}";
-        boot.loader.grub.extraConfig = "serial; terminal_output.serial";
+
+        boot.loader.grub.configurationLimit = 100 + ${toString forceGrubReinstallCount};
+
+        ${optionalString (!readOnly) "nix.readOnlyStore = false;"}
 
         environment.systemPackages = [ ${optionalString testChannel "pkgs.rlwrap"} ];
       }
-    '';
-
-  rootFS =
-    ''
-      fileSystems."/".device = "/dev/disk/by-label/nixos";
-    '';
-
-  bootFS =
-    ''
-      fileSystems."/boot".device = "/dev/disk/by-label/boot";
     '';
 
 
@@ -87,20 +89,33 @@ let
   channelContents = [ pkgs.rlwrap ];
 
 
+  efiBios = pkgs.runCommand "ovmf-bios" {} ''
+    mkdir $out
+    ln -s ${pkgs.OVMF}/FV/OVMF.fd $out/bios.bin
+  '';
+
+
   # The test script boots the CD, installs NixOS on an empty hard
   # disk, and then reboot from the hard disk.  It's parameterized with
   # a test script fragment `createPartitions', which must create
-  # partitions and filesystems, and a configuration.nix fragment
-  # `fileSystems'.
-  testScriptFun = { createPartitions, fileSystems, testChannel, grubVersion, grubDevice }:
-    let iface = if grubVersion == 1 then "scsi" else "virtio"; in
+  # partitions and filesystems.
+  testScriptFun = { createPartitions, testChannel, useEFI, grubVersion, grubDevice, grubIdentifier }:
+    let
+      # FIXME: OVMF doesn't boot from virtio http://www.mail-archive.com/edk2-devel@lists.sourceforge.net/msg01501.html
+      iface = if useEFI || grubVersion == 1 then "scsi" else "virtio";
+      qemuFlags =
+        (if iso.system == "x86_64-linux" then "-m 768 " else "-m 512 ") +
+        (optionalString (iso.system == "x86_64-linux") "-cpu kvm64 ") +
+        (optionalString useEFI ''-L ${efiBios} -hda ''${\(Cwd::abs_path('harddisk'))} '');
+      hdFlags = optionalString (!useEFI)
+        ''hda => "harddisk", hdaInterface => "${iface}", '';
+    in
     ''
       createDisk("harddisk", 4 * 1024);
 
-      my $machine = createMachine({ hda => "harddisk",
-        hdaInterface => "${iface}",
+      my $machine = createMachine({ ${hdFlags}
         cdrom => glob("${iso}/iso/*.iso"),
-        qemuFlags => '${optionalString testChannel (toString (qemuNICFlags 1 1 2))} ${optionalString (iso.system == "x86_64-linux") "-cpu kvm64"}'});
+        qemuFlags => "${qemuFlags} " . '${optionalString testChannel (toString (qemuNICFlags 1 1 2))}' });
       $machine->start;
 
       ${optionalString testChannel ''
@@ -120,9 +135,10 @@ let
       #$machine->waitForUnit('getty@tty2');
       $machine->waitForUnit("rogue");
       $machine->waitForUnit("nixos-manual");
-      $machine->waitForUnit("dhcpcd");
 
       ${optionalString testChannel ''
+        $machine->waitForUnit("dhcpcd");
+
         # Allow the machine to talk to the fake nixos.org.
         $machine->succeed(
             "rm /etc/hosts",
@@ -137,6 +153,9 @@ let
             or die "bad `hello' output";
       ''}
 
+      # Wait for hard disks to appear in /dev
+      $machine->succeed("udevadm settle");
+
       # Partition the disk.
       ${createPartitions}
 
@@ -148,56 +167,82 @@ let
       $machine->succeed("cat /mnt/etc/nixos/hardware-configuration.nix >&2");
 
       $machine->copyFileFromHost(
-          "${ config { inherit fileSystems testChannel grubVersion grubDevice; } }",
+          "${ makeConfig { inherit testChannel useEFI grubVersion grubDevice grubIdentifier; } }",
           "/mnt/etc/nixos/configuration.nix");
 
       # Perform the installation.
-      $machine->succeed("nixos-install >&2");
+      $machine->succeed("nixos-install < /dev/null >&2");
 
       # Do it again to make sure it's idempotent.
-      $machine->succeed("nixos-install >&2");
+      $machine->succeed("nixos-install < /dev/null >&2");
+
+      $machine->succeed("umount /mnt/boot || true");
+      $machine->succeed("umount /mnt");
+      $machine->succeed("sync");
 
       $machine->shutdown;
 
       # Now see if we can boot the installation.
-      my $machine = createMachine({ hda => "harddisk", hdaInterface => "${iface}" });
+      $machine = createMachine({ ${hdFlags} qemuFlags => "${qemuFlags}" });
 
-      # Did /boot get mounted, if appropriate?
+      # Did /boot get mounted?
       $machine->waitForUnit("local-fs.target");
-      $machine->succeed("test -e /boot/grub");
+
+      ${if useEFI then ''
+        $machine->succeed("test -e /boot/efi");
+      '' else ''
+        $machine->succeed("test -e /boot/grub");
+      ''}
 
       # Did the swap device get activated?
       $machine->waitForUnit("swap.target");
       $machine->succeed("cat /proc/swaps | grep -q /dev");
 
+      # Check whether the channel works.
       $machine->succeed("nix-env -i coreutils >&2");
       $machine->succeed("type -tP ls | tee /dev/stderr") =~ /.nix-profile/
           or die "nix-env failed";
 
+      # We need to a writable nix-store on next boot
+      $machine->copyFileFromHost(
+          "${ makeConfig { inherit testChannel useEFI grubVersion grubDevice grubIdentifier; readOnly = false; forceGrubReinstallCount = 1; } }",
+          "/etc/nixos/configuration.nix");
+
+      # Check whether nixos-rebuild works.
       $machine->succeed("nixos-rebuild switch >&2");
 
       # Test nixos-option.
       $machine->succeed("nixos-option boot.initrd.kernelModules | grep virtio_console");
-      $machine->succeed("nixos-option -d boot.initrd.kernelModules | grep 'List of modules'");
-      $machine->succeed("nixos-option -l boot.initrd.kernelModules | grep qemu-guest.nix");
+      $machine->succeed("nixos-option boot.initrd.kernelModules | grep 'List of modules'");
+      $machine->succeed("nixos-option  boot.initrd.kernelModules | grep qemu-guest.nix");
 
+      $machine->shutdown;
+
+      # Check whether a writable store build works
+      $machine = createMachine({ ${hdFlags} qemuFlags => "${qemuFlags}" });
+      $machine->waitForUnit("multi-user.target");
+      $machine->copyFileFromHost(
+          "${ makeConfig { inherit testChannel useEFI grubVersion grubDevice grubIdentifier; readOnly = false; forceGrubReinstallCount = 2; } }",
+          "/etc/nixos/configuration.nix");
+      $machine->succeed("nixos-rebuild boot >&2");
       $machine->shutdown;
 
       # And just to be sure, check that the machine still boots after
       # "nixos-rebuild switch".
-      my $machine = createMachine({ hda => "harddisk", hdaInterface => "${iface}" });
+      $machine = createMachine({ ${hdFlags} qemuFlags => "${qemuFlags}" });
       $machine->waitForUnit("network.target");
       $machine->shutdown;
     '';
 
 
-  makeInstallerTest =
-    { createPartitions, fileSystems, testChannel ? false, grubVersion ? 2, grubDevice ? "/dev/vda" }:
+  makeInstallerTest = name:
+    { createPartitions, testChannel ? false, useEFI ? false, grubVersion ? 2, grubDevice ? "/dev/vda", grubIdentifier ? "uuid" }:
     makeTest {
       inherit iso;
+      name = "installer-" + name;
       nodes = if testChannel then { inherit webserver; } else { };
       testScript = testScriptFun {
-        inherit createPartitions fileSystems testChannel grubVersion grubDevice;
+        inherit createPartitions testChannel useEFI grubVersion grubDevice grubIdentifier;
       };
     };
 
@@ -209,7 +254,7 @@ in {
 
   # The (almost) simplest partitioning scheme: a swap partition and
   # one big filesystem partition.
-  simple = makeInstallerTest
+  simple = makeInstallerTest "simple"
     { createPartitions =
         ''
           $machine->succeed(
@@ -223,12 +268,11 @@ in {
               "mount LABEL=nixos /mnt",
           );
         '';
-      fileSystems = rootFS;
       testChannel = true;
     };
 
   # Same as the previous, but now with a separate /boot partition.
-  separateBoot = makeInstallerTest
+  separateBoot = makeInstallerTest "separateBoot"
     { createPartitions =
         ''
           $machine->succeed(
@@ -246,12 +290,11 @@ in {
               "mount LABEL=boot /mnt/boot",
           );
         '';
-      fileSystems = rootFS + bootFS;
     };
 
   # Create two physical LVM partitions combined into one volume group
   # that contains the logical swap and root partitions.
-  lvm = makeInstallerTest
+  lvm = makeInstallerTest "lvm"
     { createPartitions =
         ''
           $machine->succeed(
@@ -271,10 +314,9 @@ in {
               "mount LABEL=nixos /mnt",
           );
         '';
-      fileSystems = rootFS;
     };
 
-  swraid = makeInstallerTest
+  swraid = makeInstallerTest "swraid"
     { createPartitions =
         ''
           $machine->succeed(
@@ -304,11 +346,10 @@ in {
               "mdadm -W /dev/md1",
           );
         '';
-      fileSystems = rootFS + bootFS;
     };
 
   # Test a basic install using GRUB 1.
-  grub1 = makeInstallerTest
+  grub1 = makeInstallerTest "grub1"
     { createPartitions =
         ''
           $machine->succeed(
@@ -323,14 +364,33 @@ in {
           );
 
         '';
-      fileSystems = rootFS;
       grubVersion = 1;
       grubDevice = "/dev/sda";
+    };
+
+  # Test an EFI install.
+  efi = makeInstallerTest "efi"
+    { createPartitions =
+        ''
+          $machine->succeed(
+              "sgdisk -Z /dev/sda",
+              "sgdisk -n 1:0:+256M -n 2:0:+1024M -N 3 -t 1:ef00 -t 2:8200 -t 3:8300 -c 1:boot -c 2:swap -c 3:root /dev/sda",
+              "mkfs.vfat -n BOOT /dev/sda1",
+              "mkswap /dev/sda2 -L swap",
+              "swapon -L swap",
+              "mkfs.ext3 -L nixos /dev/sda3",
+              "mount LABEL=nixos /mnt",
+              "mkdir /mnt/boot",
+              "mount LABEL=BOOT /mnt/boot",
+          );
+        '';
+      useEFI = true;
     };
 
   # Rebuild the CD configuration with a little modification.
   rebuildCD = makeTest
     { inherit iso;
+      name = "rebuild-cd";
       nodes = { };
       testScript =
         ''
@@ -354,4 +414,103 @@ in {
           $machine->shutdown;
         '';
     };
+
+  # Test using labels to identify volumes in grub
+  simpleLabels = makeInstallerTest "simpleLabels" {
+    createPartitions = ''
+      $machine->succeed(
+        "sgdisk -Z /dev/vda",
+        "sgdisk -n 1:0:+1M -n 2:0:+1G -N 3 -t 1:ef02 -t 2:8200 -t 3:8300 -c 3:root /dev/vda",
+        "mkswap /dev/vda2 -L swap",
+        "swapon -L swap",
+        "mkfs.ext4 -L root /dev/vda3",
+        "mount LABEL=root /mnt",
+      );
+    '';
+    grubIdentifier = "label";
+  };
+
+  # Test using the provided disk name within grub
+  # TODO: Fix udev so the symlinks are unneeded in /dev/disks
+  simpleProvided = makeInstallerTest "simpleProvided" {
+    createPartitions = ''
+      my $UUID = "\$(blkid -s UUID -o value /dev/vda2)";
+      $machine->succeed(
+        "sgdisk -Z /dev/vda",
+        "sgdisk -n 1:0:+1M -n 2:0:+100M -n 3:0:+1G -N 4 -t 1:ef02 -t 2:8300 -t 3:8200 -t 4:8300 -c 2:boot -c 4:root /dev/vda",
+        "mkswap /dev/vda3 -L swap",
+        "swapon -L swap",
+        "mkfs.ext4 -L boot /dev/vda2",
+        "mkfs.ext4 -L root /dev/vda4",
+      );
+      $machine->execute("ln -s ../../vda2 /dev/disk/by-uuid/$UUID");
+      $machine->execute("ln -s ../../vda4 /dev/disk/by-label/root");
+      $machine->succeed(
+        "mount /dev/disk/by-label/root /mnt",
+        "mkdir /mnt/boot",
+        "mount /dev/disk/by-uuid/$UUID /mnt/boot"
+      );
+    '';
+    grubIdentifier = "provided";
+  };
+
+  # Simple btrfs grub testing
+  btrfsSimple = makeInstallerTest "btrfsSimple" {
+    createPartitions = ''
+      $machine->succeed(
+        "sgdisk -Z /dev/vda",
+        "sgdisk -n 1:0:+1M -n 2:0:+1G -N 3 -t 1:ef02 -t 2:8200 -t 3:8300 -c 3:root /dev/vda",
+        "mkswap /dev/vda2 -L swap",
+        "swapon -L swap",
+        "mkfs.btrfs -L root /dev/vda3",
+        "mount LABEL=root /mnt",
+      );
+    '';
+  };
+
+  # Test to see if we can detect /boot and /nix on subvolumes
+  btrfsSubvols = makeInstallerTest "btrfsSubvols" {
+    createPartitions = ''
+      $machine->succeed(
+        "sgdisk -Z /dev/vda",
+        "sgdisk -n 1:0:+1M -n 2:0:+1G -N 3 -t 1:ef02 -t 2:8200 -t 3:8300 -c 3:root /dev/vda",
+        "mkswap /dev/vda2 -L swap",
+        "swapon -L swap",
+        "mkfs.btrfs -L root /dev/vda3",
+        "btrfs device scan",
+        "mount LABEL=root /mnt",
+        "btrfs subvol create /mnt/boot",
+        "btrfs subvol create /mnt/nixos",
+        "btrfs subvol create /mnt/nixos/default",
+        "umount /mnt",
+        "mount -o defaults,subvol=nixos/default LABEL=root /mnt",
+        "mkdir /mnt/boot",
+        "mount -o defaults,subvol=boot LABEL=root /mnt/boot",
+      );
+    '';
+  };
+
+  # Test to see if we can detect default and aux subvolumes correctly
+  btrfsSubvolDefault = makeInstallerTest "btrfsSubvolDefault" {
+    createPartitions = ''
+      $machine->succeed(
+        "sgdisk -Z /dev/vda",
+        "sgdisk -n 1:0:+1M -n 2:0:+1G -N 3 -t 1:ef02 -t 2:8200 -t 3:8300 -c 3:root /dev/vda",
+        "mkswap /dev/vda2 -L swap",
+        "swapon -L swap",
+        "mkfs.btrfs -L root /dev/vda3",
+        "btrfs device scan",
+        "mount LABEL=root /mnt",
+        "btrfs subvol create /mnt/badpath",
+        "btrfs subvol create /mnt/badpath/boot",
+        "btrfs subvol create /mnt/nixos",
+        "btrfs subvol set-default \$(btrfs subvol list /mnt | grep 'nixos' | awk '{print \$2}') /mnt",
+        "umount /mnt",
+        "mount -o defaults LABEL=root /mnt",
+        "mkdir -p /mnt/badpath/boot", # Help ensure the detection mechanism is actually looking up subvolumes
+        "mkdir /mnt/boot",
+        "mount -o defaults,subvol=badpath/boot LABEL=root /mnt/boot",
+      );
+    '';
+  };
 }

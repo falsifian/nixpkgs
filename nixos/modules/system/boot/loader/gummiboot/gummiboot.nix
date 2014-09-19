@@ -16,7 +16,7 @@ let
 
     nix = config.nix.package;
 
-    inherit (cfg) timeout;
+    timeout = if cfg.timeout != null then cfg.timeout else "";
 
     inherit (efi) efiSysMountPoint canTouchEfiVariables;
   };
@@ -53,6 +53,8 @@ in {
         message = "This kernel does not support the EFI boot stub";
       }
     ];
+
+    boot.loader.grub.enable = mkDefault false;
 
     system = {
       build.installBootLoader = gummibootBuilder;

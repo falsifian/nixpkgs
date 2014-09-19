@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, ncurses, python27, which, groff, gettext, man_db, bc }:
+{ stdenv, fetchurl, ncurses, python, which, groff, gettext, man_db, bc }:
 
 stdenv.mkDerivation rec {
   name = "fish-${version}";
@@ -12,8 +12,8 @@ stdenv.mkDerivation rec {
   buildInputs = [ ncurses ];
 
   # Required binaries during execution
-  # Python27: Autocompletion generated from manpages and config editing
-  propagatedBuildInputs = [ python27 which groff gettext man_db bc ];
+  # Python: Autocompletion generated from manpages and config editing
+  propagatedBuildInputs = [ python which groff gettext man_db bc ];
 
   postInstall = ''
     sed -i "s|bc|${bc}/bin/bc|" "$out/share/fish/functions/seq.fish"
@@ -23,13 +23,15 @@ stdenv.mkDerivation rec {
         -e "s|which |${which}/bin/which |" \
         -i "$out/share/fish/functions/_.fish"
     sed -i "s|Popen(\['manpath'|Popen(\['${man_db}/bin/manpath'|" "$out/share/fish/tools/create_manpage_completions.py"
+    sed -i "s|/sbin /usr/sbin||" \
+           "$out/share/fish/functions/__fish_complete_subcommand_root.fish"
   '';
 
   meta = with stdenv.lib; {
     description = "Smart and user-friendly command line shell";
     homepage = "http://fishshell.com/";
     license = licenses.gpl2;
-    platforms = platforms.linux;
+    platforms = platforms.unix;
     maintainers = with maintainers; [ ocharles ];
   };
 }

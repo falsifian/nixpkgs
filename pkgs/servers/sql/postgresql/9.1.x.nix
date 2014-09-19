@@ -1,13 +1,13 @@
 { stdenv, fetchurl, zlib, readline }:
 
-let version = "9.1.12"; in
+let version = "9.1.14"; in
 
 stdenv.mkDerivation rec {
   name = "postgresql-${version}";
 
   src = fetchurl {
     url = "mirror://postgresql/source/v${version}/${name}.tar.bz2";
-    sha256 = "0b267ebab5feb39ad6ef945b9588787886e7f7e5284467921d18cc7b76bcb383";
+    sha256 = "d0647ce563d18ae02bf68c5dd646a4c75e8b45b3a4fada64d481371fdc16f522";
   };
 
   buildInputs = [ zlib readline ];
@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
   meta = {
     homepage = http://www.postgresql.org/;
     description = "A powerful, open source object-relational database system";
-    license = "bsd";
+    license = stdenv.lib.licenses.postgresql;
     maintainers = [ stdenv.lib.maintainers.ocharles ];
     hydraPlatforms = stdenv.lib.platforms.linux;
   };

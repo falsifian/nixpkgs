@@ -11,7 +11,7 @@ with stdenv.lib;
 
 let
 
-  version = "4.3.10"; # changes ./guest-additions as well
+  version = "4.3.14"; # changes ./guest-additions as well
 
   forEachModule = action: ''
     for mod in \
@@ -31,13 +31,13 @@ let
   '';
 
   # See https://github.com/NixOS/nixpkgs/issues/672 for details
-  extpackRevision = "93012";
+  extpackRevision = "95030";
   extensionPack = requireFile rec {
     name = "Oracle_VM_VirtualBox_Extension_Pack-${version}-${extpackRevision}.vbox-extpack";
     # IMPORTANT: Hash must be base16 encoded because it's used as an input to
     # VBoxExtPackHelperApp!
     # Tip: see http://dlc.sun.com.edgesuite.net/virtualbox/4.3.10/SHA256SUMS
-    sha256 = "ec3f2a98373d5e228acb4756ac07f44212c4d53f6b83deee81b791abb0d2608a";
+    sha256 = "b965c3565e7933bc61019d2992f4da084944cfd9e809fbeaff330f4743d47537";
     message = ''
       In order to use the extension pack, you need to comply with the VirtualBox Personal Use
       and Evaluation License (PUEL) by downloading the related binaries from:
@@ -56,7 +56,7 @@ in stdenv.mkDerivation {
 
   src = fetchurl {
     url = "http://download.virtualbox.org/virtualbox/${version}/VirtualBox-${version}.tar.bz2";
-    sha256 = "739835aee3274a663b23eeb748bd0430e8a5d8ba2f4d0eae5dc47ff2c485e23b";
+    sha256 = "bc893adde4449a2d35d8b4d0b8b247f0f2ac62a434fd8a8f7c54f613a100855a";
   };
 
   buildInputs =
@@ -76,6 +76,7 @@ in stdenv.mkDerivation {
     ls kBuild/bin/linux.x86/k* tools/linux.x86/bin/* | xargs -n 1 patchelf --set-interpreter ${stdenv.glibc}/lib/ld-linux.so.2
     ls kBuild/bin/linux.amd64/k* tools/linux.amd64/bin/* | xargs -n 1 patchelf --set-interpreter ${stdenv.glibc}/lib/ld-linux-x86-64.so.2
     find . -type f | xargs sed 's/depmod -a/true/' -i
+    sed -e 's@"libasound.so.2"@"${alsaLib}/lib/libasound.so.2"@g' -i src/VBox/Main/xml/Settings.cpp src/VBox/Devices/Audio/alsa_stubs.c
     export USER=nix
     set +x
   '';

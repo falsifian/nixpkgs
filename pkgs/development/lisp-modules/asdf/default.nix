@@ -3,11 +3,11 @@ let
   s = # Generated upstream information
   rec {
     baseName="asdf";
-    version="3.0.3";
+    version="3.1.3";
     name="${baseName}-${version}";
-    hash="0iszin6j0qxw48gkn30rqgwm240177hx06khhgv8041zsf1ivw85";
-    url="http://common-lisp.net/project/asdf/archives/asdf-3.0.3.tar.gz";
-    sha256="0iszin6j0qxw48gkn30rqgwm240177hx06khhgv8041zsf1ivw85";
+    hash="11jgbl2ys98i7lir0z76g0msm89zmz1b91gwkdz0gnxr6gavj6cn";
+    url="http://common-lisp.net/project/asdf/archives/asdf-3.1.3.tar.gz";
+    sha256="11jgbl2ys98i7lir0z76g0msm89zmz1b91gwkdz0gnxr6gavj6cn";
   };
   buildInputs = [
     texinfo texLive
@@ -29,7 +29,6 @@ stdenv.mkDerivation {
     cp -r ./* "$out"/lib/common-lisp/asdf/
     cp -r doc/* "$out"/share/doc/asdf/
   '';
-  sourceRoot=".";
   meta = {
     inherit (s) version;
     description = ''Standard software-system definition library for Common Lisp'';

@@ -12,11 +12,11 @@ let
 in
 stdenv.mkDerivation rec {
   name = "murmur-" + version;
-  version = "1.2.5";
+  version = "1.2.8";
 
   src = fetchurl {
     url = "mirror://sourceforge/mumble/mumble-${version}.tar.gz";
-    sha256 = "1bsgains6xgpgpd1b5bq682z0kswp5fcjh2cir4c4qkndya5clci";
+    sha256 = "0ng1xd7i0951kqnd9visf84y2dcwia79a1brjwfvr1wnykgw6bsc";
   };
 
   patchPhase = optional iceSupport ''

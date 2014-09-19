@@ -4,12 +4,15 @@ with lib;
 
 let
 
-  dhcpcd =  if !config.boot.isContainer then pkgs.dhcpcd else pkgs.dhcpcd_without_udev;
+  dhcpcd = if !config.boot.isContainer then pkgs.dhcpcd else pkgs.dhcpcd.override { udev = null; };
+
+  cfg = config.networking.dhcpcd;
 
   # Don't start dhcpcd on explicitly configured interfaces or on
-  # interfaces that are part of a bridge.
+  # interfaces that are part of a bridge, bond or sit device.
   ignoredInterfaces =
-    map (i: i.name) (filter (i: i.ipAddress != null) (attrValues config.networking.interfaces))
+    map (i: i.name) (filter (i: i.ip4 != [ ] || i.ipAddress != null) (attrValues config.networking.interfaces))
+    ++ mapAttrsToList (i: _: i) config.networking.sits
     ++ concatLists (attrValues (mapAttrs (n: v: v.interfaces) config.networking.bridges))
     ++ concatLists (attrValues (mapAttrs (n: v: v.interfaces) config.networking.bonds))
     ++ config.networking.dhcpcd.denyInterfaces;
@@ -34,27 +37,18 @@ let
 
       # Ignore peth* devices; on Xen, they're renamed physical
       # Ethernet cards used for bridging.  Likewise for vif* and tap*
-      # (Xen) and virbr* and vnet* (libvirt) and c-* and ctmp-* (NixOS
-      # containers).
-      denyinterfaces ${toString ignoredInterfaces} peth* vif* tap* tun* virbr* vnet* vboxnet* c-* ctmp-*
+      # (Xen) and virbr* and vnet* (libvirt).
+      denyinterfaces ${toString ignoredInterfaces} lo peth* vif* tap* tun* virbr* vnet* vboxnet* sit*
 
-      ${config.networking.dhcpcd.extraConfig}
+      # Use the list of allowed interfaces if specified
+      ${optionalString (cfg.allowInterfaces != null) "allowinterfaces ${toString cfg.allowInterfaces}"}
+
+      ${cfg.extraConfig}
     '';
 
   # Hook for emitting ip-up/ip-down events.
   exitHook = pkgs.writeText "dhcpcd.exit-hook"
     ''
-      #exec >> /var/log/dhcpcd 2>&1
-      #set -x
-
-      params="IFACE=$interface REASON=$reason"
-
-      # only works when interface is wireless and wpa_supplicant has a control socket
-      # but we allow it to fail silently
-      ${optionalString config.networking.wireless.enable ''
-        params+=" $(${pkgs.wpa_supplicant}/sbin/wpa_cli -i$interface status 2>/dev/null | grep ssid | sed 's|^b|B|;s|ssid|SSID|' | xargs)"
-      ''}
-
       if [ "$reason" = BOUND -o "$reason" = REBOOT ]; then
           # Restart ntpd.  We need to restart it to make sure that it
           # will actually do something: if ntpd cannot resolve the
@@ -69,6 +63,8 @@ let
       #if [ "$reason" = EXPIRE -o "$reason" = RELEASE -o "$reason" = NOCARRIER ] ; then
       #    ${config.systemd.package}/bin/systemctl start ip-down.target
       #fi
+
+      ${cfg.runHook}
     '';
 
 in
@@ -79,7 +75,20 @@ in
 
   options = {
 
+    networking.dhcpcd.persistent = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+          Whenever to leave interfaces configured on dhcpcd daemon
+          shutdown. Set to true if you have your root or store mounted
+          over the network or this machine accepts SSH connections
+          through DHCP interfaces and clients should be notified when
+          it shuts down.
+      '';
+    };
+
     networking.dhcpcd.denyInterfaces = mkOption {
+      type = types.listOf types.str;
       default = [];
       description = ''
          Disable the DHCP client for any interface whose name matches
@@ -89,10 +98,32 @@ in
       '';
     };
 
+    networking.dhcpcd.allowInterfaces = mkOption {
+      type = types.nullOr (types.listOf types.str);
+      default = null;
+      description = ''
+         Enable the DHCP client for any interface whose name matches
+         any of the shell glob patterns in this list. Any interface not
+         explicitly matched by this pattern will be denied. This pattern only
+         applies when non-null.
+      '';
+    };
+
     networking.dhcpcd.extraConfig = mkOption {
+      type = types.lines;
       default = "";
       description = ''
          Literal string to append to the config file generated for dhcpcd.
+      '';
+    };
+
+    networking.dhcpcd.runHook = mkOption {
+      type = types.lines;
+      default = "";
+      example = "if [[ $reason =~ BOUND ]]; then echo $interface: Routers are $new_routers - were $old_routers; fi";
+      description = ''
+         Shell code that will be run after all other hooks. See
+         `man dhcpcd-run-hooks` for details on what is possible.
       '';
     };
 
@@ -107,6 +138,9 @@ in
       { description = "DHCP Client";
 
         wantedBy = [ "network.target" ];
+        # Work-around to deal with problems where the kernel would remove &
+        # re-create Wifi interfaces early during boot.
+        after = [ "network-interfaces.target" ];
 
         # Stopping dhcpcd during a reconfiguration is undesirable
         # because it brings down the network interfaces configured by
@@ -120,9 +154,8 @@ in
         serviceConfig =
           { Type = "forking";
             PIDFile = "/run/dhcpcd.pid";
-            ExecStart = "@${dhcpcd}/sbin/dhcpcd dhcpcd --config ${dhcpcdConf}";
+            ExecStart = "@${dhcpcd}/sbin/dhcpcd dhcpcd --quiet ${optionalString cfg.persistent "--persistent"} --config ${dhcpcdConf}";
             ExecReload = "${dhcpcd}/sbin/dhcpcd --rebind";
-            StandardError = "null";
             Restart = "always";
           };
       };

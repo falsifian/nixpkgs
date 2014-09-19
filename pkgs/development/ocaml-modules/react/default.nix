@@ -1,28 +1,35 @@
-{stdenv, fetchurl, ocaml, findlib, ocaml_oasis}:
+{stdenv, fetchurl, ocaml, findlib, opam}:
 
 stdenv.mkDerivation {
-  name = "ocaml-react-0.9.4";
+  name = "ocaml-react-1.1.0";
 
   src = fetchurl {
-    url = http://github.com/dbuenzli/react/archive/v0.9.4.tar.gz;
-    sha256 = "16k0kx93kd45s7pigkzvirfsbr22xhby0y88y86p473qxzc6ngrm";
+    url = http://erratique.ch/software/react/releases/react-1.1.0.tbz;
+    sha256 = "1gymn8hy7ga0l9qymmb1jcnnkqvy7l2zr87xavzqz0dfi9ci8dm7";
   };
 
-  buildInputs = [ocaml findlib ocaml_oasis];
+  unpackCmd = "tar xjf $src";
+  buildInputs = [ocaml findlib opam];
 
   createFindlibDestdir = true;
 
-  configurePhase = "oasis setup && ocaml setup.ml -configure --prefix $out";
-  buildPhase     = "ocaml setup.ml -build";
-  installPhase   = "ocaml setup.ml -install";
+  configurePhase = "ocaml pkg/git.ml";
+  buildPhase     = "ocaml pkg/build.ml native=true native-dynlink=true";
 
-  meta = {
+  installPhase   =
+  let ocamlVersion = (builtins.parseDrvName (ocaml.name)).version;
+  in
+   ''
+    opam-installer --script --prefix=$out react.install > install.sh
+    sed -i s!lib/react!lib/ocaml/${ocamlVersion}/site-lib/react! install.sh
+    sh install.sh
+  '';
+
+  meta = with stdenv.lib; {
     homepage = http://erratique.ch/software/react;
     description = "Applicative events and signals for OCaml";
-    license = stdenv.lib.licenses.bsd3;
+    license = licenses.bsd3;
     platforms = ocaml.meta.platforms;
-    maintainers = [
-      stdenv.lib.maintainers.z77z
-    ];
+    maintainers = with maintainers; [ z77z vbmithr gal_bolle];
   };
 }
