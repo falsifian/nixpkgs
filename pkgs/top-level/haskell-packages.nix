@@ -1105,8 +1105,6 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   hedis = callPackage ../development/libraries/haskell/hedis {};
 
-  here = callPackage ../development/libraries/haskell/here {};
-
   heredoc = callPackage ../development/libraries/haskell/heredoc {};
 
   hexpat = callPackage ../development/libraries/haskell/hexpat {};
@@ -2207,6 +2205,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   setlocale = callPackage ../development/libraries/haskell/setlocale {};
 
+  shellCheck = callPackage ../development/libraries/haskell/ShellCheck {};
 
   shellish = callPackage ../development/libraries/haskell/shellish {};
 
@@ -2457,6 +2456,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   tastyHspec = callPackage ../development/libraries/haskell/tasty-hspec {};
 
   tastyHunit = callPackage ../development/libraries/haskell/tasty-hunit {};
+
+  tastyProgram = callPackage ../development/libraries/haskell/tasty-program {};
 
   tastyQuickcheck = callPackage ../development/libraries/haskell/tasty-quickcheck {};
 

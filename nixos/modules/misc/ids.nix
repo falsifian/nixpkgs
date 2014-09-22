@@ -151,6 +151,7 @@
       dnsmasq = 141;
       uhub = 142;
       yandexdisk=143;
+      collectd=144;
 
       tinc = 200;
 
