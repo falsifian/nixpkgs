@@ -8,11 +8,21 @@ let
 
   dataDir = cfg.dataDir;
 
+  graphiteApiConfig = pkgs.writeText "graphite-api.yaml" ''
+    time_zone: ${config.time.timeZone}
+    search_index: ${dataDir}/index
+    ${optionalString (cfg.api.finders != []) ''finders:''}
+    ${concatMapStringsSep "\n" (f: "  - " + f.moduleName) cfg.api.finders}
+    ${optionalString (cfg.api.functions != []) ''functions:''}
+    ${concatMapStringsSep "\n" (f: "  - " + f) cfg.api.functions}
+    ${cfg.api.extraConfig}
+  '';
+
   configDir = pkgs.buildEnv {
     name = "graphite-config";
     paths = lists.filter (el: el != null) [
       (writeTextOrNull "carbon.conf" cfg.carbon.config)
-      (writeTextOrNull "storage-agregation.conf" cfg.carbon.storageAggregation)
+      (writeTextOrNull "storage-aggregation.conf" cfg.carbon.storageAggregation)
       (writeTextOrNull "storage-schemas.conf" cfg.carbon.storageSchemas)
       (writeTextOrNull "blacklist.conf" cfg.carbon.blacklist)
       (writeTextOrNull "whitelist.conf" cfg.carbon.whitelist)
@@ -47,27 +57,87 @@ in {
 
     web = {
       enable = mkOption {
-        description = "Whether to enable graphite web frontend";
+        description = "Whether to enable graphite web frontend.";
         default = false;
         type = types.uniq types.bool;
       };
 
       host = mkOption {
-        description = "Graphite web frontend listen address";
+        description = "Graphite web frontend listen address.";
         default = "127.0.0.1";
         type = types.str;
       };
 
       port = mkOption {
-        description = "Graphite web frontend port";
+        description = "Graphite web frontend port.";
         default = 8080;
         type = types.int;
       };
     };
 
+    api = {
+      enable = mkOption {
+        description = "Whether to enable graphite api.";
+        default = false;
+        type = types.uniq types.bool;
+      };
+
+      finders = mkOption {
+        description = "List of finder plugins load.";
+        default = [];
+        example = [ pkgs.python27Packages.graphite_influxdb ];
+        type = types.listOf types.package;
+      };
+
+      functions = mkOption {
+        description = "List of functions to load.";
+        default = [
+          "graphite_api.functions.SeriesFunctions"
+          "graphite_api.functions.PieFunctions"
+        ];
+        type = types.listOf types.str;
+      };
+
+      host = mkOption {
+        description = "Graphite web service listen address.";
+        default = "127.0.0.1";
+        type = types.str;
+      };
+
+      port = mkOption {
+        description = "Graphite api service port.";
+        default = 8080;
+        type = types.int;
+      };
+
+      extraConfig = mkOption {
+        description = "Extra configuration for graphite api.";
+        default = ''
+          whisper:
+            directories:
+                - ${dataDir}/whisper
+        '';
+        example = literalExample ''
+          allowed_origins:
+            - dashboard.example.com
+          cheat_times: true
+          influxdb:
+            host: localhost
+            port: 8086
+            user: influxdb
+            pass: influxdb
+            db: metrics
+          cache:
+            CACHE_TYPE: 'filesystem'
+            CACHE_DIR: '/tmp/graphite-api-cache'
+        '';
+        type = types.str;
+      };
+    };
+
     carbon = {
       config = mkOption {
-        description = "Content of carbon configuration file";
+        description = "Content of carbon configuration file.";
         default = ''
           [cache]
           # Listen on localhost by default for security reasons
@@ -83,13 +153,13 @@ in {
       };
 
       enableCache = mkOption {
-        description = "Whether to enable carbon cache, the graphite storage daemon";
+        description = "Whether to enable carbon cache, the graphite storage daemon.";
         default = false;
         type = types.uniq types.bool;
       };
 
       storageAggregation = mkOption {
-        description = "Defines how to aggregate data to lower-precision retentions";
+        description = "Defines how to aggregate data to lower-precision retentions.";
         default = null;
         type = types.uniq (types.nullOr types.string);
         example = ''
@@ -101,7 +171,7 @@ in {
       };
 
       storageSchemas = mkOption {
-        description = "Defines retention rates for storing metrics";
+        description = "Defines retention rates for storing metrics.";
         default = "";
         type = types.uniq (types.nullOr types.string);
         example = ''
@@ -112,21 +182,24 @@ in {
       };
 
       blacklist = mkOption {
-        description = "Any metrics received which match one of the experssions will be dropped";
+        description = "Any metrics received which match one of the experssions will be dropped.";
         default = null;
         type = types.uniq (types.nullOr types.string);
         example = "^some\.noisy\.metric\.prefix\..*";
       };
 
       whitelist = mkOption {
-        description = "Only metrics received which match one of the experssions will be persisted";
+        description = "Only metrics received which match one of the experssions will be persisted.";
         default = null;
         type = types.uniq (types.nullOr types.string);
         example = ".*";
       };
 
       rewriteRules = mkOption {
-        description = "Regular expression patterns that can be used to rewrite metric names in a search and replace fashion";
+        description = ''
+          Regular expression patterns that can be used to rewrite metric names
+          in a search and replace fashion.
+        '';
         default = null;
         type = types.uniq (types.nullOr types.string);
         example = ''
@@ -137,7 +210,7 @@ in {
       };
 
       enableRelay = mkOption {
-        description = "Whether to enable carbon relay, the carbon replication and sharding service";
+        description = "Whether to enable carbon relay, the carbon replication and sharding service.";
         default = false;
         type = types.uniq types.bool;
       };
@@ -154,13 +227,13 @@ in {
       };
 
       enableAggregator = mkOption {
-        description = "Whether to enable carbon agregator, the carbon buffering service";
+        description = "Whether to enable carbon agregator, the carbon buffering service.";
         default = false;
         type = types.uniq types.bool;
       };
 
       aggregationRules = mkOption {
-        description = "Defines if and how received metrics will be agregated";
+        description = "Defines if and how received metrics will be agregated.";
         default = null;
         type = types.uniq (types.nullOr types.string);
         example = ''
@@ -173,7 +246,7 @@ in {
 
   ###### implementation
 
-  config = mkIf (cfg.carbon.enableAggregator || cfg.carbon.enableCache || cfg.carbon.enableRelay || cfg.web.enable) {
+  config = mkIf (cfg.carbon.enableAggregator || cfg.carbon.enableCache || cfg.carbon.enableRelay || cfg.web.enable || cfg.api.enable) {
     systemd.services.carbonCache = {
       enable = cfg.carbon.enableCache;
       description = "Graphite Data Storage Backend";
@@ -186,13 +259,6 @@ in {
         Group = "graphite";
         PermissionsStartOnly = true;
       };
-      restartTriggers = [
-        pkgs.pythonPackages.carbon
-        cfg.carbon.config
-        cfg.carbon.storageAggregation
-        cfg.carbon.storageSchemas
-        cfg.carbon.rewriteRules
-      ];
       preStart = ''
         mkdir -p ${cfg.dataDir}/whisper
         chmod 0700 ${cfg.dataDir}/whisper
@@ -211,9 +277,6 @@ in {
         User = "graphite";
         Group = "graphite";
       };
-      restartTriggers = [
-        pkgs.pythonPackages.carbon cfg.carbon.config cfg.carbon.aggregationRules
-      ];
     };
 
     systemd.services.carbonRelay = {
@@ -227,9 +290,6 @@ in {
         User = "graphite";
         Group = "graphite";
       };
-      restartTriggers = [
-        pkgs.pythonPackages.carbon cfg.carbon.config cfg.carbon.relayRules
-      ];
     };
 
     systemd.services.graphiteWeb = {
@@ -241,7 +301,7 @@ in {
       environment = {
         PYTHONPATH = "${pkgs.python27Packages.graphite_web}/lib/python2.7/site-packages";
         DJANGO_SETTINGS_MODULE = "graphite.settings";
-        GRAPHITE_CONF_DIR = "/etc/graphite/";
+        GRAPHITE_CONF_DIR = configDir;
         GRAPHITE_STORAGE_DIR = dataDir;
       };
       serviceConfig = {
@@ -269,10 +329,40 @@ in {
           chown -R graphite:graphite ${cfg.dataDir}
         fi
       '';
-      restartTriggers = [
-        pkgs.python27Packages.graphite_web
-        pkgs.python27Packages.waitress
-      ];
+    };
+
+    systemd.services.graphiteApi = {
+      enable = cfg.api.enable;
+      description = "Graphite Api Interface";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-interfaces.target" ];
+      environment = {
+        PYTHONPATH =
+          "${pkgs.python27Packages.graphite_api}/lib/python2.7/site-packages:" +
+          concatMapStringsSep ":" (f: f + "/lib/python2.7/site-packages") cfg.api.finders;
+        GRAPHITE_API_CONFIG = graphiteApiConfig;
+        LD_LIBRARY_PATH = "${pkgs.cairo}/lib";
+      };
+      serviceConfig = {
+        ExecStart = ''
+          ${pkgs.python27Packages.waitress}/bin/waitress-serve \
+          --host=${cfg.api.host} --port=${toString cfg.api.port} \
+          graphite_api.app:app 
+        '';
+        User = "graphite";
+        Group = "graphite";
+        PermissionsStartOnly = true;
+      };
+      preStart = ''
+        if ! test -e ${dataDir}/db-created; then
+          mkdir -p ${dataDir}/cache/
+          chmod 0700 ${dataDir}/cache/
+
+          touch ${dataDir}/db-created
+
+          chown -R graphite:graphite ${cfg.dataDir}
+        fi
+      '';
     };
 
     environment.systemPackages = [

@@ -12,6 +12,7 @@
 , enablePepperPDF ? false
 , cupsSupport ? false
 , pulseSupport ? false
+, hiDPISupport ? false
 }:
 
 let
@@ -27,7 +28,7 @@ let
     mkChromiumDerivation = callPackage ./common.nix {
       inherit enableSELinux enableNaCl useOpenSSL gnomeSupport
               gnomeKeyringSupport proprietaryCodecs cupsSupport
-              pulseSupport;
+              pulseSupport hiDPISupport;
     };
 
     browser = callPackage ./browser.nix { };
@@ -67,7 +68,7 @@ in stdenv.mkDerivation {
     browserBinary = "${chromium.browser}/libexec/chromium/chromium";
     sandboxBinary = "${chromium.sandbox}/bin/chromium-sandbox";
   in ''
-    ensureDir "$out/bin" "$out/share/applications"
+    mkdir -p "$out/bin" "$out/share/applications"
 
     ln -s "${chromium.browser}/share" "$out/share"
     makeWrapper "${browserBinary}" "$out/bin/chromium" \

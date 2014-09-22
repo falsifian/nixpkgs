@@ -10,7 +10,7 @@
 , python, pythonPackages, perl, pkgconfig
 , nspr, udev, krb5
 , utillinux, alsaLib
-, gcc, bison, gperf
+, bison, gperf
 , glib, gtk, dbus_glib
 , libXScrnSaver, libXcursor, libXtst, mesa
 , protobuf, speechd, libXdamage
@@ -27,6 +27,7 @@
 , proprietaryCodecs ? true
 , cupsSupport ? false
 , pulseSupport ? false, pulseaudio ? null
+, hiDPISupport ? false
 
 , source
 , plugins
@@ -79,7 +80,7 @@ let
   };
 
   opusWithCustomModes = libopus.override {
-    withCustomModes = !versionOlder source.version "35.0.0.0";
+    withCustomModes = true;
   };
 
   defaultDependencies = [
@@ -108,7 +109,7 @@ let
       nspr udev
       (if useOpenSSL then openssl else nss)
       utillinux alsaLib
-      gcc bison gperf krb5
+      bison gperf krb5
       glib gtk dbus_glib
       libXScrnSaver libXcursor libXtst mesa
       pciutils protobuf speechd libXdamage
@@ -134,17 +135,19 @@ let
         -exec chmod u+w {} +
     '';
 
-    postPatch = let
-      toPatch = if versionOlder source.version "36.0.0.0"
-                then "content/browser/browser_main_loop.cc"
-                else "sandbox/linux/suid/client/setuid_sandbox_client.cc";
-    in ''
+    postPatch = ''
       sed -i -e '/base::FilePath exe_dir/,/^ *} *$/c \
         sandbox_binary = base::FilePath(getenv("CHROMIUM_SANDBOX_BINARY_PATH"));
-      ' ${toPatch}
+      ' sandbox/linux/suid/client/setuid_sandbox_client.cc
+
+      sed -i -e '/module_path *=.*libexif.so/ {
+        s|= [^;]*|= base::FilePath().AppendASCII("${libexif}/lib/libexif.so")|
+      }' chrome/utility/media_galleries/image_metadata_extractor.cc
     '';
 
     gypFlags = mkGypFlags (gypFlagsUseSystemLibs // {
+      linux_use_bundled_binutils = false;
+      linux_use_bundled_gold = false;
       linux_use_gold_binary = false;
       linux_use_gold_flags = false;
       proprietary_codecs = false;
@@ -159,6 +162,8 @@ let
       use_cups = cupsSupport;
       linux_sandbox_chrome_path="${libExecPath}/${packageName}";
       werror = "";
+      clang = false;
+      enable_hidpi = hiDPISupport;
 
       # Google API keys, see:
       #   http://www.chromium.org/developers/how-tos/api-keys
@@ -188,16 +193,16 @@ let
     '';
 
     buildPhase = let
-      CC = "${gcc}/bin/gcc";
-      CXX = "${gcc}/bin/g++";
-    in ''
-      CC="${CC}" CC_host="${CC}"     \
-      CXX="${CXX}" CXX_host="${CXX}" \
-      LINK_host="${CXX}"             \
+      buildCommand = target: ''
         "${ninja}/bin/ninja" -C "${buildPath}"  \
           -j$NIX_BUILD_CORES -l$NIX_BUILD_CORES \
-          ${concatStringsSep " " (extraAttrs.buildTargets or [])}
-    '';
+          "${target}"
+      '' + optionalString (target == "mksnapshot" || target == "chrome") ''
+        paxmark m "${buildPath}/${target}"
+      '';
+      targets = extraAttrs.buildTargets or [];
+      commands = map buildCommand targets;
+    in concatStringsSep "\n" commands;
   };
 
 # Remove some extraAttrs we supplied to the base attributes already.

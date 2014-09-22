@@ -26,11 +26,9 @@ with { inherit (stdenv.lib) optional optionals; };
 
 let
   result = {
-    # Security vulnerablilities:
-    # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1370175
-    # https://bugs.launchpad.net/ubuntu/+source/libav/+bug/1354755
-    libav_9   = libavFun  "9.12"  "1wm0nf12c1p138y54jh71mvbpikrpk43zc9m2qhpjm9pgnagizk0 XXX vulnerable";
-    libav_0_8 = libavFun "0.8.11" "0nhm0mzz2aj78sgmw9xf20a1mlgig78cv1nyhx4zrq7nvgqf8d2r XXX vulnerable";
+    libav_0_8 = libavFun "0.8.13" "1fr3rzykrlm1cla0csm9hqa3gcqp19hf5rgn70nyb9w92r67v685";
+    libav_9   = libavFun   "9.16" "18378gdgzqsxaacc9vl7ligwndbdvy95wbn50hs8xvdqn1rn916a";
+    libav_10  = libavFun  "10.4"  "1zzvjfdlv9swhq7dzvli1pk8cn02q1076ax9m3cx9ipilbg21639";
   };
 
   libavFun = version : sha256 : stdenv.mkDerivation rec {
@@ -107,7 +105,7 @@ let
       description = "A complete, cross-platform solution to record, convert and stream audio and video (fork of ffmpeg)";
       license = with licenses; if enableUnfree then unfree #ToDo: redistributable or not?
         else if enableGPL then gpl2Plus else lgpl21Plus;
-      platforms = platforms.all;
+      platforms = platforms.linux;
       maintainers = [ maintainers.vcunat ];
     };
   }; # libavFun

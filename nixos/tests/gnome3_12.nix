@@ -1,4 +1,5 @@
 import ./make-test.nix {
+  name = "gnome3_12";
 
   machine =
     { config, pkgs, ... }:
@@ -23,7 +24,7 @@ import ./make-test.nix {
 
       $machine->succeed("su - alice -c 'DISPLAY=:0.0 gnome-terminal &'");
       $machine->waitForWindow(qr/Terminal/);
-      $machine->sleep(10);
+      $machine->sleep(20);
       $machine->screenshot("screen");
     '';
 

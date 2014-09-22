@@ -9,6 +9,23 @@ let
 
   cfg = config.environment;
 
+  exportedEnvVars =
+    let
+      absoluteVariables =
+        mapAttrs (n: toList) cfg.variables;
+
+      suffixedVariables =
+        flip mapAttrs cfg.profileRelativeEnvVars (envVar: listSuffixes:
+          concatMap (profile: map (suffix: "${profile}${suffix}") listSuffixes) cfg.profiles
+        );
+
+      allVariables =
+        zipAttrsWith (n: concatLists) [ absoluteVariables suffixedVariables ];
+
+      exportVariables =
+        mapAttrsToList (n: v: ''export ${n}="${concatStringsSep ":" v}"'') allVariables;
+    in
+      concatStringsSep "\n" exportVariables;
 in
 
 {
@@ -19,6 +36,7 @@ in
       default = {};
       description = ''
         A set of environment variables used in the global environment.
+        These variables will be set on shell initialisation.
         The value of each variable can be either a string or a list of
         strings.  The latter is concatenated, interspersed with colon
         characters.
@@ -48,22 +66,15 @@ in
       type = types.listOf types.string;
     };
 
-    environment.profileVariables = mkOption {
-      default = (p: {});
+    environment.profileRelativeEnvVars = mkOption {
+      type = types.attrsOf (types.listOf types.str);
+      example = { PATH = [ "/bin" "/sbin" ]; MANPATH = [ "/man" "/share/man" ]; };
       description = ''
-        A function which given a profile path should give back
-        a set of environment variables for that profile.
+	Attribute set of environment variable.  Each attribute maps to a list
+	of relative paths.  Each relative path is appended to the each profile
+        of <option>environment.profiles</option> to form the content of the
+        corresponding environment variable.
       '';
-      # !!! this should be of the following type:
-      #type = types.functionTo (types.attrsOf (types.optionSet envVar));
-      # and envVar should be changed to something more like environOpts.
-      # Having unique `value' _or_ multiple `list' is much more useful
-      # than just sticking everything together with ':' unconditionally.
-      # Anyway, to have this type mentioned above
-      # types.optionSet needs to be transformed into a type constructor
-      # (it has a !!! mark on that in nixpkgs)
-      # for now we hack all this to be
-      type = types.functionTo (types.attrsOf (types.listOf types.string));
     };
 
     # !!! isn't there a better way?
@@ -121,7 +132,9 @@ in
 
     environment.binsh = mkOption {
       default = "${config.system.build.binsh}/bin/sh";
-      example = "\${pkgs.dash}/bin/dash";
+      example = literalExample ''
+        "''${pkgs.dash}/bin/dash"
+      '';
       type = types.path;
       description = ''
         The shell executable that is linked system-wide to
@@ -148,6 +161,12 @@ in
 
     system.build.binsh = pkgs.bashInteractive;
 
+    # Set session variables in the shell as well. This is usually
+    # unnecessary, but it allows changes to session variables to take
+    # effect without restarting the session (e.g. by opening a new
+    # terminal instead of logging out of X11).
+    environment.variables = config.environment.sessionVariables;
+
     environment.etc."shells".text =
       ''
         ${concatStringsSep "\n" cfg.shells}
@@ -156,10 +175,7 @@ in
 
     system.build.setEnvironment = pkgs.writeText "set-environment"
        ''
-         ${concatStringsSep "\n" (
-           (mapAttrsToList (n: v: ''export ${n}="${concatStringsSep ":" v}"'')
-             # This line is a kind of a hack because of !!! note above
-             (zipAttrsWith (const concatLists) ([ (mapAttrs (n: v: [ v ]) cfg.variables) ] ++ map cfg.profileVariables cfg.profiles))))}
+         ${exportedEnvVars}
 
          ${cfg.extraInit}
 
