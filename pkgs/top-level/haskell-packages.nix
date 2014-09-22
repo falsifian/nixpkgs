@@ -908,9 +908,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   ghcjsCodemirror = callPackage ../development/libraries/haskell/ghcjs-codemirror {};
 
-  ghcMod_4_1_6 = callPackage ../development/libraries/haskell/ghc-mod/4.1.6.nix { inherit (pkgs) emacs; };
-  ghcMod_5_0_1_2 = callPackage ../development/libraries/haskell/ghc-mod/5.0.1.2.nix { inherit (pkgs) emacs; };
-  ghcMod = self.ghcMod_4_1_6;
+  ghcMod = callPackage ../development/libraries/haskell/ghc-mod { inherit (pkgs) emacs; };
 
   ghcMtl = callPackage ../development/libraries/haskell/ghc-mtl {};
 
@@ -1491,6 +1489,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   libjenkins = callPackage ../development/libraries/haskell/libjenkins {};
 
   libmpd = callPackage ../development/libraries/haskell/libmpd {};
+
+  libmpd_0_8_0_5 = callPackage ../development/libraries/haskell/libmpd/0.8.0.5.nix {};
 
   liblastfm = callPackage ../development/libraries/haskell/liblastfm {};
 
@@ -2214,6 +2214,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   shelly_0_15_4_1 = callPackage ../development/libraries/haskell/shelly/0.15.4.1.nix {};
   shelly_1_5_3_1 = callPackage ../development/libraries/haskell/shelly {};
   shelly = self.shelly_1_5_3_1;
+
+  shell-conduit = callPackage ../development/libraries/haskell/shell-conduit {};
 
   simpleConduit = callPackage ../development/libraries/haskell/simple-conduit {};
 
@@ -3040,7 +3042,9 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   xlsx = callPackage ../development/libraries/haskell/xlsx {};
 
-  xmobar = callPackage ../applications/misc/xmobar {};
+  xmobar = callPackage ../applications/misc/xmobar {
+    libmpd = self.libmpd_0_8_0_5;
+  };
 
   xmonad = callPackage ../applications/window-managers/xmonad {};
 
@@ -3098,6 +3102,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   cabal2Ghci = callPackage ../development/tools/haskell/cabal2ghci {};
 
   cabalGhci = callPackage ../development/tools/haskell/cabal-ghci {};
+
+  cabalg = callPackage ../development/libraries/haskell/cabalg {};
 
   cabalInstall_0_6_2  = callPackage ../tools/package-management/cabal-install/0.6.2.nix {};
   cabalInstall_0_8_0  = callPackage ../tools/package-management/cabal-install/0.8.0.nix {};
