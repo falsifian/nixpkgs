@@ -865,6 +865,23 @@ let
   };
 
 
+  blinker = buildPythonPackage rec {
+    name = "blinker-${version}";
+    version = "1.3";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/b/blinker/${name}.tar.gz";
+      md5 = "66e9688f2d287593a0e698cd8a5fbc57";
+    };
+
+    meta = with stdenv.lib; {
+      homepage = http://pythonhosted.org/blinker/;
+      description = "Fast, simple object-to-object and broadcast signaling";
+      license = licenses.mit;
+    };
+  };
+
+
   blockdiag = buildPythonPackage rec {
     name = "blockdiag-1.3.2";
 
@@ -1145,6 +1162,22 @@ let
     meta = {
       homepage = http://pypi.python.org/pypi/carrot;
       description = "AMQP Messaging Framework for Python";
+    };
+  };
+
+
+  characteristic = buildPythonPackage rec {
+    name = "characteristic-14.1.0";
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/c/characteristic/${name}.tar.gz";
+      md5 = "68ea7e28997fc57d3631791ec0567a05";
+    };
+
+    buildInputs = [ pythonPackages.pytest ];
+
+    meta = {
+      description = "Python attributes without boilerplate";
+      homepage = https://characteristic.readthedocs.org;
     };
   };
 
@@ -1589,22 +1622,16 @@ let
   };
 
   pytest = buildPythonPackage rec {
-    name = "pytest-2.5.1";
+    name = "pytest-2.6.2";
 
     src = fetchurl {
       url = "http://pypi.python.org/packages/source/p/pytest/${name}.tar.gz";
-      md5 = "4e155a0134e6757b37cc6698c20f3e9f";
+      md5 = "0a1735fb1d481ef3864f34678607ba85";
     };
 
     preCheck = ''
-      # broken on python3, fixed in master, remove in next release
-      rm doc/en/plugins_index/test_plugins_index.py
-
       # don't test bash builtins
       rm testing/test_argcomplete.py
-
-      # yaml test are failing
-      rm doc/en/example/nonpython/test_simple.yml
     '';
 
     propagatedBuildInputs = [ py ]
@@ -1614,7 +1641,7 @@ let
         pythonPackages.selenium;
 
     meta = with stdenv.lib; {
-      maintainers = with maintainers; [ iElectric lovek323 ];
+      maintainers = with maintainers; [ iElectric lovek323 madjar ];
       platforms = platforms.unix;
     };
   };
@@ -1989,6 +2016,7 @@ let
 
   dropbox = buildPythonPackage rec {
     name = "dropbox-2.0.0";
+    doCheck = !isPy3k; # failures with hash randomization
 
     src = fetchurl {
       url = "https://pypi.python.org/packages/source/d/dropbox/${name}.zip";
@@ -3435,6 +3463,21 @@ let
     };
   };
 
+  feedgenerator = buildPythonPackage (rec {
+    name = "feedgenerator-1.7";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/f/feedgenerator/${name}.tar.gz";
+      md5 = "92978492871342ad64e8ae0ccfcf200c";
+    };
+
+    propagatedBuildInputs = [ six pytz ];
+
+    meta = {
+      homepage = https://github.com/dmdm/feedgenerator-py3k.git;
+      description = "Standalone version of django.utils.feedgenerator,  compatible with Py3k";
+    };
+  });
 
   feedparser = buildPythonPackage (rec {
     name = "feedparser-5.1.3";
@@ -5753,6 +5796,29 @@ let
     };
   };
 
+  pelican = buildPythonPackage rec {
+    name = "pelican-${version}";
+    version = "3.4.0";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/p/pelican/${name}.tar.gz";
+      md5 = "8e57bdd075503903125b14621b1e533d";
+    };
+
+    # Test data not provided
+    #buildInputs = [nose mock];
+    doCheck = false;
+
+    propagatedBuildInputs = [jinja2 pygments docutils pytz unidecode six dateutil feedgenerator blinker pillow beautifulsoup4];
+
+    meta = {
+      homepage = http://getpelican.com/;
+      description = "A tool to generate a static blog from reStructuredText or Markdown input files";
+      license = licenses.agpl3;
+      maintainers = [ stdenv.lib.maintainers.offline ];
+    };
+  };
+
   pep8 = buildPythonPackage rec {
     name = "pep8-${version}";
     version = "1.5.7";
@@ -6093,11 +6159,11 @@ let
 
 
   py = buildPythonPackage rec {
-    name = "py-1.4.20";
+    name = "py-1.4.24";
 
     src = fetchurl {
       url = "https://pypi.python.org/packages/source/p/py/${name}.tar.gz";
-      md5 = "5f1708be5482f3ff6711dfd6cafd45e0";
+      md5 = "8f32ee0cd1e01472a255fe1d28d81217";
     };
   };
 
@@ -6606,6 +6672,26 @@ let
       license = stdenv.lib.licenses.bsd2;
     };
   });
+
+  pyqtgraph = buildPythonPackage rec {
+    name = "pyqtgraph-${version}";
+    version = "0.9.8";
+
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/source/p/pyqtgraph/${name}.tar.gz";
+      sha256 = "1fnhj26d9qrqqmjx092m1qspclh3mia3vag7rji5wciw0plpszi5";
+    };
+
+    propagatedBuildInputs = [ scipy numpy pyqt4 pyopengl ];
+
+    meta = with stdenv.lib; {
+      description = "Scientific Graphics and GUI Library for Python";
+      homepage = http://www.pyqtgraph.org/;
+      license = licenses.mit;
+      platforms = platforms.unix;
+      maintainers = [ maintainers.koral ];
+    };
+  };
 
   pyro3 = buildPythonPackage (rec {
     name = "Pyro-3.16";
@@ -10797,6 +10883,27 @@ let
     };
   };
 
+  snapperGUI = buildPythonPackage rec {
+    name = "Snapper-GUI";
+
+    src = fetchgit {
+      url = "https://github.com/ricardomv/snapper-gui";
+      rev = "11d98586b122180c75a86fccda45c4d7e3137591";
+      sha256 = "7a9f86fc17dbf130526e70c3e925eac30e2c74d6b932efbf7e7cd9fbba6dc4b1";
+    };
+
+    # no tests available
+    doCheck = false;
+
+    propagatedBuildInputs = with pythonPackages; [ pygobject3 dbus ];
+
+    meta = {
+      homepage = https://github.com/ricardomv/snapper-gui;
+      description = "Graphical frontend for snapper";
+      license = licenses.gpl2;
+      maintainers = [ stdenv.lib.maintainers.tstrobel ];
+    };
+  };
 
 # python2.7 specific packages
 } // optionalAttrs isPy27 (
@@ -10916,5 +11023,4 @@ let
       maintainers = [ stdenv.lib.maintainers.DamienCassou ];
     };
   };
-
 }); in pythonPackages

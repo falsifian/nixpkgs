@@ -467,6 +467,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
                then callPackage ../development/libraries/haskell/compdata {}
                else null;
 
+  compdataParam = callPackage ../development/libraries/haskell/compdata-param {};
+
   composition = callPackage ../development/libraries/haskell/composition {};
 
   compressed = callPackage ../development/libraries/haskell/compressed {};
@@ -1426,6 +1428,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   JuicyPixelsUtil = callPackage ../development/libraries/haskell/JuicyPixels-util {};
 
+  jwt = callPackage ../development/libraries/haskell/jwt {};
+
   kanExtensions = callPackage ../development/libraries/haskell/kan-extensions {};
 
   kansasLava = callPackage ../development/libraries/haskell/kansas-lava {};
@@ -1488,9 +1492,11 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   libjenkins = callPackage ../development/libraries/haskell/libjenkins {};
 
-  libmpd = callPackage ../development/libraries/haskell/libmpd {};
-
   libmpd_0_8_0_5 = callPackage ../development/libraries/haskell/libmpd/0.8.0.5.nix {};
+
+  libmpd_0_9_0_1 = callPackage ../development/libraries/haskell/libmpd/0.9.0.1.nix {};
+
+  libmpd = self.libmpd_0_9_0_1;
 
   liblastfm = callPackage ../development/libraries/haskell/liblastfm {};
 
@@ -2715,8 +2721,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   void = callPackage ../development/libraries/haskell/void {};
 
   vty_4_7_5 = callPackage ../development/libraries/haskell/vty/4.7.5.nix {};
-  vty_5_2_1 = callPackage ../development/libraries/haskell/vty/5.2.1.nix {};
-  vty = self.vty_5_2_1;
+  vty_5_2_2 = callPackage ../development/libraries/haskell/vty/5.2.2.nix {};
+  vty = self.vty_5_2_2;
 
   vtyUi = callPackage ../development/libraries/haskell/vty-ui {
     vty = self.vty_4_7_5;
@@ -2758,10 +2764,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   webRoutesBoomerang = callPackage ../development/libraries/haskell/web-routes-boomerang {};
 
-  websockets = callPackage ../development/libraries/haskell/websockets {
-    testFrameworkQuickcheck2 = self.testFrameworkQuickcheck2.override { QuickCheck = self.QuickCheck_2_6; };
-    QuickCheck = self.QuickCheck_2_6;
-  };
+  websockets = callPackage ../development/libraries/haskell/websockets {};
 
   websocketsSnap = callPackage ../development/libraries/haskell/websockets-snap {};
 
@@ -3119,7 +3122,11 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   commandQq = callPackage ../development/libraries/haskell/command-qq {};
 
-  gitAnnex = callPackage ../applications/version-management/git-and-tools/git-annex {};
+  escoger = callPackage ../tools/misc/escoger { };
+
+  gitAnnex = callPackage ../applications/version-management/git-and-tools/git-annex {
+    cabal = self.cabal.override { extension = self : super : { enableSharedExecutables = false; }; };
+  };
 
   githubBackup = callPackage ../applications/version-management/git-and-tools/github-backup {};
 

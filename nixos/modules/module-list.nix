@@ -38,6 +38,7 @@
   ./hardware/pcmcia.nix
   ./hardware/video/bumblebee.nix
   ./hardware/video/nvidia.nix
+  ./hardware/video/ati.nix
   ./installer/tools/nixos-checkout.nix
   ./installer/tools/tools.nix
   ./misc/assertions.nix
@@ -142,6 +143,7 @@
   ./services/hardware/udev.nix
   ./services/hardware/udisks2.nix
   ./services/hardware/upower.nix
+  ./services/hardware/thermald.nix
   ./services/logging/klogd.nix
   ./services/logging/logcheck.nix
   ./services/logging/logrotate.nix
@@ -157,6 +159,7 @@
   ./services/mail/postfix.nix
   ./services/mail/spamassassin.nix
   #./services/misc/autofs.nix
+  ./services/misc/cpuminer-cryptonight.nix
   ./services/misc/cgminer.nix
   ./services/misc/dictd.nix
   ./services/misc/disnix.nix

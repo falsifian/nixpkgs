@@ -589,6 +589,20 @@ let
 
   bindfs = callPackage ../tools/filesystems/bindfs { };
 
+  binwalk = callPackage ../tools/misc/binwalk {
+    python = pythonFull;
+    wrapPython = pythonPackages.wrapPython;
+    curses = pythonPackages.curses;
+  };
+
+  binwalk-full = callPackage ../tools/misc/binwalk {
+    python = pythonFull;
+    wrapPython = pythonPackages.wrapPython;
+    curses = pythonPackages.curses;
+    visualizationSupport = true;
+    pyqtgraph = pythonPackages.pyqtgraph;
+  };
+
   bitbucket-cli = pythonPackages.bitbucket-cli;
 
   blockdiag = pythonPackages.blockdiag;
@@ -598,6 +612,8 @@ let
   bochs = callPackage ../applications/virtualization/bochs { wxSupport = false; };
 
   boomerang = callPackage ../development/tools/boomerang { };
+
+  boost-build = callPackage ../development/tools/boost-build { };
 
   bootchart = callPackage ../tools/system/bootchart { };
 
@@ -1230,6 +1246,8 @@ let
 
   gource = callPackage ../applications/version-management/gource {};
 
+  gparted = callPackage ../tools/misc/gparted { };
+
   gpodder = callPackage ../applications/audio/gpodder { };
 
   gptfdisk = callPackage ../tools/system/gptfdisk { };
@@ -1273,6 +1291,10 @@ let
   grub2_efi = grub2.override { efiSupport = true; };
 
   grub2_zfs = grub2.override { zfsSupport = true; };
+
+  gsmartcontrol = callPackage ../tools/misc/gsmartcontrol {
+    inherit (gnome) libglademm;
+  };
 
   gssdp = callPackage ../development/libraries/gssdp {
     inherit (gnome) libsoup;
@@ -1585,6 +1607,8 @@ let
 
   mfcuk = callPackage ../tools/security/mfcuk { };
 
+  mfoc = callPackage ../tools/security/mfoc { };
+
   minecraft = callPackage ../games/minecraft { };
 
   minecraft-server = callPackage ../games/minecraft-server { };
@@ -1614,7 +1638,6 @@ let
   monit = callPackage ../tools/system/monit { };
 
   mosh = callPackage ../tools/networking/mosh {
-    boost = boostHeaders;
     inherit (perlPackages) IOTty;
   };
 
@@ -1740,6 +1763,8 @@ let
   };
 
   notbit = callPackage ../applications/networking/notbit { };
+
+  notify_osd = callPackage ../applications/misc/notify-osd { };
 
   nox = callPackage ../tools/package-management/nox {
     pythonPackages = python3Packages;
@@ -3066,6 +3091,8 @@ let
   };
   gcc-arm-embedded = gcc-arm-embedded-4_8;
 
+  gforth = callPackage ../development/compilers/gforth {};
+
   # Haskell and GHC
 
   # Import Haskell infrastructure.
@@ -3112,9 +3139,7 @@ let
   hhvm = callPackage ../development/compilers/hhvm { };
   hiphopvm = hhvm; /* Compatibility alias */
 
-  falcon = builderDefsPackage (import ../development/interpreters/falcon) {
-    inherit cmake;
-  };
+  falcon = callPackage ../development/interpreters/falcon { };
 
   fsharp = callPackage ../development/compilers/fsharp {};
 
@@ -3311,6 +3336,8 @@ let
 
   ocaml_4_01_0 = callPackage ../development/compilers/ocaml/4.01.0.nix { };
 
+  ocaml_4_02_0 = callPackage ../development/compilers/ocaml/4.02.0.nix { };
+
   orc = callPackage ../development/compilers/orc { };
 
   metaocaml_3_09 = callPackage ../development/compilers/ocaml/metaocaml-3.09.nix { };
@@ -3325,6 +3352,11 @@ let
     inherit ocaml;
 
     camlidl = callPackage ../development/tools/ocaml/camlidl { };
+
+    camlp4 =
+      if lib.versionOlder "4.02" ocaml_version
+      then callPackage ../development/tools/ocaml/camlp4 { }
+      else null;
 
     camlp5_old_strict =
       if lib.versionOlder "4.00" ocaml_version
@@ -3533,14 +3565,17 @@ let
   ocamlPackages_3_12_1 = mkOcamlPackages ocaml_3_12_1 pkgs.ocamlPackages_3_12_1;
   ocamlPackages_4_00_1 = mkOcamlPackages ocaml_4_00_1 pkgs.ocamlPackages_4_00_1;
   ocamlPackages_4_01_0 = mkOcamlPackages ocaml_4_01_0 pkgs.ocamlPackages_4_01_0;
-  ocamlPackages_latest = ocamlPackages_4_01_0;
+  ocamlPackages_4_02_0 = mkOcamlPackages ocaml_4_02_0 pkgs.ocamlPackages_4_02_0;
+  ocamlPackages_latest = ocamlPackages_4_02_0;
 
   ocaml_make = callPackage ../development/ocaml-modules/ocamlmake { };
 
   opa = let callPackage = newScope pkgs.ocamlPackages_4_00_1; in callPackage ../development/compilers/opa { };
 
   opam_1_0_0 = callPackage ../development/tools/ocaml/opam/1.0.0.nix { };
-  opam_1_1 = callPackage ../development/tools/ocaml/opam/1.1.nix { };
+  opam_1_1 = callPackage ../development/tools/ocaml/opam/1.1.nix {
+    inherit (ocamlPackages_4_01_0) ocaml;
+  };
   opam = opam_1_1;
 
   ocamlnat = let callPackage = newScope pkgs.ocamlPackages_3_12_1; in callPackage ../development/ocaml-modules/ocamlnat { };
@@ -3717,6 +3752,8 @@ let
   love_luajit = callPackage ../development/interpreters/love {lua=luajit;};
   love_0_9 = callPackage ../development/interpreters/love/0.9.nix { };
 
+  ### LUA MODULES
+
   lua4 = callPackage ../development/interpreters/lua-4 { };
   lua5_0 = callPackage ../development/interpreters/lua-5/5.0.3.nix { };
   lua5_1 = callPackage ../development/interpreters/lua-5/5.1.nix { };
@@ -3727,12 +3764,15 @@ let
   lua5 = lua5_2_compat;
   lua = lua5;
 
-  lua5_1_sockets = callPackage ../development/interpreters/lua-5/sockets.nix {
-    lua5 = lua5_1; # version 2.* only works with 5.1
-  };
+  lua51Packages = recurseIntoAttrs (callPackage ./lua-packages.nix { lua = lua5_1; });
+
+  lua52Packages = recurseIntoAttrs (callPackage ./lua-packages.nix { lua = lua5_2; });
+
+  luaPackages = lua52Packages;
+
+  lua5_1_sockets = lua51Packages.sockets;
+
   lua5_expat = callPackage ../development/interpreters/lua-5/expat.nix {};
-  lua5_filesystem = callPackage ../development/interpreters/lua-5/filesystem.nix {};
-  lua51_filesystem = lua5_filesystem.override { lua5=lua5_1; };
   lua51_zip = callPackage ../development/interpreters/lua-5/zip.nix { };
   lua5_sec = callPackage ../development/interpreters/lua-5/sec.nix { };
 
@@ -3741,6 +3781,8 @@ let
   };
 
   luajit = callPackage ../development/interpreters/luajit {};
+
+  ### END OF LUA
 
   lush2 = callPackage ../development/interpreters/lush {};
 
@@ -4308,6 +4350,11 @@ let
 
   neoload = callPackage ../development/tools/neoload {
     licenseAccepted = (config.neoload.accept_license or false);
+    fontsConf = makeFontsConf {
+      fontDirectories = [
+        xorg.fontbhttf
+      ];
+    };
   };
 
   ninja = callPackage ../development/tools/build-managers/ninja { };
@@ -4577,9 +4624,8 @@ let
   boost144 = callPackage ../development/libraries/boost/1.44.nix { };
   boost149 = callPackage ../development/libraries/boost/1.49.nix { };
   boost155 = callPackage ../development/libraries/boost/1.55.nix { };
+  boost156 = callPackage ../development/libraries/boost/1.56.nix { };
   boost = boost155;
-
-  boostHeaders = callPackage ../development/libraries/boost/header-only-wrapper.nix { };
 
   botan = callPackage ../development/libraries/botan { };
   botanUnstable = callPackage ../development/libraries/botan/unstable.nix { };
@@ -4684,9 +4730,7 @@ let
 
   cppunit = callPackage ../development/libraries/cppunit { };
 
-  cppnetlib = callPackage ../development/libraries/cppnetlib {
-    boost = boostHeaders;
-  };
+  cppnetlib = callPackage ../development/libraries/cppnetlib { };
 
   cracklib = callPackage ../development/libraries/cracklib { };
 
@@ -5895,7 +5939,6 @@ let
   libyaml = callPackage ../development/libraries/libyaml { };
 
   libyamlcpp = callPackage ../development/libraries/libyaml-cpp { };
-  libyamlcpp03 = callPackage ../development/libraries/libyaml-cpp/0.3.x.nix { };
 
   libyubikey = callPackage ../development/libraries/libyubikey {};
 
@@ -6871,7 +6914,6 @@ let
 
   planetary_annihilation = callPackage ../games/planetaryannihilation { };
 
-
   ### DEVELOPMENT / PYTHON MODULES
 
   # python function with default python interpreter
@@ -7195,7 +7237,9 @@ let
 
   mariadb = callPackage ../servers/sql/mariadb {};
 
-  mongodb = callPackage ../servers/nosql/mongodb { };
+  mongodb = callPackage ../servers/nosql/mongodb {
+    sasl = cyrus_sasl;
+  };
 
   riak = callPackage ../servers/nosql/riak/1.3.1.nix { };
 
@@ -8690,6 +8734,7 @@ let
   darcs = with haskellPackages_ghc783; callPackage ../applications/version-management/darcs {
     cabal = cabal.override {
       extension = self : super : {
+        enableSharedExecutables = false;
         isLibrary = false;
         configureFlags = "-f-library " + super.configureFlags or "";
       };
@@ -9404,6 +9449,7 @@ let
 
   k3d = callPackage ../applications/graphics/k3d {
     inherit (pkgs.gnome2) gtkglext;
+    boost = boost149;
   };
 
   keepnote = callPackage ../applications/office/keepnote {
@@ -9454,7 +9500,6 @@ let
     inherit (perlPackages) ArchiveZip CompressZlib;
     inherit (gnome) GConf ORBit2 gnome_vfs;
     zip = zip.override { enableNLS = false; };
-    boost = boost155;
     jdk = openjdk;
     fontsConf = makeFontsConf {
       fontDirectories = [
@@ -9589,8 +9634,8 @@ let
   };
 
   monotoneViz = builderDefsPackage (import ../applications/version-management/monotone-viz/mtn-head.nix) {
-    inherit ocaml graphviz pkgconfig autoconf automake libtool glib gtk;
-    inherit (ocamlPackages) lablgtk;
+    inherit graphviz pkgconfig autoconf automake libtool glib gtk;
+    inherit (ocamlPackages_4_01_0) lablgtk ocaml;
     inherit (gnome) libgnomecanvas;
   };
 
@@ -9657,7 +9702,9 @@ let
 
   mrxvt = callPackage ../applications/misc/mrxvt { };
 
-  mudlet = callPackage ../games/mudlet { };
+  mudlet = callPackage ../games/mudlet {
+    inherit (lua51Packages) filesystem;
+  };
 
   multisync = callPackage ../applications/misc/multisync {
     inherit (gnome) ORBit2 libbonobo libgnomeui GConf;
@@ -10060,9 +10107,16 @@ let
     libpng = libpng12;
   };
 
+
   smartgithg = callPackage ../applications/version-management/smartgithg { };
 
+  slimThemes = recurseIntoAttrs (import ../applications/display-managers/slim/themes.nix {
+    inherit stdenv fetchurl slim;
+  });
+
   smartdeblur = callPackage ../applications/graphics/smartdeblur { };
+
+  snapper = callPackage ../tools/misc/snapper { };
 
   snd = callPackage ../applications/audio/snd { };
 
@@ -10442,10 +10496,15 @@ let
       cores = with libretro;
       ([ ]
       ++ lib.optional (cfg.enable4do or false) _4do
+      ++ lib.optional (cfg.enableBsnesMercury or false) bsnes-mercury
       ++ lib.optional (cfg.enableDesmume or false) desmume
+      ++ lib.optional (cfg.enableFBA or false) fba
       ++ lib.optional (cfg.enableFceumm or false) fceumm
+      ++ lib.optional (cfg.enableGambatte or false) gambatte
+      ++ lib.optional (cfg.enableGenesisPlusGX or false) genesis-plus-gx
       ++ lib.optional (cfg.enableMupen64Plus or false) mupen64plus
       ++ lib.optional (cfg.enablePicodrive or false) picodrive
+      ++ lib.optional (cfg.enablePrboom or false) prboom
       ++ lib.optional (cfg.enablePPSSPP or false) ppsspp
       ++ lib.optional (cfg.enableScummVM or false) scummvm
       ++ lib.optional (cfg.enableSnes9xNext or false) snes9x-next
@@ -10588,7 +10647,7 @@ let
 
   inherit (gnome3) yelp;
 
-  qgis = callPackage ../applications/misc/qgis {};
+  qgis = callPackage ../applications/gis/qgis {};
 
   qtbitcointrader = callPackage ../applications/misc/qtbitcointrader { };
 
@@ -10749,12 +10808,6 @@ let
 
   gnugo = callPackage ../games/gnugo { };
 
-  gparted = callPackage ../tools/misc/gparted { };
-
-  gsmartcontrol = callPackage ../tools/misc/gsmartcontrol {
-    inherit (gnome) libglademm;
-  };
-
   gtypist = callPackage ../games/gtypist { };
 
   hexen = callPackage ../games/hexen { };
@@ -10838,6 +10891,8 @@ let
 
   rogue = callPackage ../games/rogue { };
 
+  saga = callPackage ../applications/gis/saga { };
+
   samplv1 = callPackage ../applications/audio/samplv1 { };
 
   sauerbraten = callPackage ../games/sauerbraten {};
@@ -10888,7 +10943,7 @@ let
 
   tennix = callPackage ../games/tennix { };
 
-  tibia = callPackage ../games/tibia { };
+  tibia = callPackage_i686 ../games/tibia { };
 
   tintin = callPackage ../games/tintin { };
 
@@ -11341,8 +11396,8 @@ let
   alt-ergo = callPackage ../applications/science/logic/alt-ergo {};
 
   coq = callPackage ../applications/science/logic/coq {
-    inherit (ocamlPackages) findlib lablgtk;
-    camlp5 = ocamlPackages.camlp5_transitional;
+    inherit (ocamlPackages_4_01_0) ocaml findlib lablgtk;
+    camlp5 = ocamlPackages_4_01_0.camlp5_transitional;
   };
 
   coq_HEAD = callPackage ../applications/science/logic/coq/HEAD.nix {
@@ -11415,8 +11470,8 @@ let
   picosat = callPackage ../applications/science/logic/picosat {};
 
   prooftree = callPackage ../applications/science/logic/prooftree {
-    inherit (ocamlPackages) findlib lablgtk;
-    camlp5 = ocamlPackages.camlp5_transitional;
+    inherit (ocamlPackages_4_01_0) ocaml findlib lablgtk;
+    camlp5 = ocamlPackages_4_01_0.camlp5_transitional;
   };
 
   prover9 = callPackage ../applications/science/logic/prover9 { };
