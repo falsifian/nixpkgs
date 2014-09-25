@@ -15,7 +15,8 @@ in stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_3_16_4_RTM/src/${name}.tar.gz";
-    sha256 = "adcd1e655fd9508e7f13847452fd5887a835eff882e3f0d3c42dfcd651650b77";
+    # sha256 = "adcd1e655fd9508e7f13847452fd5887a835eff882e3f0d3c42dfcd651650b77";
+    sha256 = "0000000000000000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-1568.
   };
 
   buildInputs = [ nspr perl zlib sqlite ];
