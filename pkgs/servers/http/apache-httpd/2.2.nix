@@ -12,12 +12,12 @@ assert ldapSupport -> aprutil.ldapSupport && openldap != null;
 assert mpm == "prefork" || mpm == "worker" || mpm == "event";
 
 stdenv.mkDerivation rec {
-  version = "2.2.27";
+  version = "2.2.29";
   name = "apache-httpd-${version}";
 
   src = fetchurl {
-    url = "XXX VULNERABLE mirror://apache/httpd/httpd-${version}.tar.bz2";
-    sha256 = "0iw19y6knijinqwvv4q16fgq5xq8nwxdg14wrrbc0mfasvg76n90"; # Maybe vulnerable to CVE-2014-0118 CVE-2014-0226 CVE-2014-0231"; perhaps keep an eye on http://httpd.apache.org/security/vulnerabilities_22.html .
+    url = "mirror://apache/httpd/httpd-${version}.tar.bz2";
+    sha1 = "1d6a8fbc1391d358cc6fe430edc16222b97258d5";
   };
 
   buildInputs = [perl apr aprutil pcre] ++
