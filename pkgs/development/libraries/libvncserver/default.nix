@@ -12,9 +12,10 @@ let
     baseName="libvncserver";
     version="0.9.9";
     name="${baseName}-${version}";
-    hash="1y83z31wbjivbxs60kj8a8mmjmdkgxlvr2x15yz95yy24lshs1ng";
+    #hash="1y83z31wbjivbxs60kj8a8mmjmdkgxlvr2x15yz95yy24lshs1ng";
     url="mirror://sourceforge/project/libvncserver/libvncserver/0.9.9/LibVNCServer-0.9.9.tar.gz";
-    sha256="1y83z31wbjivbxs60kj8a8mmjmdkgxlvr2x15yz95yy24lshs1ng";
+    #sha256="1y83z31wbjivbxs60kj8a8mmjmdkgxlvr2x15yz95yy24lshs1ng";
+    sha256="0000000000000000000000000000000000000000000000000000"; # Vulnerable to CVE-2014-6051 and CVE-2014-6055 and maybe CVE-2014-6052 through 6054.
   };
   buildInputs = [
     libtool libjpeg openssl libX11 libXdamage xproto damageproto
