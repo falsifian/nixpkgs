@@ -5,7 +5,8 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     url = http://www.rsyslog.com/files/download/rsyslog/rsyslog-7.6.3.tar.gz;
-    sha256 = "1v7mi2jjyn3awrfxqvd3mg64m5r027dgpbzd511mlvlbbw1mjcq1";
+    # sha256 = "1v7mi2jjyn3awrfxqvd3mg64m5r027dgpbzd511mlvlbbw1mjcq1";
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # Maybe vulnerable to CVE-2014-3683.
   };
 
   buildInputs = [pkgconfig libestr libee json_c libuuid zlib gnutls libgcrypt systemd liblogging];
