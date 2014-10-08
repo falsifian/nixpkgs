@@ -24,7 +24,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://www.ffmpeg.org/releases/${name}.tar.bz2";
-    sha256 = "1xn9fmpq2cbf1bx1gxbxnas8fq02gb8bmvvg5vjjxyw9lz5zw49f XXX vulnerable CVE-2011-3934";
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # Vulnerable to CVE-2011-3934 .
   };
 
   # `--enable-gpl' (as well as the `postproc' and `swscale') mean that

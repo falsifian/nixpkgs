@@ -35,7 +35,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "http://tarballs.nixos.org/openjdk-7u${update}-b${build}.tar.xz";
     #sha256 = "0lyp75sl5w4b9azphb2nq5cwzli85inpksq4943q4j349rkmdprx";
-    sha256 = "VULNERABLE_various_cves";  # See  DSA-2912-1, USN-2187-1, USN-2191-1, DSA 2923-1, DSA-2980-1, DSA-2987-1, USN-2319-1.  I'm not sure which versions are vulnerable.
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # See  DSA-2912-1, USN-2187-1, USN-2191-1, DSA 2923-1, DSA-2980-1, DSA-2987-1, USN-2319-1.  I'm not sure which versions are vulnerable.
   };
 
   outputs = [ "out" "jre" ];

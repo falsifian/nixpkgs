@@ -19,6 +19,6 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     url = ftp://ftp.fu-berlin.de/pub/unix/mail/procmail/procmail-3.22.tar.gz;
-    sha256 = "05z1c803n5cppkcq99vkyd5myff904lf9sdgynfqngfk9nrpaz08 XXX vulnerable"; # see http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3618
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # Vulnerable: see http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3618 .
   };
 }

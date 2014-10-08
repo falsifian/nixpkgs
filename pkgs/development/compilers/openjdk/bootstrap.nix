@@ -5,12 +5,14 @@ let
   src = if glibc.system == "x86_64-linux" then
     fetchurl {
       url = http://tarballs.nixos.org/openjdk-bootstrap-x86_64-linux-2012-08-24.tar.xz;
-      sha256 = "0gla9dxrfq2w1hvgsnn8jg8a60k27im6z43a6iidi0qmwa0wah32 XXX maybe vulnerable DSA-2987-1 USN-2319-1";
+      # sha256 = "0gla9dxrfq2w1hvgsnn8jg8a60k27im6z43a6iidi0qmwa0wah32";
+      sha256 = "0000000000000000000000000000000000000000000000000000"; # Maybe vulnerable; see DSA-2987-1 and USN-2319-1";
     }
   else if glibc.system == "i686-linux" then
     fetchurl {
       url = http://tarballs.nixos.org/openjdk-bootstrap-i686-linux-2012-08-24.tar.xz;
-      sha256 = "184wq212bycwbbq4ix8cc6jwjxkrqw9b01zb86q95kqpa8zy5206 XXX maybe vulnerable DSA-2987-1 USN-2319-1";
+      # sha256 = "184wq212bycwbbq4ix8cc6jwjxkrqw9b01zb86q95kqpa8zy5206";
+      sha256 = "0000000000000000000000000000000000000000000000000000"; # Maybe vulnerable; see DSA-2987-1 and USN-2319-1";
     }
   else throw "No bootstrap for system";
 in

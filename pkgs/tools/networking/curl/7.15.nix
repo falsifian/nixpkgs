@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://curl.haxx.se/download/archeology/${name}.tar.gz";
-    sha256 = "VULNERABLE_CVE-2014-0138";
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # Vulnerable to CVE-2014-0138.
   };
 
   # Zlib and OpenSSL must be propagated because `libcurl.la' contains
