@@ -14,7 +14,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://wiki.qemu.org/download/${n}.tar.bz2";
-    sha256 = "0frsahiw56jr4cqr9m6s383lyj4ar9hfs2wp3y4yr76krah1mk30";
+    # sha256 = "0frsahiw56jr4cqr9m6s383lyj4ar9hfs2wp3y4yr76krah1mk30";
+    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to various things.  See DSA 3044-1, DSA 3045-1, https://rhn.redhat.com/errata/RHSA-2014-0420.html .
   };
 
   patches = [ ./cve-2014-0150.patch ];
