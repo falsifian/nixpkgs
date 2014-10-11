@@ -8,23 +8,21 @@
 with stdenv.lib;
 let
   wrapArgs = "--prefix PYTHONPATH : \"$(toPythonPath $out)\""
+    + " --prefix PYTHONPATH : \"$(toPythonPath ${python.modules.readline})\""
     + " --prefix PATH : \"$out/bin\""
     + " --prefix LD_LIBRARY_PATH : \"$out/lib\"";
 in
 stdenv.mkDerivation rec {
   name="ceph-${version}";
-  version="0.85";
+  version="0.86";
 
   src = fetchgit {
     url = "git://github.com/ceph/ceph.git";
-    rev = "refs/tags/v0.85";
-    sha256 = "0g98cgrs3gfsc8azg3k0n61bgna2w906qm69j4qbjkb61l83ld1z";
+    rev = "refs/tags/v${version}";
+    sha256 = "19bl96z97kvsrliwid4g6dl7s3i0nw5z9nmg964i7jdwlsl98cfj";
   };
 
-  patches = [
-    ./0001-Cleanup-boost-optionals.patch # Remove in 0.86
-    ./0001-Makefile-env-Don-t-force-sbin.patch
-  ];
+  patches = [ ./0001-Makefile-env-Don-t-force-sbin.patch ];
 
   nativeBuildInputs = [ autoconf automake makeWrapper pkgconfig libtool which ];
   buildInputs = [
@@ -45,6 +43,8 @@ stdenv.mkDerivation rec {
     wrapProgram $out/bin/ceph ${wrapArgs}
     wrapProgram $out/bin/ceph-brag ${wrapArgs}
     wrapProgram $out/bin/ceph-rest-api ${wrapArgs}
+    wrapProgram $out/sbin/ceph-create-keys ${wrapArgs}
+    wrapProgram $out/sbin/ceph-disk ${wrapArgs}
   '';
 
   enableParallelBuilding = true;

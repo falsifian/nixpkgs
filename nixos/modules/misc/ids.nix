@@ -154,6 +154,7 @@
       collectd = 144;
       consul = 145;
       mailpile = 146;
+      redmine = 147;
 
       tinc = 200;
 
@@ -277,6 +278,7 @@
       riemanndash = 138;
       uhub = 142;
       mailpile = 146;
+      redmine = 147;
 
       # When adding a gid, make sure it doesn't match an existing uid. And don't use gids above 399!
 
