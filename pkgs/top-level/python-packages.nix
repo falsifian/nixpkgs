@@ -7397,7 +7397,8 @@ let
 
     src = pkgs.fetchurl {
       url = "http://pypi.python.org/packages/source/r/requests/${name}.tar.gz";
-      md5 = "adbd3f18445f7fe5e77f65c502e264fb";
+      # md5 = "adbd3f18445f7fe5e77f65c502e264fb";
+      md5 = "00000000000000000000000000000000";  # Vulnerable to CVE-2014-1829 and CVE-2014-1830.
     };
 
     meta = {
