@@ -10,7 +10,8 @@ in
 rec {
   src = fetchurl {
     url = mirror://sourceforge/funpidgin/carrier-2.5.0.tar.bz2;
-    sha256 = "0m80s7hnvz5vc2dy3xiy1zfb6incmb7p28zahzxdif2vz44riz28";
+    # sha256 = "0m80s7hnvz5vc2dy3xiy1zfb6incmb7p28zahzxdif2vz44riz28";
+    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3694..3696, CVE-2014-3698.
   };
 
   buildInputs = [gtkspell aspell

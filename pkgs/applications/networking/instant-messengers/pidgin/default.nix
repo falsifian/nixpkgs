@@ -24,7 +24,8 @@ stdenv.mkDerivation rec {
   name = "pidgin-2.10.9";
   src = fetchurl {
     url = "mirror://sourceforge/pidgin/${name}.tar.bz2";
-    sha256 = "06gka47myl9f5x0flkq74ml75akkf28rx9sl8pm3wqkzazc2wdnw";
+    # sha256 = "06gka47myl9f5x0flkq74ml75akkf28rx9sl8pm3wqkzazc2wdnw";
+    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3694..3696, CVE-2014-3698.
   };
 
   inherit nss ncurses;
