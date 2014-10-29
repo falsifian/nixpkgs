@@ -16,7 +16,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${version}/source/firefox-${version}.source.tar.bz2";
-    sha1 = "a6c3e25ee3aeb7da42db2aaeb50a385d63532beb";
+    # sha1 = "a6c3e25ee3aeb7da42db2aaeb50a385d63532beb";
+    sha1 = "0000000000000000000000000000000000000000";  # Maybe vulnerable.
   };
 
   buildInputs =
