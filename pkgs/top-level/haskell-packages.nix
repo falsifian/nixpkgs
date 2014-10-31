@@ -125,6 +125,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   accelerateIo = callPackage ../development/libraries/haskell/accelerate-io {};
 
+  acmeLookofdisapproval = callPackage ../development/libraries/haskell/acme-lookofdisapproval {};
+
   active = callPackage ../development/libraries/haskell/active {};
 
   ACVector = callPackage ../development/libraries/haskell/AC-Vector {};
@@ -143,8 +145,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   aeson_0_7_0_4 = callPackage ../development/libraries/haskell/aeson/0.7.0.4.nix { blazeBuilder = null; };
   aeson_0_7_0_6 = callPackage ../development/libraries/haskell/aeson/0.7.0.6.nix { blazeBuilder = null; };
-  aeson_0_8_0_1 = callPackage ../development/libraries/haskell/aeson/0.8.0.1.nix { blazeBuilder = null; };
-  aeson = self.aeson_0_8_0_1;
+  aeson_0_8_0_2 = callPackage ../development/libraries/haskell/aeson/0.8.0.2.nix { blazeBuilder = null; };
+  aeson = self.aeson_0_8_0_2;
 
   aesonPretty = callPackage ../development/libraries/haskell/aeson-pretty {};
 
@@ -271,6 +273,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   bitsExtras = callPackage ../development/libraries/haskell/bits-extras {};
 
+  bitset = callPackage ../development/libraries/haskell/bitset {};
+
   bktrees = callPackage ../development/libraries/haskell/bktrees {};
 
   blankCanvas = callPackage ../development/libraries/haskell/blank-canvas {};
@@ -395,6 +399,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   cgrep = callPackage ../development/libraries/haskell/cgrep {};
 
   charset = callPackage ../development/libraries/haskell/charset {};
+
+  charsetdetectAe = callPackage ../development/libraries/haskell/charsetdetect-ae {};
 
   Chart = callPackage ../development/libraries/haskell/Chart {};
   ChartCairo = callPackage ../development/libraries/haskell/Chart-cairo {};
@@ -591,6 +597,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   dataLens = callPackage ../development/libraries/haskell/data-lens {};
 
+  dataLensFd = callPackage ../development/libraries/haskell/data-lens-fd {};
+
   dataLensLight = callPackage ../development/libraries/haskell/data-lens-light {};
 
   dataLensTemplate = callPackage ../development/libraries/haskell/data-lens-template {};
@@ -614,6 +622,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   dbmigrations = callPackage ../development/libraries/haskell/dbmigrations {};
 
   dbus = callPackage ../development/libraries/haskell/dbus {};
+
+  Decimal = callPackage ../development/libraries/haskell/Decimal {};
 
   deepseq_1_1_0_0 = callPackage ../development/libraries/haskell/deepseq/1.1.0.0.nix {};
   deepseq_1_1_0_2 = callPackage ../development/libraries/haskell/deepseq/1.1.0.2.nix {};
@@ -788,7 +798,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   executablePath = callPackage ../development/libraries/haskell/executable-path {};
 
-  Extra = callPackage ../development/libraries/haskell/Extra {};
+  Extra = callPackage ../development/libraries/haskell/Extra-lib {};
 
   fay = callPackage ../development/libraries/haskell/fay {};
 
@@ -813,6 +823,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   extensibleExceptions_0_1_1_3 = callPackage ../development/libraries/haskell/extensible-exceptions/0.1.1.3.nix {};
   extensibleExceptions_0_1_1_4 = callPackage ../development/libraries/haskell/extensible-exceptions/0.1.1.4.nix {};
   extensibleExceptions = self.extensibleExceptions_0_1_1_4;
+
+  extra = callPackage ../development/libraries/haskell/extra {};
 
   failure = callPackage ../development/libraries/haskell/failure {};
 
@@ -906,6 +918,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
     cabal = self.cabal.override { enableLibraryProfiling = false; }; # pkg cannot be built with profiling enabled
   };
 
+  ghcid = callPackage ../development/tools/haskell/ghcid {};
 
   ghcServer = callPackage ../development/libraries/haskell/ghc-server {};
 
@@ -1041,7 +1054,9 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   groupoids = callPackage ../development/libraries/haskell/groupoids {};
 
-  hakyll = callPackage ../development/libraries/haskell/hakyll {};
+  hakyll = callPackage ../development/libraries/haskell/hakyll {
+    pandocCiteproc = self.pandocCiteproc_0_4;
+  };
 
   hamlet = callPackage ../development/libraries/haskell/hamlet {};
 
@@ -1202,7 +1217,9 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   hi = callPackage ../development/libraries/haskell/hi {};
 
-  hindent = callPackage ../development/libraries/haskell/hindent {};
+  hindent = callPackage ../development/libraries/haskell/hindent {
+    haskellSrcExts = self.haskellSrcExts_1_15_0_1;
+  };
 
   hint = callPackage ../development/libraries/haskell/hint {};
 
@@ -1242,10 +1259,18 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   hoodleTypes = callPackage ../development/libraries/haskell/hoodle-types {};
 
-  hoogle = callPackage ../development/libraries/haskell/hoogle {};
+  hoogle_4_2_34 = callPackage ../development/libraries/haskell/hoogle/4.2.34.nix { haskellSrcExts = self.haskellSrcExts_1_15_0_1; };
+  hoogle_4_2_36 = callPackage ../development/libraries/haskell/hoogle/4.2.36.nix {};
+  hoogle = self.hoogle_4_2_36;
+
   hoogleLocal = callPackage ../development/libraries/haskell/hoogle/local.nix {};
 
   hopenssl = callPackage ../development/libraries/haskell/hopenssl {};
+
+  hosc = callPackage ../development/libraries/haskell/hosc {
+    binary = self.binary_0_7_2_2;
+    dataBinaryIeee754 = self.dataBinaryIeee754.override { binary = self.binary_0_7_2_2; };
+  };
 
   hostname = callPackage ../development/libraries/haskell/hostname {};
 
@@ -1256,6 +1281,20 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   hS3 = callPackage ../development/libraries/haskell/hS3 {};
 
   hsBibutils = callPackage ../development/libraries/haskell/hs-bibutils {};
+
+  hsc3 = callPackage ../development/libraries/haskell/hsc3 {};
+
+  hsc3-dot = callPackage ../development/libraries/haskell/hsc3-dot {};
+
+  hsc3-process = callPackage ../development/libraries/haskell/hsc3-process {};
+
+  hsc3-db = callPackage ../development/libraries/haskell/hsc3-db {};
+
+  hsc3-lang = callPackage ../development/libraries/haskell/hsc3-lang {
+    hmatrixSpecial = self.hmatrixSpecial.override {
+      hmatrix = self.hmatrix.override { binary = self.binary_0_7_2_2; };
+    };
+  };
 
   hsdns = callPackage ../development/libraries/haskell/hsdns {};
 
@@ -1296,6 +1335,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   hspecExpectationsLens = callPackage ../development/libraries/haskell/hspec-expectations-lens {};
 
   hspecMeta = callPackage ../development/libraries/haskell/hspec-meta {};
+
+  hspecCheckers = callPackage ../development/libraries/haskell/hspec-checkers {};
 
   hstatsd = callPackage ../development/libraries/haskell/hstatsd {};
 
@@ -1466,7 +1507,12 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   languageHaskellExtract = callPackage ../development/libraries/haskell/language-haskell-extract {};
 
-  lambdabot = callPackage ../development/libraries/haskell/lambdabot {};
+  lambdabot = callPackage ../development/libraries/haskell/lambdabot {
+    haskellSrcExts = self.haskellSrcExts_1_15_0_1;
+    hoogle = self.hoogle_4_2_34.override {
+      haskellSrcExts = self.haskellSrcExts_1_15_0_1;
+    };
+  };
 
   lambdabotWrapper = callPackage ../development/libraries/haskell/lambdabot/wrapper.nix {
     mueval = self.muevalWrapper.override {
@@ -1698,6 +1744,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   mtl_2_0_1_0 = callPackage ../development/libraries/haskell/mtl/2.0.1.0.nix {};
   mtl_2_1_1 = callPackage ../development/libraries/haskell/mtl/2.1.1.nix {};
   mtl_2_1_2 = callPackage ../development/libraries/haskell/mtl/2.1.2.nix {};
+  mtl_2_1_3_1 = callPackage ../development/libraries/haskell/mtl/2.1.3.1.nix {};
   mtl_2_2_1 = callPackage ../development/libraries/haskell/mtl/2.2.1.nix {};
   mtl = null; # tightly coupled with 'transformers' which is a core package
 
@@ -1832,7 +1879,6 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   options = callPackage ../development/libraries/haskell/options {};
 
-  #optparseApplicative_0_9_1_1 = callPackage ../development/libraries/haskell/optparse-applicative/0.9.1.1.nix {};
   optparseApplicative_0_10_0 = callPackage ../development/libraries/haskell/optparse-applicative/0.10.0.nix {};
   optparseApplicative_0_11_0_1 = callPackage ../development/libraries/haskell/optparse-applicative/0.11.0.1.nix {};
   optparseApplicative = self.optparseApplicative_0_11_0_1;
@@ -1843,7 +1889,10 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   pandoc = callPackage ../development/libraries/haskell/pandoc {};
 
-  pandocCiteproc = callPackage ../development/libraries/haskell/pandoc-citeproc {};
+  pandocCiteproc_0_4 = callPackage ../development/libraries/haskell/pandoc-citeproc/0.4.nix {};
+  pandocCiteproc_0_5 = callPackage ../development/libraries/haskell/pandoc-citeproc/0.5.nix {};
+  pandocCiteproc_0_6 = callPackage ../development/libraries/haskell/pandoc-citeproc/0.6.nix {};
+  pandocCiteproc = self.pandocCiteproc_0_6;
 
   pandocTypes = callPackage ../development/libraries/haskell/pandoc-types {};
 
@@ -1937,6 +1986,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   pipesSafe = callPackage ../development/libraries/haskell/pipes-safe {};
 
+  pipesShell = callPackage ../development/libraries/haskell/pipes-shell {};
+
   pipesText = callPackage ../development/libraries/haskell/pipes-text {};
 
   pipesZlib = callPackage ../development/libraries/haskell/pipes-zlib {};
@@ -1995,7 +2046,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   punycode = callPackage ../development/libraries/haskell/punycode {};
 
-  pureCdb = callPackage ../development/libraries/haskell/pure-cdb { testSimple = null; };
+  pureCdb = callPackage ../development/libraries/haskell/pure-cdb {};
 
   primitive_0_5_0_1 = callPackage ../development/libraries/haskell/primitive/0.5.0.1.nix {};
   primitive_0_5_2_1 = callPackage ../development/libraries/haskell/primitive/0.5.2.1.nix {};
@@ -2075,6 +2126,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   ranges = callPackage ../development/libraries/haskell/ranges {};
 
   Rasterific = callPackage ../development/libraries/haskell/Rasterific {};
+
+  rawStringsQq = callPackage ../development/libraries/haskell/rawStringsQq {};
 
   reserve = callPackage ../development/libraries/haskell/reserve {};
 
@@ -2753,13 +2806,9 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   void = callPackage ../development/libraries/haskell/void {};
 
-  vty_4_7_5 = callPackage ../development/libraries/haskell/vty/4.7.5.nix {};
-  vty_5_2_3 = callPackage ../development/libraries/haskell/vty/5.2.3.nix {};
-  vty = self.vty_5_2_3;
+  vty = callPackage ../development/libraries/haskell/vty {};
 
-  vtyUi = callPackage ../development/libraries/haskell/vty-ui {
-    vty = self.vty_4_7_5;
-  };
+  vtyUi = callPackage ../development/libraries/haskell/vty-ui {};
 
   wai = callPackage ../development/libraries/haskell/wai {};
 
@@ -3057,12 +3106,7 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   arbtt = callPackage ../applications/misc/arbtt {};
 
-  idris_plain = callPackage ../development/compilers/idris {
-    llvmGeneral = self.llvmGeneral_3_3_8_2;
-    llvmGeneralPure = self.llvmGeneralPure_3_3_8_2;
-    languageJava = self.languageJava_0_2_6;
-    optparseApplicative = self.optparseApplicative_0_10_0;
-  };
+  idris_plain = callPackage ../development/compilers/idris {};
 
   idris = callPackage ../development/compilers/idris/wrapper.nix {};
 
@@ -3092,19 +3136,23 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   wordTrie = callPackage ../development/libraries/haskell/word-trie {};
 
-  # You should prefer ‘yiCustom’ over ‘yi’ unless you never plan to
-  # use any external libraries in your config.
+  # This is an unwrapped version of Yi, it will not behave well (no
+  # M-x or reload). Use ‘yiCustom’ instead.
   yi = callPackage ../applications/editors/yi/yi.nix { };
 
-  yiContrib = callPackage ../development/libraries/haskell/yi-contrib {};
-
   yiCustom = callPackage ../applications/editors/yi/yi-custom.nix {
-    extraPackages = [];
+    extraPackages = pkgs: [];
   };
+
+  yiFuzzyOpen = callPackage ../development/libraries/haskell/yi-fuzzy-open {};
+
+  yiMonokai = callPackage ../development/libraries/haskell/yi-monokai {};
 
   yiLanguage = callPackage ../development/libraries/haskell/yi-language {};
 
   yiRope = callPackage ../development/libraries/haskell/yi-rope {};
+
+  yiSnippet = callPackage ../development/libraries/haskell/yi-snippet {};
 
   # Tools.
 
@@ -3125,20 +3173,21 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
       buildCommand = ''
       export HOME="$TMPDIR"
-      ${nativePkgs.haskellPackages.cabal2nix}/bin/cabal2nix ${src + "/${name}.cabal"} --sha256=FILTERME \
-          | grep -v FILTERME | sed \
-            -e 's/licenses.proprietary/licenses.unfree/' \
-            -e 's/{ cabal/{ cabal, cabalInstall, cabalDrvArgs ? {}, src/' \
-            -e 's/cabal.mkDerivation (self: {/cabal.mkDerivation (self: cabalDrvArgs \/\/ {/' \
-            -e 's/buildDepends = \[/buildDepends = \[ cabalInstall/' \
-            -e 's/pname = \([^\n]*\)/pname = \1\n  inherit src;\n/'  > $out
+      ${nativePkgs.haskellPackages.cabal2nix}/bin/cabal2nix ${src} \
+          | sed -e 's/licenses.proprietary/licenses.unfree/' > $out
       '';
 
     } // pkgs.lib.optionalAttrs nativePkgs.stdenv.isLinux {
       LANG = "en_US.UTF-8";
       LOCALE_ARCHIVE = "${nativePkgs.glibcLocales}/lib/locale/locale-archive";
     });
-  in callPackage cabalExpr ({ inherit src cabalDrvArgs; } // args);
+  in callPackage cabalExpr ({
+    cabal = self.cabal.override {
+      extension = eself: esuper: {
+        buildDepends = [ self.cabalInstall ] ++ esuper.buildDepends;
+      } // cabalDrvArgs;
+    };
+  } // args);
 
   buildLocalCabal = src: name: self.buildLocalCabalWithArgs { inherit src name; };
 

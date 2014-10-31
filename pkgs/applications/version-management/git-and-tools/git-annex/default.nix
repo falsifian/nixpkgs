@@ -17,8 +17,8 @@
 
 cabal.mkDerivation (self: {
   pname = "git-annex";
-  version = "5.20140927";
-  sha256 = "02zmg8pcrdavfna2xy51n6chn6i5g0b8p20rba1vj29rlfj3cask";
+  version = "5.20141024";
+  sha256 = "065b181m76a9w3jznrmb087gccwnpgmyzyndgf8krg28g85y0bq5";
   isLibrary = false;
   isExecutable = true;
   buildDepends = [
@@ -48,6 +48,5 @@ cabal.mkDerivation (self: {
     license = self.stdenv.lib.licenses.gpl3;
     platforms = self.ghc.meta.platforms;
     maintainers = with self.stdenv.lib.maintainers; [ simons ];
-    broken = true;
   };
 })
