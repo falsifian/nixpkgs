@@ -21,7 +21,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "ftp://ftp.mozilla.org/pub/thunderbird/releases/${verName}/source/thunderbird-${verName}.source.tar.bz2";
-    sha1 = "a3983e7d29bd70e8117ca26f5b9873c68675caa9";
+    # sha1 = "a3983e7d29bd70e8117ca26f5b9873c68675caa9";
+    sha1 = "0000000000000000000000000000000000000000";  # Maybe vulnerable.
   };
 
   buildInputs = # from firefox30Pkgs.xulrunner, but without gstreamer and libvpx
