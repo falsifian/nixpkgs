@@ -1,11 +1,14 @@
-{ stdenv, fetchurl, pkgconfig, freetype, expat }:
+{ stdenv, fetchurl, fetchpatch, pkgconfig, freetype, expat, libxslt, fontbhttf }:
 
+let
+  configVersion = "2.11"; # bump whenever fontconfig breaks compatibility with older configurations
+in
 stdenv.mkDerivation rec {
-  name = "fontconfig-2.10.2";
+  name = "fontconfig-2.11.1";
 
   src = fetchurl {
     url = "http://fontconfig.org/release/${name}.tar.bz2";
-    sha256 = "0llraqw86jmw4vzv7inskp3xxm2gc64my08iwq5mzncgfdbfza4f";
+    sha256 = "16baa4g5lswkyjlyf1h5lwc0zjap7c4d8grw79349a5w6dsl8qnw";
   };
 
   infinality_patch =
@@ -16,14 +19,18 @@ stdenv.mkDerivation rec {
       }
     ;
 
+  patches = [(fetchpatch {
+    url = "http://cgit.freedesktop.org/fontconfig/patch/?id=f44157c809d280e2a0ce87fb078fc4b278d24a67";
+    sha256 = "19s5irclg4irj2yxd7xw9yikbazs9263px8qbv4r21asw06nfalv";
+  })];
+
   propagatedBuildInputs = [ freetype ];
-  buildInputs = [ pkgconfig expat ];
+  buildInputs = [ pkgconfig libxslt expat ];
 
   configureFlags = [
-    "--sysconfdir=/etc"
     "--with-cache-dir=/var/cache/fontconfig"
     "--disable-docs"
-    "--with-default-fonts="
+    "--with-default-fonts=${fontbhttf}"
   ];
 
   # We should find a better way to access the arch reliably.
@@ -40,11 +47,24 @@ stdenv.mkDerivation rec {
   doCheck = true;
 
   # Don't try to write to /var/cache/fontconfig at install time.
-  installFlags = "sysconfdir=$(out)/etc fc_cachedir=$(TMPDIR)/dummy RUN_FC_CACHE_TEST=false";
+  installFlags = "fc_cachedir=$(TMPDIR)/dummy RUN_FC_CACHE_TEST=false";
 
+  # Add a default font for non-nixos systems. fontbhttf is only about 1mb.
   postInstall = ''
     cd "$out/etc/fonts" && tar xvf ${infinality_patch}
+    rm conf.d/{50-user,51-local}.conf
+    xsltproc --stringparam fontDirectories "${fontbhttf}" \
+      --stringparam fontconfig "$out" \
+      --stringparam fontconfigConfigVersion "${configVersion}" \
+      --path $out/share/xml/fontconfig \
+      ${./make-fonts-conf.xsl} $out/etc/fonts/fonts.conf \
+      > fonts.conf.tmp
+    mv fonts.conf.tmp $out/etc/fonts/fonts.conf
   '';
+
+  passthru = {
+    inherit configVersion;
+  };
 
   meta = with stdenv.lib; {
     description = "A library for font customization and configuration";
@@ -54,3 +74,4 @@ stdenv.mkDerivation rec {
     maintainers = [ maintainers.vcunat ];
   };
 }
+

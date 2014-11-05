@@ -85,7 +85,7 @@ let
   # Helper functions that are exported through `pkgs'.
   helperFunctions =
     stdenvAdapters //
-    (import ../build-support/trivial-builders.nix { inherit (pkgs) stdenv; inherit (pkgs.xorg) lndir; });
+    (import ../build-support/trivial-builders.nix { inherit lib; inherit (pkgs) stdenv; inherit (pkgs.xorg) lndir; });
 
   stdenvAdapters =
     import ../stdenv/adapters.nix pkgs;
@@ -205,7 +205,7 @@ let
 
 
   allStdenvs = import ../stdenv {
-    inherit system platform config;
+    inherit system platform config lib;
     allPackages = args: import ./all-packages.nix ({ inherit config system; } // args);
   };
 
@@ -1246,9 +1246,7 @@ let
     guile = guile_1_8;
   };
 
-  gnugrep = callPackage ../tools/text/gnugrep {
-    libiconv = libiconvOrNull;
-  };
+  gnugrep = callPackage ../tools/text/gnugrep { };
 
   gnulib = callPackage ../development/tools/gnulib { };
 
@@ -4197,6 +4195,8 @@ let
 
   guile_ncurses = callPackage ../development/guile-modules/guile-ncurses { };
 
+  guile-opengl = callPackage ../development/guile-modules/guile-opengl { };
+
   guile-xcb = callPackage ../development/guile-modules/guile-xcb { };
 
   pharo-vm = callPackage_i686 ../development/pharo/vm { };
@@ -5052,11 +5052,14 @@ let
 
   cfitsio = callPackage ../development/libraries/cfitsio { };
 
+  fontconfig_210 = callPackage ../development/libraries/fontconfig/2.10.nix { };
+
   fontconfig = callPackage ../development/libraries/fontconfig { };
 
   makeFontsConf = let fontconfig_ = fontconfig; in {fontconfig ? fontconfig_, fontDirectories}:
     import ../development/libraries/fontconfig/make-fonts-conf.nix {
       inherit runCommand libxslt fontconfig fontDirectories;
+      inherit (xorg) fontbhttf;
     };
 
   freealut = callPackage ../development/libraries/freealut { };
@@ -5222,7 +5225,7 @@ let
   gperftools = callPackage ../development/libraries/gperftools { };
 
   gst_all_1 = recurseIntoAttrs(callPackage ../development/libraries/gstreamer {
-    callPackage = pkgs.newScope (pkgs // { libav = pkgs.libav_10; });
+    callPackage = pkgs.newScope (pkgs // { inherit (pkgs) libav; });
   });
 
   gst_all = {
@@ -5390,6 +5393,10 @@ let
   heimdal = callPackage ../development/libraries/kerberos/heimdal.nix { };
 
   harfbuzz = callPackage ../development/libraries/harfbuzz { };
+  harfbuzz-icu = callPackage ../development/libraries/harfbuzz {
+    withIcu = true;
+    withGraphite2 = true;
+  };
 
   hawknl = callPackage ../development/libraries/hawknl { };
 
@@ -5535,9 +5542,9 @@ let
 
   libatomic_ops = callPackage ../development/libraries/libatomic_ops {};
 
-  libav = libav_10;
+  libav = libav_11; # branch 11 is API-compatible with branch 10
   libav_all = callPackage ../development/libraries/libav { };
-  inherit (libav_all) libav_0_8 libav_9 libav_10;
+  inherit (libav_all) libav_0_8 libav_9 libav_11;
 
   libavc1394 = callPackage ../development/libraries/libavc1394 { };
 
@@ -6878,13 +6885,17 @@ let
   webkit = webkitgtk;
 
   webkitgtk = callPackage ../development/libraries/webkitgtk {
-    harfbuzz = harfbuzz.override {
-      withIcu = true;
-    };
+    harfbuzz = harfbuzz-icu;
+    inherit (xorg) libpthreadstubs;
     gst-plugins-base = gst_all_1.gst-plugins-base;
   };
 
-  webkitgtk2 = webkitgtk.override {
+  webkitgtk24x = callPackage ../development/libraries/webkitgtk/2.4.6.nix {
+    harfbuzz = harfbuzz-icu;
+    gst-plugins-base = gst_all_1.gst-plugins-base;
+  };
+
+  webkitgtk2 = webkitgtk24x.override {
     withGtk2 = true;
     enableIntrospection = false;
   };
@@ -7432,7 +7443,7 @@ let
   nginx = callPackage ../servers/http/nginx {
     rtmp        = true;
     fullWebDAV  = true;
-    syslog      = true;
+    syslog      = false; # the patch is not found
     moreheaders = true;
   };
 
@@ -7641,7 +7652,7 @@ let
   xorg = recurseIntoAttrs (import ../servers/x11/xorg/default.nix {
     inherit clangStdenv fetchurl fetchgit fetchpatch stdenv pkgconfig intltool freetype fontconfig
       libxslt expat libpng zlib perl mesa_drivers spice_protocol
-      dbus libuuid openssl gperf m4
+      dbus libuuid openssl gperf m4 libevdev
       autoconf automake libtool xmlto asciidoc flex bison python mtdev pixman;
     mesa = mesa_noglu;
     udev = if stdenv.isLinux then udev else null;
@@ -9566,6 +9577,7 @@ let
   };
 
   gtkpod = callPackage ../applications/audio/gtkpod {
+    gnome = gnome3;
     inherit (gnome) libglade;
   };
 
@@ -9810,7 +9822,9 @@ let
     };
   };
 
-  liferea = callPackage ../applications/networking/newsreaders/liferea { };
+  liferea = callPackage ../applications/networking/newsreaders/liferea {
+    webkitgtk = webkitgtk24x;
+  };
 
   lingot = callPackage ../applications/audio/lingot {
     inherit (gnome) libglade;
@@ -9845,7 +9859,9 @@ let
 
   lxdvdrip = callPackage ../applications/video/lxdvdrip { };
 
-  handbrake = callPackage ../applications/video/handbrake { };
+  handbrake = callPackage ../applications/video/handbrake {
+    webkitgtk = webkitgtk24x;
+  };
 
   lilyterm = callPackage ../applications/misc/lilyterm {
     inherit (gnome) vte;
@@ -9886,7 +9902,9 @@ let
 
   mid2key = callPackage ../applications/audio/mid2key { };
 
-  midori = callPackage ../applications/networking/browsers/midori { };
+  midori = callPackage ../applications/networking/browsers/midori {
+    webkitgtk = webkitgtk24x;
+  };
 
   midoriWrapper = wrapFirefox
     { browser = midori; browserName = "midori"; desktopName = "Midori";
@@ -11482,14 +11500,15 @@ let
     inherit (pkgs) libsoup libwnck gtk_doc gnome_doc_utils;
   };
 
-  gnome3 = recurseIntoAttrs (callPackage ../desktops/gnome-3/3.10 {
-    callPackage = pkgs.newScope pkgs.gnome3;
-    self = pkgs.gnome3;
+  gnome3_10 = recurseIntoAttrs (callPackage ../desktops/gnome-3/3.10 {
+    callPackage = pkgs.newScope pkgs.gnome3_10;
   });
 
   gnome3_12 = recurseIntoAttrs (callPackage ../desktops/gnome-3/3.12 {
     callPackage = pkgs.newScope pkgs.gnome3_12;
   });
+
+  gnome3 = gnome3_12;
 
   gnome = recurseIntoAttrs gnome2;
 
@@ -11623,7 +11642,7 @@ let
         daemon = false;
         client = false;
         withKDE = false;
-        qt = qt5;
+        #qt = qt5;
         tag = "-without-kde";
       });
 
@@ -11632,7 +11651,7 @@ let
         daemon = true;
         client = false;
         withKDE = false;
-        qt = qt5;
+        #qt = qt5;
         tag = "-daemon";
       });
 
@@ -11648,7 +11667,7 @@ let
         daemon = false;
         client = true;
         withKDE = false;
-        qt = qt5;
+        #qt = qt5;
         tag = "-client-without-kde";
       });
 
