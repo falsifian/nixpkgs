@@ -37,7 +37,8 @@ let
 
      src = fetchurl {
        url = "http://kohei.us/files/ixion/src/${name}.tar.bz2";
-       sha256 = "10amvz7fzr1kcy3svfspkdykmspqgpjdmk44cyr406wi7v4lwnf9";
+       # sha256 = "10amvz7fzr1kcy3svfspkdykmspqgpjdmk44cyr406wi7v4lwnf9";
+       sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693
      };
 
      configureFlags = "--with-boost=${boost}";
@@ -73,7 +74,8 @@ let
   srcs = {
     third_party = [ (fetchurl rec {
         url = "http://dev-www.libreoffice.org/extern/${md5}-${name}";
-        md5 = "185d60944ea767075d27247c3162b3bc";
+        # md5 = "185d60944ea767075d27247c3162b3bc";
+        md5 = "00000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693.
         name = "unowinreg.dll";
       }) ] ++ (map fetchThirdParty (import ./libreoffice-srcs.nix));
 
@@ -96,7 +98,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://download.documentfoundation.org/libreoffice/src/${subdir}/libreoffice-${version}.tar.xz";
-    sha256 = "0s1j5y1gfyf3r53bbqnzirx17p49i8ah07737nrzik0ggps3lgd5";
+    # sha256 = "0s1j5y1gfyf3r53bbqnzirx17p49i8ah07737nrzik0ggps3lgd5";
+    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693.
   };
 
   # Openoffice will open libcups dynamically, so we link it directly
