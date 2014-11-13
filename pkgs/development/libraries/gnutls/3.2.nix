@@ -8,7 +8,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "ftp://ftp.gnutls.org/gcrypt/gnutls/v3.2/${name}.tar.lz";
-    sha256 = "a332adda1d294fbee859ae46ee0c128d8959c4a5b9c28e7cdbe5c9b56898fc25";
+    # sha256 = "a332adda1d294fbee859ae46ee0c128d8959c4a5b9c28e7cdbe5c9b56898fc25";
+    sha256 = "0000000000000000000000000000000000000000000000000000000000000000";  # GnuTLS before 3.3.10, 3.2.20, 3.1.28 vulnerable to CVE-2014-8564.
   };
 
   patches =

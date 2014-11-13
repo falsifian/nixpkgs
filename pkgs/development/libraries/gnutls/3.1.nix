@@ -8,7 +8,8 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "ftp://ftp.gnutls.org/gcrypt/gnutls/v3.1/${name}.tar.lz";
-    sha256 = "7947e18fd0c292c0274d810c9bdf674b8faa3566e056ea404a39f335982607a3";
+    # sha256 = "7947e18fd0c292c0274d810c9bdf674b8faa3566e056ea404a39f335982607a3";
+    sha256 = "0000000000000000000000000000000000000000000000000000000000000000";  # GnuTLS before 3.3.10, 3.2.20, 3.1.28 vulnerable to CVE-2014-8564.
   };
 
   # FreeBSD doesn't have <alloca.h>, and Gnulib's `alloca' module isn't used.
