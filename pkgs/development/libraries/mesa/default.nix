@@ -78,7 +78,7 @@ stdenv.mkDerivation {
 
     "--with-dri-drivers=i965,r200,radeon"
     "--with-gallium-drivers=i915,nouveau,r300,r600,svga,swrast,radeonsi"
-    "--with-egl-platforms=x11,wayland,drm" "--enable-gbm"
+    "--with-egl-platforms=x11,drm" "--enable-gbm"
   ]
     ++ optional enableTextureFloats "--enable-texture-float"
     ++ optionals enableExtraFeatures [
@@ -97,7 +97,7 @@ stdenv.mkDerivation {
     autoreconfHook intltool expat libxml2Python llvm
     glproto dri2proto dri3proto presentproto
     libX11 libXext libxcb libXt libXfixes libxshmfence
-    libffi wayland libvdpau libelf
+    libffi /* wayland */ libvdpau libelf
   ] ++ optionals enableExtraFeatures [ /*libXvMC*/ ]
     ++ optional stdenv.isLinux udev
     ;
@@ -113,8 +113,8 @@ stdenv.mkDerivation {
   '' + optionalString enableExtraFeatures ''
       `#$out/lib/libXvMC*` \
       $out/lib/gbm $out/lib/libgbm* \
-      $out/lib/gallium-pipe \
   '' + ''
+      $out/lib/gallium-pipe \
       $out/lib/libdricore* \
       $out/lib/libgallium* \
       $out/lib/vdpau \
@@ -134,8 +134,8 @@ stdenv.mkDerivation {
     sed "/^libdir=/s,$out,$drivers," -i \
   '' + optionalString enableExtraFeatures ''
       `#$drivers/lib/libXvMC*.la` \
-      $drivers/lib/gallium-pipe/*.la \
   '' + ''
+      $drivers/lib/gallium-pipe/*.la \
       $drivers/lib/libgallium.la \
       $drivers/lib/vdpau/*.la \
       $drivers/lib/libdricore*.la

@@ -34,12 +34,14 @@ let
         { nixpkgs.config.allow${unfreeOrBroken} = true; }
       in configuration.nix to override this. If you use Nix standalone, you can add
         { allow${unfreeOrBroken} = true; }
-      to ~/.nixpkgs/config.nix.
-    '';
+      to ~/.nixpkgs/config.nix.'';
 
   unsafeGetAttrPos = builtins.unsafeGetAttrPos or (n: as: null);
 
-  extraBuildInputs' = extraBuildInputs ++
+  isUnfree = licenses: lib.lists.any (l:
+    !l.free or true || l == "unfree" || l == "unfree-redistributable") licenses;
+
+  defaultNativeBuildInputs = extraBuildInputs ++
     [ ../../build-support/setup-hooks/move-docs.sh
       ../../build-support/setup-hooks/compress-man-pages.sh
       ../../build-support/setup-hooks/strip.sh
@@ -60,20 +62,18 @@ let
           unsafeGetAttrPos "name" attrs;
       pos' = if pos != null then "‘" + pos.file + ":" + toString pos.line + "’" else "«unknown-file»";
     in
-    if !allowUnfree
-       && (let l = lib.lists.toList attrs.meta.license or []; in lib.lists.elem "unfree" l || lib.lists.elem "unfree-redistributable" l)
-       && !allowUnfreePredicate attrs then
+    if !allowUnfree && isUnfree (lib.lists.toList attrs.meta.license or []) && !allowUnfreePredicate attrs then
       throw ''
-            Package ‘${attrs.name}’ in ${pos'} has an unfree license, refusing to evaluate.
-            ${forceEvalHelp "Unfree"}''
+        Package ‘${attrs.name}’ in ${pos'} has an unfree license, refusing to evaluate.
+        ${forceEvalHelp "Unfree"}''
     else if !allowBroken && attrs.meta.broken or false then
-          throw ''
-            Package ‘${attrs.name}’ in ${pos'} is marked as broken, refusing to evaluate.
-            ${forceEvalHelp "Broken"}''
+      throw ''
+        Package ‘${attrs.name}’ in ${pos'} is marked as broken, refusing to evaluate.
+        ${forceEvalHelp "Broken"}''
     else if !allowBroken && attrs.meta.platforms or null != null && !lib.lists.elem result.system attrs.meta.platforms then
-          throw ''
-            Package ‘${attrs.name}’ in ${pos'} is not supported on ‘${result.system}’, refusing to evaluate.
-            ${forceEvalHelp "Broken"}''
+      throw ''
+        Package ‘${attrs.name}’ in ${pos'} is not supported on ‘${result.system}’, refusing to evaluate.
+        ${forceEvalHelp "Broken"}''
     else
       lib.addPassthru (derivation (
         (removeAttrs attrs ["meta" "passthru" "crossAttrs"])
@@ -93,10 +93,10 @@ let
           __ignoreNulls = true;
 
           # Inputs built by the cross compiler.
-          buildInputs = if crossConfig != null then buildInputs ++ extraBuildInputs' else [];
+          buildInputs = if crossConfig != null then buildInputs else [];
           propagatedBuildInputs = if crossConfig != null then propagatedBuildInputs else [];
           # Inputs built by the usual native compiler.
-          nativeBuildInputs = nativeBuildInputs ++ (if crossConfig == null then buildInputs ++ extraBuildInputs' else []);
+          nativeBuildInputs = nativeBuildInputs ++ (if crossConfig == null then buildInputs else []);
           propagatedNativeBuildInputs = propagatedNativeBuildInputs ++
             (if crossConfig == null then propagatedBuildInputs else []);
         }))) (
@@ -120,7 +120,7 @@ let
   # The stdenv that we are producing.
   result =
     derivation (
-    (if isNull allowedRequisites then {} else { inherit allowedRequisites; }) //
+    (if isNull allowedRequisites then {} else { allowedRequisites = allowedRequisites ++ defaultNativeBuildInputs; }) //
     {
       inherit system name;
 
@@ -130,10 +130,7 @@ let
 
       setup = setupScript;
 
-      inherit preHook initialPath shell;
-
-      propagatedUserEnvPkgs = [gcc] ++
-        lib.filter lib.isDerivation initialPath;
+      inherit preHook initialPath shell defaultNativeBuildInputs;
     })
 
     // rec {
@@ -164,7 +161,8 @@ let
       isBSD = system == "i686-freebsd"
            || system == "x86_64-freebsd"
            || system == "i686-openbsd"
-           || system == "x86_64-openbsd";
+           || system == "x86_64-openbsd"
+           || system == "x86_64-darwin";
       isi686 = system == "i686-linux"
             || system == "i686-gnu"
             || system == "i686-freebsd"

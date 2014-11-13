@@ -24,7 +24,7 @@ let
   langsSpaces = stdenv.lib.concatStringsSep " " langs;
   major = "4";
   minor = "3";
-  patch = "1";
+  patch = "3";
   tweak = "2";
   subdir = "${major}.${minor}.${patch}";
   version = "${subdir}${if tweak == "" then "" else "."}${tweak}";
@@ -41,9 +41,9 @@ let
        sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693
      };
 
-     configureFlags = "--with-boost=${boost}";
+     buildInputs = [ boost mdds pkgconfig ];
 
-     buildInputs = [ boost boost.lib mdds pkgconfig ];
+     configureFlags = [ "--with-boost=${boost.dev}" ];
   };
 
   fetchThirdParty = {name, md5, brief, subDir ? ""}: fetchurl {
@@ -61,9 +61,10 @@ let
       (x: x.name == "${name}.tar.bz2")
       ("Error: update liborcus version inside LO expression")
       (import ./libreoffice-srcs.nix));
-    configureFlags = "--with-boost=${boost}";
 
-    buildInputs = [ boost boost.lib mdds pkgconfig zlib libixion ];
+    buildInputs = [ boost mdds pkgconfig zlib libixion ];
+
+    configureFlags = [ "--with-boost=${boost.dev}" ];
   };
 
   fetchSrc = {name, sha256}: fetchurl {
@@ -81,14 +82,14 @@ let
 
     translations = fetchSrc {
       name = "translations";
-      sha256 = "0vj1fpr99cb124hag0hijpp3pfbbi0gak56qiikxbwbq7mab6p9h";
+      sha256 = "0jpkkb71fbiid12r2dpvak304hlvx4ws1bk2yrb3narz15wzcvjr";
     };
 
     # TODO: dictionaries
 
     help = fetchSrc {
       name = "help";
-      sha256 = "1q0vzfla764zjz6xcx6r4nc8rikwb3pr2jsraj28hhwr5b26gdfz";
+      sha256 = "0vd4ndnqy7xjlxh9flfp84jy82bvaq80pxcsx6lsarxsb4cvw7sz";
     };
 
   };
@@ -116,9 +117,7 @@ stdenv.mkDerivation rec {
   '' + (stdenv.lib.concatMapStrings (f: "ln -sv ${f} $sourceRoot/src/${f.outputHash}-${f.name}\nln -sv ${f} $sourceRoot/src/${f.name}\n") srcs.third_party)
   + ''
     ln -sv ${srcs.help} $sourceRoot/src/${srcs.help.name}
-    tar xf $sourceRoot/src/${srcs.help.name} -C $sourceRoot/../
-    ln -sv ${srcs.translations} $sourceRoot/src/${srcs.translations.name}
-    tar xf $sourceRoot/src/${srcs.translations.name} -C $sourceRoot/../
+    ln -svf ${srcs.translations} $sourceRoot/src/${srcs.translations.name}
   '';
 
   patchPhase = ''
@@ -186,6 +185,8 @@ stdenv.mkDerivation rec {
   '';
 
   configureFlags = [
+    "--with-boost=${boost.dev}"
+    "--with-boost-libdir=${boost.lib}/lib"
     "--with-vendor=NixOS"
 
     # Without these, configure does not finish
@@ -201,7 +202,6 @@ stdenv.mkDerivation rec {
     "--with-system-headers"
     "--with-system-openssl"
     "--with-system-openldap"
-    "--with-boost-libdir=${boost.lib}/lib"
     "--without-system-libwps"  # TODO
     "--without-doxygen"
 
@@ -239,7 +239,7 @@ stdenv.mkDerivation rec {
   '';
 
   buildInputs = with xorg;
-    [ ant ArchiveZip autoconf automake bison boost boost.lib cairo clucene_core
+    [ ant ArchiveZip autoconf automake bison boost cairo clucene_core
       CompressZlib cppunit cups curl db dbus_glib expat file flex fontconfig
       freetype GConf getopt gnome_vfs gperf gst_plugins_base gstreamer gtk
       hunspell icu jdk kde4.kdelibs lcms libcdr libexttextcat unixODBC libjpeg

@@ -46,5 +46,5 @@ with lib;
   boot.supportedFilesystems = [ "zfs" "btrfs" ];
 
   # Allow the user to log in as root without a password.
-  security.initialRootPassword = "";
+  users.extraUsers.root.initialHashedPassword = "";
 }

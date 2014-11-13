@@ -4,12 +4,11 @@
 
 stdenv.mkDerivation rec {
   name = "mysql-${version}";
-  version = "5.5.39";
+  version = "5.5.40";
 
   src = fetchurl {
-    url = "http://cdn.mysql.com/Downloads/MySQL-5.5/${name}.tar.gz";
-    # sha256 = "0qj8bc83v6vf8jyn4ag179nclpn6ilw4h4xqb50zz9jd0c5s14qq";
-    sha256 = "0000000000000000000000000000000000000000000000000000";  # Vulnerable; see USN-2384-1 and DSA-3054-1.  Version 5.5.40 probably addresses the issues listed in USN-2384-1; I haven't looked at DSA-3054-1 carefully.
+    url = "http://mysql.mirrors.pair.com/Downloads/MySQL-5.5/${name}.tar.gz";
+    sha256 = "0q29nzmmxm78b89qjfzgm93r0glaam3xw3zfx1k8ihii39v22dsd";
   };
 
   preConfigure = stdenv.lib.optional stdenv.isDarwin ''

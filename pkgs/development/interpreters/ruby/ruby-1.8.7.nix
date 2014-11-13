@@ -80,7 +80,7 @@ stdenv.mkDerivation rec {
   '';
 
   meta = {
-    license = "Ruby";
+    license = stdenv.lib.licenses.ruby;
     homepage = "http://www.ruby-lang.org/en/";
     description = "The Ruby language";
   };

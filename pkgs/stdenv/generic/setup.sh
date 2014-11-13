@@ -181,6 +181,7 @@ if [ -z "$SHELL" ]; then echo "SHELL not set"; exit 1; fi
 # Execute the pre-hook.
 export CONFIG_SHELL="$SHELL"
 if [ -z "$shell" ]; then export shell=$SHELL; fi
+runHook preHook
 
 
 # Allow the caller to augment buildInputs (it's not always possible to
@@ -219,12 +220,12 @@ findInputs() {
 }
 
 crossPkgs=""
-for i in $buildInputs $propagatedBuildInputs; do
+for i in $buildInputs $defaultBuildInputs $propagatedBuildInputs; do
     findInputs $i crossPkgs propagated-build-inputs
 done
 
 nativePkgs=""
-for i in $nativeBuildInputs $propagatedNativeBuildInputs; do
+for i in $nativeBuildInputs $defaultNativeBuildInputs $propagatedNativeBuildInputs; do
     findInputs $i nativePkgs propagated-native-build-inputs
 done
 

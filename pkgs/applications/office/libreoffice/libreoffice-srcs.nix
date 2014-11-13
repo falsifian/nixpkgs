@@ -630,4 +630,10 @@
   md5 = "00000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693.
   brief = true;
 }
+{
+  name = "libgltf-0.0.2.tar.bz2";
+  md5 = "d63a9f47ab048f5009d90693d6aa6424";
+  brief = true;
+  subDir = "libgltf/";
+}
 ]
