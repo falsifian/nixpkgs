@@ -797,6 +797,8 @@ let
 
   can-utils = callPackage ../os-specific/linux/can-utils { };
 
+  caudec = callPackage ../applications/audio/caudec { };
+
   ccid = callPackage ../tools/security/ccid { };
 
   ccrypt = callPackage ../tools/security/ccrypt { };
@@ -974,6 +976,8 @@ let
   dfc  = callPackage ../tools/system/dfc { };
 
   dev86 = callPackage ../development/compilers/dev86 { };
+
+  dnscrypt-proxy = callPackage ../tools/networking/dnscrypt-proxy { };
 
   dnsmasq = callPackage ../tools/networking/dnsmasq { };
 
@@ -1529,6 +1533,8 @@ let
   kalibrate-rtl = callPackage ../tools/misc/kalibrate-rtl { };
 
   kexectools = callPackage ../os-specific/linux/kexectools { };
+
+  keybase-node-client = callPackage ../applications/misc/keybase-node-client { };
 
   keychain = callPackage ../tools/misc/keychain { };
 
@@ -3409,36 +3415,12 @@ let
 
   jikes = callPackage ../development/compilers/jikes { };
 
-  juliaGit = callPackage ../development/compilers/julia/git-20131013.nix {
-    liblapack = liblapack.override {shared = true;};
-    llvm = llvm_33;
-    openblas = openblas_0_2_2;
-  };
   julia021 = callPackage ../development/compilers/julia/0.2.1.nix {
     liblapack = liblapack.override {shared = true;};
     llvm = llvm_33;
     openblas = openblas_0_2_2;
   };
-  julia030 = let
-    liblapack = liblapack_3_5_0.override {shared = true;};
-  in callPackage ../development/compilers/julia/0.3.0.nix {
-    inherit liblapack;
-    suitesparse = suitesparse.override {
-      inherit liblapack;
-    };
-    llvm = llvm_34;
-    openblas = openblas_0_2_10;
-  };
-  julia031 = let
-    liblapack = liblapack_3_5_0.override {shared = true;};
-  in callPackage ../development/compilers/julia/0.3.1.nix {
-    inherit liblapack;
-    suitesparse = suitesparse.override {
-      inherit liblapack;
-    };
-    llvm = llvm_34;
-    openblas = openblas_0_2_10;
-  };
+
   julia032 = let
     liblapack = liblapack_3_5_0.override {shared = true;};
   in callPackage ../development/compilers/julia/0.3.2.nix {
@@ -3449,7 +3431,7 @@ let
     llvm = llvm_34;
     openblas = openblas_0_2_10;
   };
-  julia = julia031;
+  julia = julia032;
 
   lazarus = callPackage ../development/compilers/fpc/lazarus.nix {
     fpc = fpc;
@@ -3992,6 +3974,10 @@ let
 
   nix-exec = callPackage ../development/interpreters/nix-exec {
     nix = nixUnstable;
+    git = git.override {
+      withManual = false;
+      pythonSupport = false;
+    };
   };
 
   octave = callPackage ../development/interpreters/octave {
@@ -4177,7 +4163,6 @@ let
   tcl = callPackage ../development/interpreters/tcl { };
 
   xulrunner = callPackage ../development/interpreters/xulrunner {
-    stdenv = if stdenv.isLinux then useGoldLinker stdenv else stdenv;
     inherit (gnome) libIDL;
     inherit (pythonPackages) pysqlite;
   };
@@ -4266,6 +4251,11 @@ let
   apacheAnt = callPackage ../development/tools/build-managers/apache-ant { };
 
   astyle = callPackage ../development/tools/misc/astyle { };
+
+  atom-shell = callPackage ../development/tools/atom-shell {
+    gconf = pkgs.gnome.GConf;
+  };
+
 
   autobuild = callPackage ../development/tools/misc/autobuild { };
 
@@ -4519,6 +4509,8 @@ let
 
   ibus = callPackage ../development/libraries/ibus { };
 
+  icmake = callPackage ../development/tools/build-managers/icmake { };
+
   iconnamingutils = callPackage ../development/tools/misc/icon-naming-utils {
     inherit (perlPackages) XMLSimple;
   };
@@ -4770,6 +4762,8 @@ let
   yacc = bison;
 
   yodl = callPackage ../development/tools/misc/yodl { };
+
+  winpdb = callPackage ../development/tools/winpdb { };
 
 
   ### DEVELOPMENT / LIBRARIES
@@ -5804,8 +5798,6 @@ let
   libgpgerror = callPackage ../development/libraries/libgpg-error { };
 
   libgphoto2 = callPackage ../development/libraries/libgphoto2 { };
-
-  libgphoto2_4 = callPackage ../development/libraries/libgphoto2/2.4.nix { };
 
   libgpod = callPackage ../development/libraries/libgpod {
     inherit (pkgs.pythonPackages) mutagen;
@@ -7149,11 +7141,15 @@ let
 
   commonsBcel = callPackage ../development/libraries/java/commons/bcel { };
 
+  commonsBsf = callPackage ../development/libraries/java/commons/bsf { };
+
   commonsCompress = callPackage ../development/libraries/java/commons/compress { };
 
   commonsFileUpload = callPackage ../development/libraries/java/commons/fileupload { };
 
   commonsLang = callPackage ../development/libraries/java/commons/lang { };
+
+  commonsLogging = callPackage ../development/libraries/java/commons/logging { };
 
   commonsIo = callPackage ../development/libraries/java/commons/io { };
 
@@ -7802,6 +7798,7 @@ let
 
   zabbix20 = callPackage ../servers/monitoring/zabbix/2.0.nix { };
   zabbix22 = callPackage ../servers/monitoring/zabbix/2.2.nix { };
+  zmq = callPackage ../servers/zeromq/default.nix { };
 
 
   ### OS-SPECIFIC
@@ -8133,15 +8130,6 @@ let
       ];
   };
 
-  linux_3_15 = makeOverridable (import ../os-specific/linux/kernel/linux-3.15.nix) {
-    inherit fetchurl stdenv perl buildLinux;
-    kernelPatches = lib.optionals ((platform.kernelArch or null) == "mips")
-      [ kernelPatches.mips_fpureg_emu
-        kernelPatches.mips_fpu_sigill
-        kernelPatches.mips_ext3_n32
-      ];
-  };
-
   linux_3_16 = makeOverridable (import ../os-specific/linux/kernel/linux-3.16.nix) {
     inherit fetchurl stdenv perl buildLinux;
     kernelPatches = lib.optionals ((platform.kernelArch or null) == "mips")
@@ -8267,6 +8255,8 @@ let
 
     perf = callPackage ../os-specific/linux/kernel/perf.nix { };
 
+    prl-tools = callPackage ../os-specific/linux/prl-tools { };
+
     psmouse_alps = callPackage ../os-specific/linux/psmouse-alps { };
 
     seturgent = callPackage ../os-specific/linux/seturgent { };
@@ -8309,7 +8299,6 @@ let
   linuxPackages_3_10_tuxonice = linuxPackagesFor pkgs.linux_3_10_tuxonice linuxPackages_3_10_tuxonice;
   linuxPackages_3_12 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_12 linuxPackages_3_12);
   linuxPackages_3_14 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_14 linuxPackages_3_14);
-  linuxPackages_3_15 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_15 linuxPackages_3_15);
   linuxPackages_3_16 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_16 linuxPackages_3_16);
   linuxPackages_3_17 = recurseIntoAttrs (linuxPackagesFor pkgs.linux_3_17 linuxPackages_3_17);
   linuxPackages_testing = recurseIntoAttrs (linuxPackagesFor pkgs.linux_testing linuxPackages_testing);
@@ -9041,6 +9030,10 @@ let
     python = python34;
   };
 
+  bluefish = callPackage ../applications/editors/bluefish {
+    gtk = gtk3;
+  };
+
   bristol = callPackage ../applications/audio/bristol { };
 
   bspwm = callPackage ../applications/window-managers/bspwm { };
@@ -9543,7 +9536,6 @@ let
   filezilla = callPackage ../applications/networking/ftp/filezilla { };
 
   firefox = callPackage ../applications/networking/browsers/firefox {
-    stdenv = if stdenv.isLinux then useGoldLinker stdenv else stdenv;
     inherit (gnome) libIDL;
     inherit (pythonPackages) pysqlite;
   };
@@ -10834,7 +10826,7 @@ let
 
   vimHugeX = vim_configurable;
 
-  vim_configurable = callPackage ../applications/editors/vim/configurable.nix {
+  vim_configurable = vimrc.makeCustomizable (callPackage ../applications/editors/vim/configurable.nix {
     inherit (pkgs) fetchurl fetchhg stdenv ncurses pkgconfig gettext
       composableDerivation lib config glib gtk python perl tcl ruby;
     inherit (pkgs.xlibs) libX11 libXext libSM libXpm libXt libXaw libXau libXmu
@@ -10849,7 +10841,7 @@ let
 
     # so that we can use gccApple if we're building on darwin
     inherit stdenvAdapters gccApple;
-  };
+  });
 
   vimNox = lowPrio (vim_configurable.override { source = "vim-nox"; });
 
@@ -11206,7 +11198,9 @@ let
 
   qgis = callPackage ../applications/gis/qgis {};
 
-  qtbitcointrader = callPackage ../applications/misc/qtbitcointrader { };
+  qtbitcointrader = callPackage ../applications/misc/qtbitcointrader {
+    qt = qt4;
+  };
 
   ykpers = callPackage ../applications/misc/ykpers {};
 
@@ -11586,6 +11580,8 @@ let
 
   xskat = callPackage ../games/xskat { };
 
+  xsnow = callPackage ../games/xsnow { };
+
   xsokoban = builderDefsPackage (import ../games/xsokoban) {
     inherit (xlibs) libX11 xproto libXpm libXt;
   };
@@ -11958,6 +11954,8 @@ let
 
   sage = callPackage ../applications/science/math/sage { };
 
+  ipopt = callPackage ../development/libraries/science/math/ipopt { };
+
   ### SCIENCE/MOLECULAR-DYNAMICS
 
   gromacs = callPackage ../applications/science/molecular-dynamics/gromacs {
@@ -12016,6 +12014,8 @@ let
     ssreflect = callPackage ../development/coq-modules/ssreflect {};
 
     tlc = callPackage ../development/coq-modules/tlc {};
+
+    unimath = callPackage ../development/coq-modules/unimath {};
 
     ynot = callPackage ../development/coq-modules/ynot {};
 
@@ -12584,6 +12584,8 @@ let
   };
 
   viewnior = callPackage ../applications/graphics/viewnior { };
+
+  vimrc = callPackage ../misc/vim-plugins/vimrc.nix { inherit writeText; };
 
   vimPlugins = recurseIntoAttrs (callPackage ../misc/vim-plugins { });
 
