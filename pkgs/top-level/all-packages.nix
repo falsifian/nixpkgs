@@ -2173,6 +2173,8 @@ let
 
   qjoypad = callPackage ../tools/misc/qjoypad { };
 
+  qpdf = callPackage ../development/libraries/qpdf { };
+
   qscintilla = callPackage ../development/libraries/qscintilla {
     qt = qt4;
   };
@@ -2817,6 +2819,10 @@ let
   xtreemfs = callPackage ../tools/filesystems/xtreemfs {};
 
   xvfb_run = callPackage ../tools/misc/xvfb-run { inherit (texFunctions) fontsConf; };
+
+  xvkbd = callPackage ../tools/X11/xvkbd {
+    inherit (xlibs) libXt libXaw libXtst xextproto libXi libXpm gccmakedep;
+  };
 
   youtube-dl = callPackage ../tools/misc/youtube-dl { };
 
@@ -5490,6 +5496,8 @@ let
 
   imlib2 = callPackage ../development/libraries/imlib2 { };
 
+  ijs = callPackage ../development/libraries/ijs { };
+
   incrtcl = callPackage ../development/libraries/incrtcl { };
 
   indilib = callPackage ../development/libraries/indilib { };
@@ -6911,7 +6919,10 @@ let
 
   tnt = callPackage ../development/libraries/tnt { };
 
+  kyotocabinet = callPackage ../development/libraries/kyotocabinet { };
+
   tokyocabinet = callPackage ../development/libraries/tokyo-cabinet { };
+
   tokyotyrant = callPackage ../development/libraries/tokyo-tyrant { };
 
   tremor = callPackage ../development/libraries/tremor { };
@@ -7654,6 +7665,16 @@ let
 
   OVMF = callPackage ../applications/virtualization/OVMF { };
 
+  pgpool92 = callPackage ../servers/sql/pgpool/default.nix {
+    postgresql = postgresql92;
+  };
+
+  pgpool93 = callPackage ../servers/sql/pgpool/default.nix {
+    postgresql = postgresql93;
+  };
+
+  pgpool = pgpool92;
+
   postgresql = postgresql92;
 
   postgresql84 = callPackage ../servers/sql/postgresql/8.4.x.nix { };
@@ -8054,7 +8075,6 @@ let
   libcgroup = callPackage ../os-specific/linux/libcgroup { };
 
   libnl = callPackage ../os-specific/linux/libnl { };
-  libnl_3_2_19 = callPackage ../os-specific/linux/libnl/3.2.19.nix { };
 
   linuxConsoleTools = callPackage ../os-specific/linux/consoletools { };
 
@@ -9340,7 +9360,7 @@ let
 
     metaweblog = callPackage ../applications/editors/emacs-modes/metaweblog { };
 
-    notmuch = lowPrio (callPackage ../applications/networking/mailreaders/notmuch { });
+    notmuch = lowPrio (pkgs.notmuch.override { inherit emacs; });
 
     ocamlMode = callPackage ../applications/editors/emacs-modes/ocaml { };
 
@@ -9640,7 +9660,7 @@ let
     goffice = goffice_0_8;
   };
 
-  goffice_0_8 = callPackage ../desktops/gnome-3/3.10/misc/goffice/0.8.nix {
+  goffice_0_8 = callPackage ../desktops/gnome-3/3.12/misc/goffice/0.8.nix {
     inherit (gnome2) libglade libgnomeui;
     gconf = gnome2.GConf;
     libart = gnome2.libart_lgpl;
@@ -10274,8 +10294,11 @@ let
   netsurf = recurseIntoAttrs (import ../applications/networking/browsers/netsurf { inherit pkgs; });
 
   notmuch = callPackage ../applications/networking/mailreaders/notmuch {
-    # use emacsPackages.notmuch if you want emacs support
+    # No need to build Emacs - notmuch.el works just fine without
+    # byte-compilation. Use emacs24Packages.notmuch if you want to
+    # byte-compiled files
     emacs = null;
+    sphinx = pythonPackages.sphinx;
   };
 
   nova = callPackage ../applications/virtualization/nova { };
@@ -11642,10 +11665,6 @@ let
     inherit (pkgs) libsoup libwnck gtk_doc gnome_doc_utils;
   };
 
-  gnome3_10 = recurseIntoAttrs (callPackage ../desktops/gnome-3/3.10 {
-    callPackage = pkgs.newScope pkgs.gnome3_10;
-  });
-
   gnome3_12 = recurseIntoAttrs (callPackage ../desktops/gnome-3/3.12 {
     callPackage = pkgs.newScope pkgs.gnome3_12;
   });
@@ -12318,7 +12337,6 @@ let
   ghostscript = callPackage ../misc/ghostscript {
     x11Support = false;
     cupsSupport = config.ghostscript.cups or (!stdenv.isDarwin);
-    gnuFork = config.ghostscript.gnu or false;
   };
 
   ghostscriptX = appendToName "with-X" (ghostscript.override {
@@ -12521,7 +12539,7 @@ let
   texLiveFull = lib.setName "texlive-full" (texLiveAggregationFun {
     paths = [ texLive texLiveExtra lmodern texLiveCMSuper texLiveLatexXColor
               texLivePGF texLiveBeamer texLiveModerncv tipa tex4ht texinfo
-              texLiveModerntimeline ];
+              texLiveModerntimeline texLiveContext ];
   });
 
   /* Look in configurations/misc/raskin.nix for usage example (around revisions
