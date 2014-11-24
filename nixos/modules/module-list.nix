@@ -89,6 +89,7 @@
   ./services/audio/alsa.nix
   # Disabled as fuppes it does no longer builds.
   # ./services/audio/fuppes.nix
+  ./services/audio/liquidsoap.nix
   ./services/audio/mpd.nix
   ./services/audio/mopidy.nix
   ./services/backup/almir.nix
@@ -165,6 +166,8 @@
   ./services/misc/cgminer.nix
   ./services/misc/dictd.nix
   ./services/misc/disnix.nix
+  ./services/misc/docker-registry.nix
+  ./services/misc/etcd.nix
   ./services/misc/felix.nix
   ./services/misc/folding-at-home.nix
   ./services/misc/gitolite.nix

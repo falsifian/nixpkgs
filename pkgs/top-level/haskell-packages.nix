@@ -578,6 +578,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   dataFix = callPackage ../development/libraries/haskell/data-fix {};
 
+  dataFlags = callPackage ../development/libraries/haskell/data-flags {};
+
   dataHash = callPackage ../development/libraries/haskell/data-hash {};
 
   dataInttrie = callPackage ../development/libraries/haskell/data-inttrie {};
@@ -649,6 +651,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   digest = callPackage ../development/libraries/haskell/digest {
     inherit (pkgs) zlib;
   };
+
+  digestPure = callPackage ../development/libraries/haskell/digest-pure {};
 
   digestiveFunctors = callPackage ../development/libraries/haskell/digestive-functors {};
 
@@ -984,6 +988,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   gnutls = callPackage ../development/libraries/haskell/gnutls { inherit (pkgs) gnutls; };
 
+  greencard = callPackage ../development/libraries/haskell/greencard { };
+
   gsasl = callPackage ../development/libraries/haskell/gsasl { inherit (pkgs) gsasl; };
 
   gtk = callPackage ../development/libraries/haskell/gtk {
@@ -1297,6 +1303,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   hspecCore = callPackage ../development/libraries/haskell/hspec-core {};
 
+  hspecContrib = callPackage ../development/libraries/haskell/hspec-contrib {};
+
   hspecDiscover = callPackage ../development/libraries/haskell/hspec-discover {};
 
   hstatsd = callPackage ../development/libraries/haskell/hstatsd {};
@@ -1417,6 +1425,10 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   jmacroRpcSnap = callPackage ../development/libraries/haskell/jmacro-rpc-snap {};
 
   jpeg = callPackage ../development/libraries/haskell/jpeg {};
+
+  jsFlot = callPackage ../development/libraries/haskell/js-flot {};
+
+  jsJquery = callPackage ../development/libraries/haskell/js-jquery {};
 
   json = callPackage ../development/libraries/haskell/json {};
 
@@ -1829,6 +1841,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   parseargs = callPackage ../development/libraries/haskell/parseargs {};
 
   parsec = callPackage ../development/libraries/haskell/parsec {};
+
+  parsek = callPackage ../development/libraries/haskell/parsek {};
 
   parsers = callPackage ../development/libraries/haskell/parsers {};
 
@@ -2950,6 +2964,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   taffybar = callPackage ../applications/misc/taffybar {};
 
   validation = callPackage ../development/libraries/haskell/validation {};
+
+  vimus = callPackage ../applications/audio/vimus {};
 
   xlsx = callPackage ../development/libraries/haskell/xlsx {};
 

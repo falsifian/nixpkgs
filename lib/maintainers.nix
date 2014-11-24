@@ -7,6 +7,7 @@
   _1126 = "Christian Lask <mail@elfsechsundzwanzig.de>";
   abbradar = "Nikolay Amiantov <ab@fmap.me>";
   aforemny = "Alexander Foremny <alexanderforemny@googlemail.com>";
+  aherrmann = "Andreas Herrmann <andreash87@gmx.ch>";
   ak = "Alexander Kjeldaas <ak@formalprivacy.com>";
   akc = "Anders Claesson <akc@akc.is>";
   algorith = "Dries Van Daele <dries_van_daele@telenet.be>";
@@ -84,7 +85,9 @@
   joachifm = "Joachim Fasting <joachifm@fastmail.fm>";
   joamaki = "Jussi Maki <joamaki@gmail.com>";
   joelteon = "Joel Taylor <me@joelt.io>";
+  jpbernardy = "Jean-Philippe Bernardy <jeanphilippe.bernardy@gmail.com>";
   jwiegley = "John Wiegley <johnw@newartisans.com>";
+  jzellner = "Jeff Zellner <jeffz@eml.cc>";
   kkallio = "Karn Kallio <tierpluspluslists@gmail.com>";
   koral = "Koral <koral@mailoo.org>";
   kragniz = "Louis Taylor <kragniz@gmail.com>";
@@ -105,6 +108,7 @@
   MP2E = "Cray Elliott <MP2E@archlinux.us>";
   msackman = "Matthew Sackman <matthew@wellquite.org>";
   nathan-gs = "Nathan Bijnens <nathan@nathan.gs>";
+  nckx = "Tobias Geerinckx-Rice <tobias.geerinckx.rice@gmail.com>";
   notthemessiah = "Brian Cohen <brian.cohen.88@gmail.com>";
   nslqqq = "Nikita Mikhailov <nslqqq@gmail.com>";
   ocharles = "Oliver Charles <ollie@ocharles.org.uk>";
