@@ -56,7 +56,9 @@ hashes=builtins.listToAttrs[
   {name="kdepimlibs";value="05ki1iacaraiwbabyiwzlr83f6askn4qf440cbsah8dyfm27srgb";}
   {name="kdepim-runtime";value="0kc86l2qbb24w3389yrwwh4ww4yvnnj9wygmzm7cm51hbfjvd12p";}
   {name="kdeplasma-addons";value="1nlnvj7k205cpkqkrbm0qpcfgc7rpb47xzv3r1z5iil9hz7d5jx6";}
-  {name="kde-runtime";value="1b6ag633jh519f1ncmmdy8j3ri6k7niblqsjmgk56xv4a9iy4cmg";}
+  {name="kde-runtime";
+   # value="1b6ag633jh519f1ncmmdy8j3ri6k7niblqsjmgk56xv4a9iy4cmg";}
+   value="0000000000000000000000000000000000000000000000000000";}  # Maybe vulnerable to CVE-2014-8600.
   {name="kdesdk-kioslaves";value="0brykgby8mh5laym4iwq7nz8q9slb79kc89jjlh4ci5n496h06v5";}
   {name="kdesdk-strigi-analyzers";value="1gpp4pi59cd81kw6d1z26q02vifl0pz7rbk7ipvxmy8n873q42pn";}
   {name="kdesdk-thumbnailers";value="0l662gzmm8gx6dcpw23lqnyfv0pdn7dfqqnxnwsnfycw9vd493g9";}
