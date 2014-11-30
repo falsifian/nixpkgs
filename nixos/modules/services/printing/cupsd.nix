@@ -37,6 +37,7 @@ let
     paths = cfg.drivers;
     pathsToLink = [ "/lib/cups" "/share/cups" "/bin" "/etc/cups" ];
     postBuild = cfg.bindirCmds;
+    ignoreCollisions = true;
   };
 
 in
@@ -85,6 +86,20 @@ in
           '';
         description = ''
           The contents of the configuration file of the CUPS daemon
+          (<filename>cupsd.conf</filename>).
+        '';
+      };
+
+      extraConf = mkOption {
+        type = types.lines;
+        default = "";
+        example =
+          ''
+            BrowsePoll cups.example.com
+            LogLevel debug
+          '';
+        description = ''
+          Extra contents of the configuration file of the CUPS daemon
           (<filename>cupsd.conf</filename>).
         '';
       };
@@ -257,6 +272,7 @@ in
             Order deny,allow
           </Limit>
         </Policy>
+        ${cfg.extraConf}
       '';
 
     security.pam.services.cups = {};
