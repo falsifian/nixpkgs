@@ -5,8 +5,10 @@ stdenv.mkDerivation rec {
   name = "ppp-${version}";
 
   src = fetchurl {
-    url = "${meta.homepage}ftp/ppp/${name}.tar.gz";
-    sha256 = "019m00q85nrgdpjlhb9021a3iw3pr4a0913gp4h9k7r9r7z7lca3";
+    # Vulnerable to CVE-2014-3158.
+    url = "VULNERABLE_${meta.homepage}ftp/ppp/${name}.tar.gz";
+    # sha256 = "019m00q85nrgdpjlhb9021a3iw3pr4a0913gp4h9k7r9r7z7lca3";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   patches =
