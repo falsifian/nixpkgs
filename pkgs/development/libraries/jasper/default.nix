@@ -4,8 +4,10 @@ stdenv.mkDerivation rec {
   name = "jasper-1.900.1";
 
   src = fetchurl {
-    url = "http://www.ece.uvic.ca/~mdadams/jasper/software/${name}.zip";
-    sha256 = "154l7zk7yh3v8l2l6zm5s2alvd2fzkp6c9i18iajfbna5af5m43b";
+    # Maybe vulnerable to CVE-2014-9029.
+    url = "VULNERABLE_http://www.ece.uvic.ca/~mdadams/jasper/software/${name}.zip";
+    # sha256 = "154l7zk7yh3v8l2l6zm5s2alvd2fzkp6c9i18iajfbna5af5m43b";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   nativeBuildInputs = [unzip];
