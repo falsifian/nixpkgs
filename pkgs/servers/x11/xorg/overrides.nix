@@ -173,6 +173,7 @@ in
   xf86inputevdev = attrs: attrs // {
     preBuild = "sed -e '/motion_history_proc/d; /history_size/d;' -i src/*.c";
     installFlags = "sdkdir=\${out}/include/xorg";
+    buildInputs = attrs.buildInputs ++ [ args.mtdev args.libevdev ];
   };
 
   xf86inputmouse = attrs: attrs // {
@@ -265,7 +266,7 @@ in
         recordproto libXext pixman libXfont
         damageproto xcmiscproto  bigreqsproto
         libpciaccess inputproto xextproto randrproto renderproto presentproto
-        dri2proto kbproto xineramaproto resourceproto scrnsaverproto videoproto
+        dri2proto dri3proto kbproto xineramaproto resourceproto scrnsaverproto videoproto
       ];
       commonPatches = [ ./xorgserver-xkbcomp-path.patch ];
       # XQuartz requires two compilations: the first to get X / XQuartz,

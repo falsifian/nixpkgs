@@ -169,6 +169,10 @@
       opentsdb = 159;
       scollector = 160;
       bosun = 161;
+      kubernetes = 162;
+      peerflix = 163;
+      chronos = 164;
+      gitlab = 165;
 
       tinc = 200;
 
@@ -211,6 +215,7 @@
       privoxy = 32;
       disnix = 33;
       osgi = 34;
+      tor = 35;
       ghostOne = 40;
       git = 41;
       fourstore = 42;
@@ -304,6 +309,9 @@
       liquidsoap = 155;
       scollector = 156;
       bosun = 157;
+      kubernetes = 158;
+      fleet = 159;
+      gitlab = 160;
 
       # When adding a gid, make sure it doesn't match an existing uid. And don't use gids above 399!
 
