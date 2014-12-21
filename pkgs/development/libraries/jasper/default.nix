@@ -10,13 +10,15 @@ stdenv.mkDerivation rec {
     sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
+  patches = [ ./jasper-CVE-2014-9029.diff ];
+
   nativeBuildInputs = [unzip];
   propagatedBuildInputs = [ libjpeg ];
 
   configureFlags = "--enable-shared";
   
   meta = {
-    homepage = http://www.ece.uvic.ca/~mdadams/jasper/;
+    homepage = https://www.ece.uvic.ca/~frodo/jasper/;
     description = "JPEG2000 Library";
   };
 }
