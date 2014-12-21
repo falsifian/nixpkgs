@@ -10,7 +10,11 @@ stdenv.mkDerivation rec {
     sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
-  patches = [ ./jasper-CVE-2014-9029.diff ];
+  patches = [
+    ./jasper-CVE-2014-8137-variant2.diff ./jasper-CVE-2014-8137-noabort.diff
+    ./jasper-CVE-2014-8138.diff
+    ./jasper-CVE-2014-9029.diff
+  ];
 
   nativeBuildInputs = [unzip];
   propagatedBuildInputs = [ libjpeg ];
