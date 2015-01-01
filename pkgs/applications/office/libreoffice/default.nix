@@ -24,7 +24,7 @@ let
   langsSpaces = stdenv.lib.concatStringsSep " " langs;
   major = "4";
   minor = "3";
-  patch = "3";
+  patch = "5";
   tweak = "2";
   subdir = "${major}.${minor}.${patch}";
   version = "${subdir}${if tweak == "" then "" else "."}${tweak}";
@@ -82,14 +82,14 @@ let
 
     translations = fetchSrc {
       name = "translations";
-      sha256 = "0jpkkb71fbiid12r2dpvak304hlvx4ws1bk2yrb3narz15wzcvjr";
+      sha256 = "0xqvfmfab0hq3hcq76hs7ybv32i02lzl8xghilbjf12k1wgqy96c";
     };
 
     # TODO: dictionaries
 
     help = fetchSrc {
       name = "help";
-      sha256 = "0vd4ndnqy7xjlxh9flfp84jy82bvaq80pxcsx6lsarxsb4cvw7sz";
+      sha256 = "14kdhd9pjy0a7dkyx03a73m5iy3qr3ki2xqkinhml24f3n9qddbq";
     };
 
   };
@@ -99,8 +99,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://download.documentfoundation.org/libreoffice/src/${subdir}/libreoffice-${version}.tar.xz";
-    # sha256 = "0s1j5y1gfyf3r53bbqnzirx17p49i8ah07737nrzik0ggps3lgd5";
-    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693, CVE-2014-3575.
+    sha256 = "0dr6xzdnnyhhysayz1yhnmv0l3c14kpnlhwd5h66qyzkd4d85rkq";
   };
 
   # Openoffice will open libcups dynamically, so we link it directly
@@ -183,6 +182,10 @@ stdenv.mkDerivation rec {
       substituteInPlace "$f" --replace "Exec=libreoffice${major}.${minor}" "Exec=$out/bin/soffice"
       substituteInPlace "$f" --replace "Exec=libreoffice" "Exec=$out/bin/soffice"
     done
+
+    mkdir -p "$out/share/desktop"
+    cp -r sysui/desktop/icons  "$out/share/desktop"
+    sed -re 's@Icon=libreofficedev[0-9.]*-?@Icon=@' -i "$out/share/applications/"*.desktop
   '';
 
   configureFlags = [
