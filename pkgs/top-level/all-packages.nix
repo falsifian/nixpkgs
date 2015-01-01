@@ -8406,7 +8406,7 @@ let
     nvidia_x11_legacy340 = callPackage ../os-specific/linux/nvidia-x11/legacy340.nix { };
     nvidia_x11           = callPackage ../os-specific/linux/nvidia-x11 { };
 
-    openafsClient = callPackage ../servers/openafs-client { };
+    # (expression is broken) openafsClient = callPackage ../servers/openafs-client { };
 
     openiscsi = callPackage ../os-specific/linux/open-iscsi { };
 
