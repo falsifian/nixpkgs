@@ -181,6 +181,8 @@ let result = stdenv.mkDerivation rec {
 
   passthru.jre = result; # FIXME: use multiple outputs or return actual JRE package
 
+  passthru.home = result;
+
   meta.license = stdenv.lib.licenses.unfree;
 
 }; in result

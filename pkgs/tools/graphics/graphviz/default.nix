@@ -13,6 +13,8 @@ stdenv.mkDerivation rec {
     sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
+  patches = [ ./0001-vimdot-lookup-vim-in-PATH.patch ];
+
   buildInputs =
     [ pkgconfig libpng libjpeg expat libXaw yacc libtool fontconfig
       pango gd gts
