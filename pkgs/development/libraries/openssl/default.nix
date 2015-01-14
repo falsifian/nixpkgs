@@ -39,10 +39,12 @@ stdenv.mkDerivation {
   inherit name;
 
   src = fetchurl {
+    # May be vulnerable to CVEs mentioned in DSA 3125-1 and USN-2459-1: CVE-2014-3569 CVE-2014-3570 CVE-2014-3571 CVE-2014-3572 CVE-2014-8275 CVE-2015-0204 CVE-2015-0205 CVE-2015-0206
     urls = [
-      "http://www.openssl.org/source/${name}.tar.gz"
-      "http://openssl.linux-mirror.org/source/${name}.tar.gz"
+      "VULNERABLE_http://www.openssl.org/source/${name}.tar.gz"
+      "VULNERABLE_http://openssl.linux-mirror.org/source/${name}.tar.gz"
     ];
+    #sha256 = "0754wzmzr90hiiqs5cy6g3cf8as75ljkhppgyirfg26hpapax7wg";
     sha256 = "0754wzmzr90hiiqs5cy6g3cf8as75ljkhppgyirfg26hpapax7wg";
   };
 
