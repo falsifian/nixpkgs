@@ -5,8 +5,10 @@ stdenv.mkDerivation {
   name = "libevent-${version}";
 
   src = fetchurl {
-    url = "https://github.com/downloads/libevent/libevent/libevent-${version}-stable.tar.gz";
-    sha256 = "00b3wih3qpcik6v0qh1406abs2xb954d58ncqwzs8ar2d93ip9mg";
+    # May be vulnerable to CVE-2014-6272.
+    url = "VULNERABLE_https://github.com/downloads/libevent/libevent/libevent-${version}-stable.tar.gz";
+    #sha256 = "00b3wih3qpcik6v0qh1406abs2xb954d58ncqwzs8ar2d93ip9mg";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   meta = {
