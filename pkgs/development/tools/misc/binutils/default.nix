@@ -12,8 +12,10 @@ stdenv.mkDerivation rec {
   name = basename + optionalString (cross != null) "-${cross.config}";
 
   src = fetchurl {
-    url = "mirror://gnu/binutils/${basename}.tar.bz2";
-    sha256 = "06bs5v5ndb4g5qx96d52lc818gkbskd1m0sz57314v887sqfbcia";
+    # May be vulnerable to CVEs mentioned in DSA-3123-1: CVE-2014-8484 CVE-2014-8485 CVE-2014-8501 CVE-2014-8502 CVE-2014-8503 CVE-2014-8504 CVE-2014-8737 CVE-2014-8738
+    url = "VULNERABLE_mirror://gnu/binutils/${basename}.tar.bz2";
+    #sha256 = "06bs5v5ndb4g5qx96d52lc818gkbskd1m0sz57314v887sqfbcia";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   patches = [
