@@ -5,8 +5,10 @@ stdenv.mkDerivation rec {
   name = "gparted-0.19.1";
 
   src = fetchurl {
-    url = "mirror://sourceforge/gparted/${name}.tar.bz2";
-    sha256 = "1x0mbks94jpzphb8hm8w0iqjrn665jkdm4qnzrvxrnvy0x3m2fwd";
+    # Maybe vulnerable to CVE-2014-7208.
+    url = "VULNERABLE_mirror://sourceforge/gparted/${name}.tar.bz2";
+    #sha256 = "1x0mbks94jpzphb8hm8w0iqjrn665jkdm4qnzrvxrnvy0x3m2fwd";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   configureFlags = "--disable-doc";
