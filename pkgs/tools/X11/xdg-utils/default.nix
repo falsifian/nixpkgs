@@ -4,8 +4,10 @@ stdenv.mkDerivation rec {
   name = "xdg-utils-1.1.0-rc1";
 
   src = fetchurl {
-    url = "http://portland.freedesktop.org/download/${name}.tar.gz";
-    sha256 = "00lisw4x43sp189lb7dz46j2l09y5v2fijk3d0sxx3mvwj55a1bv";
+    # May be vulnerable to CVE-2014-9622.
+    url = "VULNERABLE_http://portland.freedesktop.org/download/${name}.tar.gz";
+    #sha256 = "00lisw4x43sp189lb7dz46j2l09y5v2fijk3d0sxx3mvwj55a1bv";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   postInstall = ''
