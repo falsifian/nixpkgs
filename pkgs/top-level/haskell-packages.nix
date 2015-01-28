@@ -781,7 +781,9 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
     optparseApplicative = self.optparseApplicative_0_10_0;
   };
 
-  elmPackage = callPackage ../development/compilers/elm/elm-package.nix {};
+  elmPackage = callPackage ../development/compilers/elm/elm-package.nix {
+    optparseApplicative = self.optparseApplicative_0_10_0;
+  };
 
   elmServer = callPackage ../development/compilers/elm/elm-server.nix {};
 
@@ -1655,6 +1657,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
   loggingFacadeJournald = callPackage ../development/libraries/haskell/logging-facade-journald {};
 
   logict = callPackage ../development/libraries/haskell/logict {};
+
+  logsink = callPackage ../development/libraries/haskell/logsink {};
 
   loop = callPackage ../development/libraries/haskell/loop {};
 
@@ -2885,6 +2889,8 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   webRoutesBoomerang = callPackage ../development/libraries/haskell/web-routes-boomerang {};
 
+  webRoutesHappstack = callPackage ../development/libraries/haskell/web-routes-happstack {};
+
   websockets = callPackage ../development/libraries/haskell/websockets {};
 
   websocketsSnap = callPackage ../development/libraries/haskell/websockets-snap {};
@@ -2993,7 +2999,11 @@ self : let callPackage = x : y : modifyPrio (newScope self x y); in
 
   yesodJson = callPackage ../development/libraries/haskell/yesod-json {};
 
+  yesodMarkdown = callPackage ../development/libraries/haskell/yesod-markdown {};
+
   yesodNewsfeed = callPackage ../development/libraries/haskell/yesod-newsfeed {};
+
+  yesodPagination = callPackage ../development/libraries/haskell/yesod-pagination {};
 
   yesodPersistent = callPackage ../development/libraries/haskell/yesod-persistent {};
 

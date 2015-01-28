@@ -10,6 +10,8 @@ stdenv.mkDerivation rec {
     sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
+  patches = [ ./0001-xdg-open-recognize-KDE_SESSION_VERSION.patch ];
+
   postInstall = ''
     substituteInPlace $out/bin/xdg-mime --replace /usr/bin/file ${file}/bin/file
   '';

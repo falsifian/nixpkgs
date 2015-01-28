@@ -175,6 +175,7 @@
       gitlab = 165;
       tox-bootstrapd = 166;
       cadvisor = 167;
+      nylon = 168;
 
       tinc = 200;
 
@@ -315,6 +316,7 @@
       bosun = 161;
       kubernetes = 162;
       gitlab = 165;
+      nylon = 166;
 
       # When adding a gid, make sure it doesn't match an existing
       # uid. Users and groups with the same name should have equal

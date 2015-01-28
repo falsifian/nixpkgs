@@ -8,11 +8,11 @@ let
 
   majorVersion = "2.4";
   version = "${majorVersion}.0";
-  pythonVersion = "2.7";
   libPrefix = "pypy${majorVersion}";
 
   pypy = stdenv.mkDerivation rec {
     name = "pypy-${version}";
+    pythonVersion = "2.7";
 
     inherit majorVersion version;
 
@@ -27,8 +27,10 @@ let
 
     C_INCLUDE_PATH = stdenv.lib.concatStringsSep ":" (map (p: "${p}/include") buildInputs);
     LIBRARY_PATH = stdenv.lib.concatStringsSep ":" (map (p: "${p}/lib") buildInputs);
-    LD_LIBRARY_PATH = stdenv.lib.concatStringsSep ":" (map (p: "${p}/lib") 
+    LD_LIBRARY_PATH = stdenv.lib.concatStringsSep ":" (map (p: "${p}/lib")
       (stdenv.lib.filter (x : x.outPath != stdenv.cc.libc.outPath or "") buildInputs));
+
+    patches = [ ./fix-gcc-4-9-2.patch ];
 
     preConfigure = ''
       substituteInPlace Makefile \
