@@ -5,10 +5,10 @@ stdenv.mkDerivation {
   name = "libevent-${version}";
 
   src = fetchurl {
-    # May be vulnerable to CVE-2014-6272.
-    url = "VULNERABLE_https://github.com/downloads/libevent/libevent/libevent-${version}-stable.tar.gz";
-    #sha256 = "1xblymln9vihdmf1aqkp8chwvnhpdch3786bh30bj75slnl31992";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    # May be vulnerable to CVE-2014-6272, but not likely to be exploitable in
+    # practice.  See https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2014-6272
+    url = "https://github.com/downloads/libevent/libevent/libevent-${version}-stable.tar.gz";
+    sha256 = "1xblymln9vihdmf1aqkp8chwvnhpdch3786bh30bj75slnl31992";
   };
 
   patchPhase = ''
