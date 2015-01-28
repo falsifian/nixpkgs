@@ -6,11 +6,13 @@ stdenv.mkDerivation rec {
   version = "0.158";
 
   src = fetchurl {
+    # May be vulnerable to CVE-2014-9447.
     urls = [
-      "http://fedorahosted.org/releases/e/l/elfutils/${version}/${name}.tar.bz2"
-      "mirror://gentoo/distfiles/${name}.tar.bz2"
+      "VULNERABLE_http://fedorahosted.org/releases/e/l/elfutils/${version}/${name}.tar.bz2"
+      "VULNERABLE_mirror://gentoo/distfiles/${name}.tar.bz2"
       ];
-    sha256 = "0z9rprmizd7rwb3xwfmz5liii7hbiv3g2arl23h56brm45fay9xy";
+    # sha256 = "0z9rprmizd7rwb3xwfmz5liii7hbiv3g2arl23h56brm45fay9xy";
+    sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
   patches = [
