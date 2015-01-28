@@ -68,8 +68,10 @@ let
       { url = http://xenbits.xensource.com/xen-extfiles/ipxe-git-9a93db3f0947484e30e753bbd61a10b17336e20e.tar.gz;
         sha256 = "0p206zaxlhda60ci33h9gipi5gm46fvvsm6k5c0w7b6cjg0yhb33";
       }
-      { url = http://xenbits.xensource.com/xen-extfiles/polarssl-1.1.4-gpl.tgz;
-        sha256 = "1dl4fprpwagv9akwqpb62qwqvh24i50znadxwvd2kfnhl02gsa9d";
+      { # Maybe vulnerable to CVE-2015-1182.
+        url = "VULNERABLE_http://xenbits.xensource.com/xen-extfiles/polarssl-1.1.4-gpl.tgz";
+        # sha256 = "1dl4fprpwagv9akwqpb62qwqvh24i50znadxwvd2kfnhl02gsa9d";
+        sha256 = "0000000000000000000000000000000000000000000000000000";
       }
       { url = http://xenbits.xensource.com/xen-extfiles/gmp-4.3.2.tar.bz2;
         sha256 = "0x8prpqi9amfcmi7r4zrza609ai9529pjaq0h4aw51i867064qck";
