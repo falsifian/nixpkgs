@@ -176,6 +176,7 @@
       tox-bootstrapd = 166;
       cadvisor = 167;
       nylon = 168;
+      apache-kafka = 169;
 
       tinc = 200;
 
