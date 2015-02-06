@@ -4,10 +4,8 @@ stdenv.mkDerivation rec {
   name = "xdg-utils-1.1.0-rc1";
 
   src = fetchurl {
-    # May be vulnerable to CVE-2014-9622.
-    url = "VULNERABLE_http://portland.freedesktop.org/download/${name}.tar.gz";
-    #sha256 = "00lisw4x43sp189lb7dz46j2l09y5v2fijk3d0sxx3mvwj55a1bv";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    url = "http://portland.freedesktop.org/download/${name}.tar.gz";
+    sha256 = "00lisw4x43sp189lb7dz46j2l09y5v2fijk3d0sxx3mvwj55a1bv";
   };
 
   patches = [ ./0001-xdg-open-recognize-KDE_SESSION_VERSION.patch ];
