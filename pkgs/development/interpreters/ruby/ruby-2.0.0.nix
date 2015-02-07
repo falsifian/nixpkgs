@@ -25,12 +25,10 @@ stdenv.mkDerivation rec {
     owner  = "ruby";
     repo   = "ruby";
     rev    = "v2_0_0_${passthru.patchLevel}";
-    # sha256 = "07ccnxgiqxn5ycmq2wl7j3aqmndm4n358y35kzaivb488ayjg3pj";
-    sha256 = "0000000000000000000000000000000000000000000000000000";  # Vulnerable to CVE-2014-4975.
+    sha256 = "07ccnxgiqxn5ycmq2wl7j3aqmndm4n358y35kzaivb488ayjg3pj";
   } else fetchurl {
     url = "http://cache.ruby-lang.org/pub/ruby/2.0/${name}.tar.bz2";
-    # sha256 = "1qnqccyfhx0fykxqbzlxq0yvyvq6q9v32givyfyr303dx7bxlqh7";
-    sha256 = "0000000000000000000000000000000000000000000000000000";  # Vulnerable to CVE-2014-4975.
+    sha256 = "1qnqccyfhx0fykxqbzlxq0yvyvq6q9v32givyfyr303dx7bxlqh7";
   };
 
   # Have `configure' avoid `/usr/bin/nroff' in non-chroot builds.
