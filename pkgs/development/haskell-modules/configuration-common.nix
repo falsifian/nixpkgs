@@ -102,6 +102,7 @@ self: super: {
   network-conduit = dontHaddock super.network-conduit;
   shakespeare-text = dontHaddock super.shakespeare-text;
   uhc-light = dontHaddock super.uhc-light;                      # https://github.com/UU-ComputerScience/uhc/issues/45
+  wai-test = dontHaddock super.wai-test;
 
   # jailbreak doesn't get the job done because the Cabal file uses conditionals a lot.
   darcs = overrideCabal super.darcs (drv: {
@@ -126,6 +127,28 @@ self: super: {
 
   # https://github.com/haskell/vector/issues/47
   vector = if pkgs.stdenv.isi686 then appendConfigureFlag super.vector "--ghc-options=-msse2" else super.vector;
+
+  # cabal2nix likes to generate dependencies on hinotify when hfsevents is really required
+  # on darwin: https://github.com/NixOS/cabal2nix/issues/146
+  hinotify = if pkgs.stdenv.isDarwin then super.hfsevents else super.hinotify;
+
+  # FSEvents API is very buggy and tests are unreliable. See
+  # http://openradar.appspot.com/10207999 and similar issues
+  fsnotify = if pkgs.stdenv.isDarwin then dontCheck super.fsnotify else super.fsnotify;
+
+  # Doesn't properly handle nonsense byte sequences on HFS+
+  # https://github.com/fpco/haskell-filesystem/issues/5
+  system-fileio = if pkgs.stdenv.isDarwin
+    then dontCheck super.system-fileio
+    else super.system-fileio;
+
+  # Prevents needing to add security_tool as a build tool to all of x509-system's
+  # dependencies.
+  x509-system = overrideCabal super.x509-system (drv: {
+    patchPhase = (drv.patchPhase or "") + pkgs.stdenv.lib.optionalString pkgs.stdenv.isDarwin ''
+      substituteInPlace System/X509/MacOS.hs --replace security ${pkgs.darwin.security_tool}/bin/security
+    '';
+  });
 
   # Does not compile: <http://hydra.cryp.to/build/469842/nixlog/1/raw>.
   base_4_7_0_2 = markBroken super.base_4_7_0_2;
@@ -374,11 +397,6 @@ self: super: {
   # https://github.com/chrisdone/hindent/issues/83
   hindent = dontCheck super.hindent;
 
-  # Needs older versions of its dependencies.
-  structured-haskell-mode = (dontJailbreak super.structured-haskell-mode).override {
-    haskell-src-exts = self.haskell-src-exts_1_15_0_1;  # https://github.com/chrisdone/structured-haskell-mode/issues/90
-  };
-
   # Expect to find sendmail(1) in $PATH.
   mime-mail = appendConfigureFlag super.mime-mail "--ghc-option=-DMIME_MAIL_SENDMAIL_PATH=\"sendmail\"";
 
@@ -442,22 +460,53 @@ self: super: {
   gloss-raster = super.gloss-raster.override { llvm = pkgs.llvm_34; };
   repa-examples = super.repa-examples.override { llvm = pkgs.llvm_34; };
 
-  # Upstream notified by e-mail.
-  OpenGLRaw21 = markBrokenVersion "1.2.0.1" super.OpenGLRaw21;
-
   # Missing module.
   rematch = dontCheck super.rematch;            # https://github.com/tcrayford/rematch/issues/5
   rematch-text = dontCheck super.rematch-text;  # https://github.com/tcrayford/rematch/issues/6
 
-  # Missing files in the test suite stanza.
-  Rasterific = dontCheck super.Rasterific;              # https://github.com/Twinside/Rasterific/issues/19
-  rasterific-svg = dontCheck super.rasterific-svg;      # https://github.com/Twinside/rasterific-svg/issues/1
-
-  # https://github.com/utdemir/handsy/issues/5
-  handsy = dontCheck super.handsy;
-
   # Upstream notified by e-mail.
   MonadCompose = markBrokenVersion "0.2.0.0" super.MonadCompose;
+
+  # Make distributed-process-platform compile until next version
+  distributed-process-platform = overrideCabal super.distributed-process-platform (drv: {
+    patchPhase = "mv Setup.hs Setup.lhs";
+    doCheck = false;
+    doHaddock = false;
+  });
+
+  # This packages compiles 4+ hours on a fast machine. That's just unreasonable.
+  CHXHtml = dontDistribute super.CHXHtml;
+
+  # https://github.com/bos/bloomfilter/issues/7
+  bloomfilter = overrideCabal super.bloomfilter (drv: { broken = !pkgs.stdenv.is64bit; });
+
+  # https://github.com/ekmett/exceptions/issues/40
+  exceptions = dontCheck super.exceptions;
+
+  # https://github.com/NixOS/nixpkgs/issues/6350
+  paypal-adaptive-hoops = overrideCabal super.paypal-adaptive-hoops (drv: { testTarget = "local"; });
+
+  # https://github.com/anton-k/temporal-csound/issues/2
+  temporal-csound = markBrokenVersion "0.4.1" super.temporal-csound;
+
+  # https://github.com/gregwebs/haskell-heroku/issues/9
+  heroku = dontCheck super.heroku;
+
+  # https://github.com/seanparsons/wiring/issues/1
+  wiring = markBrokenVersion super.wiring;
+
+  # https://github.com/gibiansky/IHaskell/issues/355
+  ihaskell-parsec = markBroken super.ihaskell-parsec;
+
+  # https://github.com/jwiegley/simple-conduit/issues/2
+  simple-conduit = markBroken super.simple-conduit;
+
+  # https://github.com/alephcloud/hs-configuration-tools/issues/36
+  configuration-tools = markBroken super.configuration-tools;
+  yet-another-logger = markBroken super.yet-another-logger;
+
+  # https://github.com/evanrinehart/lowgl/issues/1
+  lowgl = markBroken super.lowgl;
 
 } // {
 

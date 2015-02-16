@@ -5,7 +5,7 @@ stdenv.mkDerivation rec {
   name = "ppp-${version}";
 
   src = fetchurl {
-    url = "${meta.homepage}ftp/ppp/${name}.tar.gz";
+    url = "mirror://samba/ppp/${name}.tar.gz";
     sha256 = "0c7vrjxl52pdwi4ckrvfjr08b31lfpgwf3pp0cqy76a77vfs7q02";
   };
 
@@ -15,6 +15,9 @@ stdenv.mkDerivation rec {
         inherit libpcap;
         glibc = stdenv.cc.libc;
       })
+      # Without nonpriv.patch, pppd --version doesn't work when not run as
+      # root.
+      ./nonpriv.patch
     ];
 
   buildInputs = [ libpcap ];
@@ -23,6 +26,6 @@ stdenv.mkDerivation rec {
     homepage = https://ppp.samba.org/;
     description = "Point-to-point implementation for Linux and Solaris";
     platforms = stdenv.lib.platforms.linux;
-    maintainers = [ stdenv.lib.maintainers.urkud ];
+    maintainers = [ stdenv.lib.maintainers.falsifian ];
   };
 }

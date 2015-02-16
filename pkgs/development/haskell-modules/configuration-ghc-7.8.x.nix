@@ -37,6 +37,9 @@ self: super: {
   # mtl 2.2.x needs the latest transformers.
   mtl_2_2_1 = super.mtl_2_2_1.override { transformers = self.transformers_0_4_2_0; };
 
+  # Configure build for mtl 2.1.x.
+  mtl-compat = addBuildDepend (enableCabalFlag super.mtl-compat "two-point-one") self.transformers-compat;
+
   # Idris requires mtl 2.2.x.
   idris = overrideCabal (super.idris.overrideScope (self: super: {
     mkDerivation = drv: super.mkDerivation (drv // { doCheck = false; });
@@ -75,6 +78,13 @@ self: super: {
   hosc = dontDistribute super.hosc;
   tidal-midi = dontDistribute super.tidal-midi;
 
+  # Needs mtl 2.2.x due to "plailude".
+  clac = dontDistribute super.clac;
+
+  # https://github.com/junjihashimoto/test-sandbox-compose/issues/1
+  test-sandbox = markBroken super.test-sandbox;
+  test-sandbox-compose = markBroken super.test-sandbox-compose;
+
 }
 
 // # packages relating to amazonka
@@ -103,7 +113,7 @@ self: super: {
     time = self.time_1_5_0_1;
     unix = self.unix_2_7_1_0;
     directory = self.directory_1_2_1_0;
-    process = overrideCabal self.process_1_2_1_0 (drv: { coreSetup = true; });
+    process = overrideCabal self.process_1_2_2_0 (drv: { coreSetup = true; });
     inherit amazonka-core amazonkaEnv amazonka amazonka-cloudwatch;
   };
   amazonka = super.amazonka.overrideScope amazonkaEnv;
