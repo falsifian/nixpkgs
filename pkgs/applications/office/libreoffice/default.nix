@@ -37,8 +37,7 @@ let
 
      src = fetchurl {
        url = "http://kohei.us/files/ixion/src/${name}.tar.bz2";
-       # sha256 = "10amvz7fzr1kcy3svfspkdykmspqgpjdmk44cyr406wi7v4lwnf9";
-       sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693, CVE-2014-3575.
+       sha256 = "10amvz7fzr1kcy3svfspkdykmspqgpjdmk44cyr406wi7v4lwnf9";
      };
 
      buildInputs = [ boost mdds pkgconfig ];
@@ -75,8 +74,7 @@ let
   srcs = {
     third_party = [ (fetchurl rec {
         url = "http://dev-www.libreoffice.org/extern/${md5}-${name}";
-        # md5 = "185d60944ea767075d27247c3162b3bc";
-        md5 = "00000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-3693, CVE-2014-3575.
+        md5 = "185d60944ea767075d27247c3162b3bc";
         name = "unowinreg.dll";
       }) ] ++ (map fetchThirdParty (import ./libreoffice-srcs.nix));
 

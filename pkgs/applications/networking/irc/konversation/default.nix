@@ -11,8 +11,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "mirror://kde/stable/${pn}/${v}/src/${name}.tar.xz";
-    # sha256 = "11hrjrq4r6v1v14ybx9llgzmrl3a45z26n292nb0q887rg1qv0wp";
-    sha256 = "0000000000000000000000000000000000000000000000000000";  # Maybe vulnerable to CVE-2014-8483.
+    sha256 = "11hrjrq4r6v1v14ybx9llgzmrl3a45z26n292nb0q887rg1qv0wp";
   };
 
   buildInputs = [ cmake qt4 perl gettext libXScrnSaver kdelibs kdepimlibs
