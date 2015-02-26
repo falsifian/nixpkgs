@@ -82,8 +82,23 @@ self: super: {
   clac = dontDistribute super.clac;
 
   # https://github.com/junjihashimoto/test-sandbox-compose/issues/1
+  hspec-test-sandbox = markBroken super.hspec-test-sandbox;
+  test-framework-sandbox = markBroken super.test-sandbox-quickcheck;
   test-sandbox = markBroken super.test-sandbox;
   test-sandbox-compose = markBroken super.test-sandbox-compose;
+  test-sandbox-hunit = markBroken super.test-sandbox-hunit;
+  test-sandbox-quickcheck = markBroken super.test-sandbox-quickcheck;
+
+  # These packages need mtl 2.2.x directly or indirectly via dependencies.
+  apiary-purescript = markBroken super.apiary-purescript;
+  highlighter2 = markBroken super.highlighter2;
+  hypher = markBroken super.hypher;
+  purescript = markBroken super.purescript;
+  yesod-purescript = markBroken super.yesod-purescript;
+  yet-another-logger = markBroken super.yet-another-logger;
+
+  # https://github.com/frosch03/arrowVHDL/issues/2
+  ArrowVHDL = markBroken super.ArrowVHDL;
 
 }
 
@@ -114,13 +129,15 @@ self: super: {
     unix = self.unix_2_7_1_0;
     directory = self.directory_1_2_1_0;
     process = overrideCabal self.process_1_2_2_0 (drv: { coreSetup = true; });
-    inherit amazonka-core amazonkaEnv amazonka amazonka-cloudwatch;
+    inherit amazonka-core amazonkaEnv amazonka amazonka-cloudwatch amazonka-glacier amazonka-ecs;
   };
   amazonka = super.amazonka.overrideScope amazonkaEnv;
   amazonka-cloudwatch = super.amazonka-cloudwatch.overrideScope amazonkaEnv;
   amazonka-core = super.amazonka-core.overrideScope amazonkaEnv;
+  amazonka-ecs = super.amazonka-ecs.overrideScope amazonkaEnv;
+  amazonka-glacier = super.amazonka-glacier.overrideScope amazonkaEnv;
   amazonka-kms = super.amazonka-kms.overrideScope amazonkaEnv;
 in {
   inherit amazonkaEnv;
-  inherit amazonka amazonka-cloudwatch amazonka-core amazonka-kms;
+  inherit amazonka amazonka-cloudwatch amazonka-core amazonka-ecs amazonka-kms amazonka-glacier;
 })

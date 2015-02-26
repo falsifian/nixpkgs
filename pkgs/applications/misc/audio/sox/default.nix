@@ -20,6 +20,13 @@ stdenv.mkDerivation rec {
     sha256 = "0000000000000000000000000000000000000000000000000000";
   };
 
+  patches = [
+    # Patches for CVE-2014-8145, found via RedHat bug 1174792.  It was not
+    # clear whether these address a NULL deref and a division by zero.
+    ./0001-Check-for-minimum-size-sphere-headers.patch
+    ./0002-More-checks-for-invalid-MS-ADPCM-blocks.patch
+  ];
+
   buildInputs =
     optional (enableAlsa && stdenv.isLinux) alsaLib ++
     optional enableLibao libao ++
@@ -31,7 +38,7 @@ stdenv.mkDerivation rec {
 
   meta = {
     description = "Sample Rate Converter for audio";
-    homepage = http://www.mega-nerd.com/SRC/index.html;
+    homepage = http://sox.sourceforge.net/;
     maintainers = [ lib.maintainers.marcweber lib.maintainers.shlevy ];
     license = lib.licenses.gpl2Plus;
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
