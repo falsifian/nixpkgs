@@ -14,10 +14,8 @@ stdenv.mkDerivation rec {
   name = "sox-14.4.1";
 
   src = fetchurl {
-    # Vulnerable to CVE-CVE-2014-8145.
-    url = "VULNERABLE_mirror://sourceforge/sox/${name}.tar.gz";
-    # sha256 = "16x8gykfjdhxg0kdxwzcwgwpm5caa08y2mx18siqsq0ywmpjr34s";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    url = "mirror://sourceforge/sox/${name}.tar.gz";
+    sha256 = "16x8gykfjdhxg0kdxwzcwgwpm5caa08y2mx18siqsq0ywmpjr34s";
   };
 
   patches = [
