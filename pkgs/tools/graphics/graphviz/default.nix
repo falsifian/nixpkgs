@@ -8,10 +8,8 @@ stdenv.mkDerivation rec {
   name = "graphviz-${version}";
 
   src = fetchurl {
-    # Vulnerable to CVE-2014-9157.
-    url = "VULNERABLE_http://www.graphviz.org/pub/graphviz/ARCHIVE/${name}.tar.gz";
-    # sha256 = "17l5czpvv5ilmg17frg0w4qwf89jzh2aglm9fgx0l0aakn6j7al1";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    url = "http://www.graphviz.org/pub/graphviz/ARCHIVE/${name}.tar.gz";
+    sha256 = "17l5czpvv5ilmg17frg0w4qwf89jzh2aglm9fgx0l0aakn6j7al1";
   };
 
   patches =
