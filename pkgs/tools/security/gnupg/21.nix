@@ -1,6 +1,7 @@
 { fetchurl, stdenv, pkgconfig, libgcrypt, libassuan, libksba, npth
 , readline ? null, libusb ? null, gnutls ? null, adns ? null, openldap ? null
-, zlib ? null, bzip2 ? null, pinentry ? null, autoreconfHook, gettext
+, zlib ? null, bzip2 ? null, pinentry ? null, autoreconfHook, gettext, texinfo
+, pcsclite
 }:
 
 with stdenv.lib;
@@ -14,10 +15,14 @@ stdenv.mkDerivation rec {
 
   patches = [ ./socket-activate-2.1.1.patch ];
 
+  postPatch = stdenv.lib.optionalString stdenv.isLinux ''
+    sed -i 's,"libpcsclite\.so[^"]*","${pcsclite}/lib/libpcsclite.so",g' scd/scdaemon.c
+  '';
+
   buildInputs = [
     pkgconfig libgcrypt libassuan libksba npth
     readline libusb gnutls adns openldap zlib bzip2
-    autoreconfHook gettext
+    autoreconfHook gettext texinfo
   ];
 
   configureFlags =

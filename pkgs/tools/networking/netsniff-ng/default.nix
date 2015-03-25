@@ -1,24 +1,25 @@
-{ stdenv, fetchFromGitHub, bison, flex, geoip, libcli, libnet
+{ stdenv, fetchFromGitHub, bison, flex, libcli, libnet
 , libnetfilter_conntrack, libnl, libpcap, libsodium, liburcu, ncurses, perl
-, pkgconfig, which, zlib }:
+, pkgconfig, zlib }:
 
 stdenv.mkDerivation rec {
-  version = "0.5.9-rc4-40-g5107740";
+  version = "0.5.9-rc4-49-g6f54288";
   name = "netsniff-ng-${version}";
 
   src = fetchFromGitHub rec { # Upstream recommends and supports git
     repo = "netsniff-ng";
     owner = repo;
-    rev = "5107740603d10feed6104afd75042970cb392843";
-    sha256 = "1z3b7pa5rhz37dhfb1riy1j9lg917bs4z7clqbxm1hzi1x2ln988";
+    rev = "6f542884d002d55d517a50dd9892068e95400b25";
+    sha256 = "0j7rqigfn9zazmzi8w3hapzi8028jr3q27lwyjw7k7lpnayj5iaa";
   };
 
-  buildInputs = [ bison flex geoip libcli libnet libnl libnetfilter_conntrack
-    libpcap libsodium liburcu ncurses perl pkgconfig which zlib ];
+  buildInputs = [ bison flex libcli libnet libnl libnetfilter_conntrack
+    libpcap libsodium liburcu ncurses perl pkgconfig zlib ];
 
   # ./configure is not autoGNU but some home-brewn magic
   configurePhase = ''
     patchShebangs configure
+    substituteInPlace configure --replace "which" "command -v"
     NACL_INC_DIR=${libsodium}/include/sodium NACL_LIB=sodium ./configure
   '';
 

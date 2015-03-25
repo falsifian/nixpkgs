@@ -1,12 +1,12 @@
 { stdenv, fetchgit }:
 
 stdenv.mkDerivation {
-  name = "firmware-linux-nonfree-2015-02-24";
+  name = "firmware-linux-nonfree-2015-03-09";
 
   src = fetchgit {
     url = "git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git";
-    rev = "4517261caab34742afdeaf0c36128b9579675717";
-    sha256 = "0w386nfwlqhk1wn7zzhfxkxx06nzqasc4dr0qq61wc29s9qlgi3c";
+    rev = "020e534ec90106d42a890cd9d090b24e3d158c53";
+    sha256 = "101mpps0jcv2dd4jh1w3j4h78d4iv8n8r1cnf4br2vg66zl3zg9v";
   };
 
   preInstall = ''

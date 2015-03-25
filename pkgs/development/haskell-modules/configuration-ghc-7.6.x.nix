@@ -31,13 +31,13 @@ self: super: {
   unix = null;
 
   # transformers is not a core library for this compiler.
-  transformers = self.transformers_0_4_2_0;
+  transformers = self.transformers_0_4_3_0;
   mtl = self.mtl_2_2_1;
   transformers-compat = disableCabalFlag super.transformers-compat "three";
 
   # haskeline and terminfo are not core libraries for this compiler.
-  haskeline = self.haskeline_0_7_1_3;
-  terminfo = self.terminfo_0_4_0_0;
+  haskeline = self.haskeline_0_7_2_0;
+  terminfo = self.terminfo_0_4_0_1;
 
   # https://github.com/haskell/cabal/issues/2322
   Cabal_1_22_1_1 = super.Cabal_1_22_1_1.override { binary = self.binary_0_7_4_0; };

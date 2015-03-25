@@ -2,7 +2,7 @@
 , withCryptodev ? false, cryptodevHeaders }:
 
 let
-  name = "openssl-1.0.1k";
+  name = "openssl-1.0.1m";
 
   opensslCrossSystem = stdenv.lib.attrByPath [ "openssl" "system" ]
     (throw "openssl needs its platform name cross building" null)
@@ -18,6 +18,8 @@ let
       # hardcoding something like /etc/ssl/cert.pem is impure and
       # cannot be overriden per-process.  For security, the
       # environment variable is ignored for setuid binaries.
+      # FIXME: drop this patch; it really isn't necessary, because
+      # OpenSSL already supports a ‘SSL_CERT_FILE’ variable.
       ./cert-file.patch
     ]
 
@@ -39,13 +41,11 @@ stdenv.mkDerivation {
   inherit name;
 
   src = fetchurl {
-    # May be vulnerable to CVEs mentioned in DSA 3125-1 and USN-2459-1: CVE-2014-3569 CVE-2014-3570 CVE-2014-3571 CVE-2014-3572 CVE-2014-8275 CVE-2015-0204 CVE-2015-0205 CVE-2015-0206
     urls = [
-      "VULNERABLE_http://www.openssl.org/source/${name}.tar.gz"
-      "VULNERABLE_http://openssl.linux-mirror.org/source/${name}.tar.gz"
+      "http://www.openssl.org/source/${name}.tar.gz"
+      "http://openssl.linux-mirror.org/source/${name}.tar.gz"
     ];
-    #sha256 = "0754wzmzr90hiiqs5cy6g3cf8as75ljkhppgyirfg26hpapax7wg";
-    sha256 = "0754wzmzr90hiiqs5cy6g3cf8as75ljkhppgyirfg26hpapax7wg";
+    sha256 = "0x7gvyybmqm4lv62mlhlm80f1rn7il2qh8224rahqv0i15xhnpq9";
   };
 
   patches = patchesCross false;
