@@ -160,6 +160,23 @@ let
       };
     });
 
+  buildWebStorm = { name, version, build, src, license, description }:
+    (mkIdeaProduct {
+      inherit name version build src;
+      product = "WebStorm";
+      meta = with stdenv.lib; {
+        homepage = "https://www.jetbrains.com/webstorm/";
+        inherit description license;
+        longDescription = ''
+          WebStorm provides an editor for HTML, JavaScript (incl. Node.js),
+          and CSS with on-the-fly code analysis, error prevention and
+          automated refactorings for JavaScript code.
+        '';
+        maintainers = with maintainers; [ abaldeau ];
+        platforms = platforms.linux;
+      };
+    });
+
   buildPycharm = { name, version, build, src, license, description }:
     (mkIdeaProduct rec {
       inherit name version build src;
@@ -205,14 +222,14 @@ in
   };
 
   clion = buildClion rec {
-    name = "clion-${version}";
+    name = "clion-${build}";
     version = "eap";
-    build = "140.1740.3";
+    build = "141.102.4";
     description  = "C/C++ IDE. New. Intelligent. Cross-platform.";
     license = stdenv.lib.licenses.unfree;
     src = fetchurl {
-      url = "https://download.jetbrains.com/cpp/${name}-${build}.tar.gz";
-      sha256 = "1hpsq37hq61id836wg5j6l3xapln6qdkqa10r3ig2p1rs2hq7i9y";
+      url = "https://download.jetbrains.com/cpp/${name}.tar.gz";
+      sha256 = "0qjm8wxqn171wfd7yqf5ys1g4mwl0iyhlbry29jkgkikxp7h9dym";
     };
   };
 
@@ -242,13 +259,13 @@ in
 
   ruby-mine = buildRubyMine rec {
     name = "ruby-mine-${version}";
-    version = "7.0";
-    build = "135.1104";
+    version = "7.0.4";
+    build = "139.1231";
     description = "The Most Intelligent Ruby and Rails IDE";
     license = stdenv.lib.licenses.unfree;
     src = fetchurl {
       url = "https://download.jetbrains.com/ruby/RubyMine-${version}.tar.gz";
-      sha256 = "0xsx44gaddarkw5k4yjidzwkayf2xvsxklfzdnzcck4rg4vyk4v4";
+      sha256 = "08b0iwccb5w9b1yk0kbs99r5mxkcyxqs9mkr57wb5j71an80yx38";
     };
   };
 
@@ -285,6 +302,18 @@ in
     src = fetchurl {
       url = "https://download.jetbrains.com/webide/PhpStorm-${version}.tar.gz";
       sha256 = "1x67nfr3nap93cx7yhdrp02xvp1v6g74zy7hdmhx41sal7hzy49b";
+    };
+  };
+
+  webstorm = buildWebStorm rec {
+    name = "webstorm-${version}";
+    version = "9.0.3";
+    build = "139.1112";
+    description = "Professional IDE for Web and JavaScript devlopment";
+    license = stdenv.lib.licenses.unfree;
+    src = fetchurl {
+      url = "https://download.jetbrains.com/webstorm/WebStorm-${version}.tar.gz";
+      sha256 = "e4cfe7b5f1220b68d880c4f236df9c9df2b1efcc04775afad6149d949f45f0aa";
     };
   };
 

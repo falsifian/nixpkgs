@@ -1,3 +1,21 @@
+/*
+
+  WARNING/NOTE: whenever you want to add an option here you need to
+  either
+
+  * mark it as an optional one with `?` suffix,
+  * or make sure it works for all the versions in nixpkgs,
+  * or check for which kernel versions it will work (using kernel
+    changelog, google or whatever) and mark it with `versionOlder` or
+    `versionAtLeast`.
+
+  Then do test your change by building all the kernels (or at least
+  their configs) in nixpkgs or else you will guarantee lots and lots
+  of pain to users trying to switch to an older kernel because of some
+  hardware problems with a new one.
+
+*/
+
 { stdenv, version, kernelPlatform, extraConfig, features }:
 
 with stdenv.lib;
@@ -222,6 +240,16 @@ with stdenv.lib;
   SECURITY_APPARMOR y
   DEFAULT_SECURITY_APPARMOR y
 
+  # Microcode loading support
+  MICROCODE y
+  MICROCODE_INTEL y
+  MICROCODE_AMD y
+  ${optionalString (versionAtLeast version "3.11") ''
+    MICROCODE_EARLY y
+    MICROCODE_INTEL_EARLY y
+    MICROCODE_AMD_EARLY y
+  ''}
+
   # Misc. options.
   8139TOO_8129 y
   8139TOO_PIO n # PIO is slower
@@ -264,7 +292,6 @@ with stdenv.lib;
   LOGO n # not needed
   MEDIA_ATTACH y
   MEGARAID_NEWGEN y
-  MICROCODE_AMD y
   MODVERSIONS y
   MOUSE_PS2_ELANTECH y # Elantech PS/2 protocol extension
   MTRR_SANITIZER y
@@ -275,7 +302,9 @@ with stdenv.lib;
   ${optionalString (versionAtLeast version "3.6") ''
     RC_DEVICES? y # Enable IR devices
   ''}
-  RT2800USB_RT55XX y
+  ${optionalString (versionAtLeast version "3.10") ''
+    RT2800USB_RT55XX y
+  ''}
   SCSI_LOGGING y # SCSI logging facility
   SERIAL_8250 y # 8250/16550 and compatible serial support
   SLIP_COMPRESSED y # CSLIP compressed headers

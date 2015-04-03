@@ -1,13 +1,11 @@
 { stdenv, fetchurl, libpcap, enableStatic ? false }:
 
 stdenv.mkDerivation rec {
-  name = "tcpdump-4.6.2";
+  name = "tcpdump-4.7.3";
 
   src = fetchurl {
-    # Vulnerable to CVE-2014-8767, maybe CVE-2014-8768..9, CVE-2014-9140.
-    url = "VULNERABLE_http://www.tcpdump.org/release/${name}.tar.gz";
-    # sha256 = "1f701387jyxq7rjhv4hiig3b3g55m4b4403rd0zncv1sx3cf8kjj";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    url = "http://www.tcpdump.org/release/${name}.tar.gz";
+    sha256 = "1kla3l7lja8cfwimp512x7z176x2dsy03ih6g8gd95p95ijzp1qz";
   };
 
   buildInputs = [ libpcap ];

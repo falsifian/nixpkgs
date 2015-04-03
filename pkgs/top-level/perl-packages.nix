@@ -7043,6 +7043,15 @@ let self = _self // overrides; _self = with self; {
     propagatedBuildInputs = [IOSocketSSL DigestHMAC];
   };
 
+  NetSMTPTLSButMaintained = buildPerlPackage {
+    name = "Net-SMTP-TLS-ButMaintained-0.24";
+    src = fetchurl {
+      url = mirror://cpan/authors/id/F/FA/FAYLAND/Net-SMTP-TLS-ButMaintained-0.24.tar.gz;
+      sha256 = "0vi5cv7f9i96hgp3q3jpxzn1ysn802kh5xc304f8b7apf67w15bb";
+    };
+    propagatedBuildInputs = [NetSSLeay DigestHMAC IOSocketSSL];
+  };
+
   NetSNMP = buildPerlPackage rec {
     name = "Net-SNMP-6.0.1";
     src = fetchurl {
@@ -7430,12 +7439,12 @@ let self = _self // overrides; _self = with self; {
   };
 
   PerlMagick = buildPerlPackage rec {
-    name = "PerlMagick-6.87";
+    name = "PerlMagick-6.89-1";
     src = fetchurl {
       url = "mirror://cpan/authors/id/J/JC/JCRISTY/${name}.tar.gz";
-      sha256 = "1bf2g80wdny2dfrrmfgk7cqrxzflx3qp1dnd3919grvrqdviyh16";
+      sha256 = "0n9afy1z5bhf9phrbahnkwhgcmijn8jggpbzwrivw1zhliliiy68";
     };
-    buildInputs = [pkgs.imagemagick];
+    buildInputs = [ pkgs.imagemagick ];
     preConfigure =
       ''
         sed -i -e 's|my \$INC_magick = .*|my $INC_magick = "-I${pkgs.imagemagick}/include/ImageMagick";|' Makefile.PL

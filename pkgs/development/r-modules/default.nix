@@ -267,6 +267,7 @@ let
     rgeos = [ pkgs.geos ];
     rgl = [ pkgs.mesa pkgs.x11 ];
     Rglpk = [ pkgs.glpk ];
+    rggobi = [ pkgs.ggobi pkgs.gtk2 pkgs.libxml2 ];
     RGtk2 = [ pkgs.gtk2 ];
     Rhpc = [ pkgs.zlib pkgs.bzip2 pkgs.icu pkgs.lzma pkgs.openmpi pkgs.pcre ];
     ridge = [ pkgs.gsl ];
@@ -277,7 +278,7 @@ let
     rmatio = [ pkgs.zlib ];
     Rmpfr = [ pkgs.gmp pkgs.mpfr ];
     Rmpi = [ pkgs.openmpi ];
-    RMySQL = [ pkgs.zlib pkgs.mysql ];
+    RMySQL = [ pkgs.zlib pkgs.mysql.lib ];
     RNetCDF = [ pkgs.netcdf pkgs.udunits ];
     RODBCext = [ pkgs.libiodbc ];
     RODBC = [ pkgs.libiodbc ];
@@ -339,6 +340,7 @@ let
     WideLM = [ pkgs.cudatoolkit ];
     RCurl = [ pkgs.curl ];
     R2SWF = [ pkgs.pkgconfig ];
+    rggobi = [ pkgs.pkgconfig ];
     RGtk2 = [ pkgs.pkgconfig ];
     RProtoBuf = [ pkgs.pkgconfig ];
     Rpoppler = [ pkgs.pkgconfig ];
@@ -434,6 +436,7 @@ let
     "PBSadmb"
     "PBSmodelling"
     "PCPS"
+    "PKgraph"
     "PopGenReport"
     "PredictABEL"
     "PrevMap"
@@ -662,9 +665,9 @@ let
     "babel" # requires edgeR
     "BACA" # requires RDAVIDWebService
     "BcDiag" # requires fabia
+    "beadarrayMSV" # requires Biobase, geneplotter, andlimma
     "bdvis" # requres taxize
     "beadarrayFilter" # requires beadarray
-    "beadarrayMSV" # requires rggobi
     "bigGP" # requires MPI running. HELP WANTED!
     "bigpca" # requires NCmisc
     "Biograph" # requires mvna
@@ -678,9 +681,9 @@ let
     "CARrampsOcl" # depends on OpenCL
     "CHAT" # requires DNAcopy
     "ChemoSpec" # depends on broken speaq
+    "Crossover" # fails self-test
     "classGraph" # requires graph, and Rgraphviz
     "clpAPI" # requires clp
-    "clusterfly" # requires rggobi
     "compendiumdb" # requires Biobase
     "CORM" # requires limma
     "cplexAPI" # requires CPLEX
@@ -729,9 +732,11 @@ let
     "GeneticTools" # requires snpStats
     "GExMap" # requires Biobase and multtest
     "gitter" # requires EBImage
+    "glmgraph" # test suite says: "undefined symbol: dgemv_"
     "gmatrix" # depends on proprietary cudatoolkit
     "GOGANPA" # requires WGCNA
     "gputools" # depends on proprietary cudatoolkit
+    "gMCP" # fails self-test
     "gRain" # requires gRbase
     "gRapHD" # requires graph
     "gRbase" # requires RBGL, and graph
@@ -796,6 +801,7 @@ let
     "NCmisc" # requires BiocInstaller
     "netClass" # requires samr
     "nettools" # requires WGCNA
+    "NORRRM" # can't load SDMTools properly
     "netweavers" # requires BiocGenerics, Biobase, and limma
     "NLPutils" # requires qdap
     "NSA" # requires aroma_core
@@ -803,6 +809,9 @@ let
     "optBiomarker" # requires rpanel
     "ora" # requires ROracle
     "orQA" # requires genefilter
+    "pRF" # requires multtest
+    "PBSmapping" # fails its test suite for unclear reasons
+    "PBSddesolve" # fails its test suite for unclear reasons
     "PairViz" # requires graph
     "PANDA" # requires GO.db
     "ParDNAcopy" # requires DNAcopy
@@ -821,7 +830,6 @@ let
     "permGPU" # requires Biobase
     "PhViD" # requires LBE
     "pi0" # requires qvalue
-    "PKgraph" # requires rggobi
     "plmDE" # requires limma
     "plsRcox" # requires survcomp
     "PMA" # requires impute
@@ -844,6 +852,7 @@ let
     "rainfreq" # SDMTools.so: undefined symbol: X
     "RAM" # requires Heatplus
     "RAPIDR" # requires Biostrings, Rsamtools, and GenomicRanges
+    "RapidPolygonLookup" # depends on broken PBSmapping
     "RbioRXN" # requires fmcsR, and KEGGREST
     "RcppAPT" # configure script depends on /bin/sh
     "RcmdrPlugin_seeg" # requires seeg
@@ -855,7 +864,6 @@ let
     "REBayes" # requires Rmosek
     "RefFreeEWAS" # requires isva
     "retistruct" # depends on broken RImageJROI
-    "rggobi" # requires GGobi
     "RImageJROI" # requires spatstat
     "rjade" # requires V8 to build
     "rJPSGCS" # requires chopsticks
@@ -872,6 +880,8 @@ let
     "rpanel" # I could not make Tcl to recognize BWidget. HELP WANTED!
     "RQuantLib" # requires QuantLib
     "RSAP" # requires SAPNWRFCSDK
+    "rgp" # fails self-test
+    "rgpui" # depends on broken rgp
     "RSeed" # requires RBGL, and graph
     "rsig" # requires survcomp
     "RSNPset" # requires qvalue
@@ -886,7 +896,6 @@ let
     "selectspm" # depends on broken ecespa
     "semiArtificial" # requires RSNNS
     "SeqFeatR" # requires Biostrings, qvalue, and widgetTools
-    "SeqGrapheR" # requires rggobi
     "sequenza" # requires copynumber
     "SGCS" # requires spatstat
     "siar" # requires spatstat
@@ -908,6 +917,8 @@ let
     "spocc" # requires leafletR
     "SQDA" # requires limma
     "Statomica" # requires Biobase, multtest
+    "stagePop" # depends on broken PBSddesolve
+    "SeqGrapheR" # depends on Biostrings
     "stpp" # requires spatstat
     "structSSI" # requires multtest
     "strum" # requires Rgraphviz
@@ -923,6 +934,7 @@ let
     "ttScreening" # requires sva, and limma
     "V8" # compilation error
     "vows" # requires rpanel
+    "vmsbase" # depends on broken PBSmapping
     "WGCNA" # requires impute
     "wgsea" # requires snpStats
     "WideLM" # depends on proprietary cudatoolkit
@@ -999,7 +1011,7 @@ let
 
     RMySQL = old.RMySQL.overrideDerivation (attrs: {
       patches = [ ./patches/RMySQL.patch ];
-      MYSQL_DIR="${pkgs.mysql}";
+      MYSQL_DIR="${pkgs.mysql.lib}";
     });
 
     devEMF = old.devEMF.overrideDerivation (attrs: {

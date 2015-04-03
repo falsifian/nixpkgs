@@ -29,6 +29,7 @@
   ./hardware/all-firmware.nix
   ./hardware/cpu/amd-microcode.nix
   ./hardware/cpu/intel-microcode.nix
+  ./hardware/ksm.nix
   ./hardware/network/b43.nix
   ./hardware/network/intel-2100bg.nix
   ./hardware/network/intel-2200bg.nix
@@ -191,6 +192,7 @@
   ./services/misc/gitlab.nix
   ./services/misc/gitolite.nix
   ./services/misc/gpsd.nix
+  ./services/misc/mediatomb.nix
   ./services/misc/mesos-master.nix
   ./services/misc/mesos-slave.nix
   ./services/misc/nix-daemon.nix
@@ -201,6 +203,7 @@
   ./services/misc/phd.nix
   ./services/misc/redmine.nix
   ./services/misc/rippled.nix
+  ./services/misc/ripple-data-api.nix
   ./services/misc/rogue.nix
   ./services/misc/siproxd.nix
   ./services/misc/svnserve.nix
