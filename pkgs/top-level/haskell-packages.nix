@@ -96,6 +96,13 @@ in {
       llvmPackages = pkgs.llvmPackages_10;
       libffi = pkgs.libffi;
     };
+    ghcjs = compiler.ghcjs810;
+    ghcjs810 = callPackage ../development/compilers/ghcjs-ng {
+      bootPkgs = packages.ghc8104;
+      ghcjsSrcJson = ../development/compilers/ghcjs-ng/8.10/git.json;
+      stage0 = ../development/compilers/ghcjs-ng/8.10/stage0.nix;
+      ghcjsDepOverrides = callPackage ../development/compilers/ghcjs-ng/8.10/dep-overrides.nix {};
+    };
 
     # The integer-simple attribute set contains all the GHC compilers
     # build with integer-simple instead of integer-gmp.
@@ -162,6 +169,14 @@ in {
       ghc = bh.compiler.ghcHEAD;
       compilerConfig = callPackage ../development/haskell-modules/configuration-ghc-head.nix { };
     };
+    ghcjs = packages.ghcjs810;
+    ghcjs810 = callPackage ../development/haskell-modules rec {
+      buildHaskellPackages = ghc.bootPkgs;
+      ghc = bh.compiler.ghcjs810;
+      compilerConfig = callPackage ../development/haskell-modules/configuration-ghc-8.10.x.nix { };
+      packageSetConfig = callPackage ../development/haskell-modules/ghcjs.nix { };
+    };
+
 
     # The integer-simple attribute set contains package sets for all the GHC compilers
     # using integer-simple instead of integer-gmp.
