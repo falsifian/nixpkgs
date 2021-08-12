@@ -8,6 +8,7 @@
 , stage0
 , haskellLib
 , cabal-install
+, emscripten
 , nodejs
 , makeWrapper
 , xorg
@@ -60,7 +61,6 @@ let
   };
 
   bootGhcjs = haskellLib.justStaticExecutables passthru.bootPkgs.ghcjs;
-  libexec = "${bootGhcjs}/libexec/${builtins.replaceStrings ["darwin" "i686"] ["osx" "i386"] stdenv.buildPlatform.system}-${passthru.bootPkgs.ghc.name}/${bootGhcjs.name}";
 
 in stdenv.mkDerivation {
     name = bootGhcjs.name;
@@ -86,19 +86,19 @@ in stdenv.mkDerivation {
       cd lib/boot
 
       mkdir -p $out/bin
-      mkdir -p $out/lib/${bootGhcjs.name}
-      lndir ${libexec} $out/bin
+      mkdir -p $out/lib
+      lndir ${bootGhcjs}/bin $out/bin
 
-      wrapProgram $out/bin/ghcjs --add-flags "-B$out/lib/${bootGhcjs.name}"
-      wrapProgram $out/bin/haddock-ghcjs --add-flags "-B$out/lib/${bootGhcjs.name}"
-      wrapProgram $out/bin/ghcjs-pkg --add-flags "--global-package-db=$out/lib/${bootGhcjs.name}/package.conf.d"
+      wrapProgram $out/bin/ghcjs --add-flags "-B$out/lib"
+      wrapProgram $out/bin/haddock --add-flags "-B$out/lib"
+      wrapProgram $out/bin/ghcjs-pkg --add-flags "--global-package-db=$out/lib/package.conf.d"
 
-      env PATH=$out/bin:$PATH $out/bin/ghcjs-boot -j1 --with-ghcjs-bin $out/bin
+      # ghcjs-boot uses its own path, after resolving symlinks, to decide where
+      # to put the libraries.
+      rm $out/bin/ghcjs-boot
+      cp ${bootGhcjs}/bin/ghcjs-boot $out/bin
+      env PATH=$out/bin:$PATH $out/bin/ghcjs-boot --with-ghc $out/bin --with-emsdk ${emscripten}
     '';
-
-    # We hard code -j1 as a temporary workaround for
-    # https://github.com/ghcjs/ghcjs/issues/654
-    # enableParallelBuilding = true;
 
     inherit passthru;
 
