@@ -19,3 +19,6 @@ $ cat $(nix-build ../../../.. -A haskell.compiler.ghcjs810.genStage0 --no-out-li
 $ cabal2nix --compiler ghcjs git://github.com/ghcjs/ghcjs-base > ghcjs-base.nix
 ```
 
+Then manually insert `alex` into `executableHaskellDepends` and the arguments
+after `callPackages` in `8.10/stage0.nix`. (TODO: figure out why `cabal2nix`
+doesn't give working output.)

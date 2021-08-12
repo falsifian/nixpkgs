@@ -43,14 +43,13 @@ runCommand "configured-ghcjs-src" {
   # TODO: How to actually fix this?
   # Seems to work fine and produce the right files.
   touch ghc/includes/ghcautoconf.h
+  touch ghc/utils/unlit/fs.h
   mkdir -p ghc/compiler/vectorise
   mkdir -p ghc/utils/haddock/haddock-library/vendor
 
-  # Remove version constraints we can't currently satisfy.
-  sed -i -e 's/aeson          >= 1.4      && < 1.5,/aeson,/' -e 's/base64-bytestring          >= 1.0 && < 1.1,/base64-bytestring,/' -e 's/wai-extra            >= 3.0  &&  < 3.1,/wai-extra,/' ghcjs.cabal
-  # Add a missing version constraint. Fixes an error in test/TestRunner.hs: the
-  # ShowHelpText constructor takes an argument in optparse-applicative 0.16.*.
-  sed -i -e 's/optparse-applicative,/optparse-applicative >= 0.14 \&\& < 0.16,/' ghcjs.cabal
+  # Work around a version mismatch in the ghc-boot library.
+  find ghc -type f -exec sed -i 's/ArchAArch64/ArchARM64/g' '{}' ';'
+  sed -i 's/ArchAArch64/ArchARM64/g' src/Gen2/DynamicLinking.hs
 
   patchShebangs .
   ./utils/makePackages.sh copy

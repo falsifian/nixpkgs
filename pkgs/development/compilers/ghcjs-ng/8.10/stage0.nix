@@ -3,7 +3,7 @@
 {
 
   ghcjs = callPackage
-    ({ mkDerivation, aeson, array, attoparsec, base, base16-bytestring
+    ({ mkDerivation, alex, aeson, array, attoparsec, base, base16-bytestring
     , base64-bytestring, binary, bytestring, Cabal, containers
     , cryptohash, data-default, deepseq, directory, executable-path
     , filepath, ghc-boot, ghc-boot-th, ghc-compact, ghc-heap, ghc-paths
@@ -32,7 +32,7 @@
       ];
       libraryToolDepends = [ happy ];
       executableHaskellDepends = [
-        aeson array base binary bytestring Cabal containers deepseq
+        aeson alex array base binary bytestring Cabal containers deepseq
         directory executable-path filepath ghc-boot lens mtl
         optparse-applicative parsec process tar terminfo text time
         transformers unix unix-compat unordered-containers vector xhtml
